@@ -1,17 +1,21 @@
+'''
+Start the main view of the application.
+'''
 
 
 import sys
-from AdcpSerialPortServer import AdcpSerialPortServer
-from PySide2 import QtCore, QtGui, QtWidgets
-from view_main import view_main
+from PySide2 import QtWidgets, QtCore
+from view_serial import view_serial
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    widget = view_main()
+    widget = view_serial()
     widget.setGeometry(100, 100, 500, 355)
     widget.show()
+
+    #app.connect(quit, QtCore.SIGNAL("aboutToQuit()"),
+    #            QtWidgets.qApp, QtCore.SLOT(widget.close()))
+    #app.aboutToQuit.connect(widget.close())
+
     sys.exit(app.exec_())
-
-
-

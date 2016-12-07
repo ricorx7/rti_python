@@ -1,3 +1,5 @@
+
+
 import sys
 import socket
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -5,7 +7,10 @@ from AdcpSerialPortServer import AdcpSerialPortServer
 import serial
 import glob
 
-class view_main(QtWidgets.QWidget):
+class view_serial(QtWidgets.QWidget):
+    """
+    Create the QT display
+    """
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -28,6 +33,10 @@ class view_main(QtWidgets.QWidget):
         connect.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         connect.clicked.connect(self.start_adcp_server)
 
+        disconnect = QtWidgets.QPushButton("Reconnect")
+        disconnect.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        disconnect.clicked.connect(self.reconnect_adcp_server)
+
         quit = QtWidgets.QPushButton("Quit")
         quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         self.connect(quit, QtCore.SIGNAL("clicked()"),
@@ -40,22 +49,48 @@ class view_main(QtWidgets.QWidget):
         gridLayout.addWidget(self.comm_port_combobox, 1, 0)
         gridLayout.addWidget(self.comm_baud_combobox, 1, 1)
         gridLayout.addWidget(connect, 2, 0)
+        gridLayout.addWidget(disconnect, 2, 1)
         gridLayout.addWidget(quit, 3, 0)
 
         gridLayout.setColumnStretch(1, 10)
         self.setLayout(gridLayout)
 
+    def closeEvent(self, event):
+        """
+        Override the close event for the QWidget.
+        If a serial port is open, close the connection.
+        """
+        print('Closing serial')
+        self.stop_adcp_server()
+        # Close window
+        event.accept()
+
     def start_adcp_server(self):
         """
         Start the ADCP Serial TCP server
         """
+
         self.serialServer = AdcpSerialPortServer(self.get_tcp_port(),
                                                  self.comm_port_combobox.currentText(),
                                                  self.get_baud())
         print("start server")
 
-    def quit(self):
-        self.serialServer.close()
+    def stop_adcp_server(self):
+        """
+        Stop the ADCP Serial TCP server
+        """
+        if self.serialServer != None:
+            self.serialServer.close()
+            print("serial server topped")
+        else:
+            print('No serial connection')
+
+    def reconnect_adcp_server(self):
+        """
+        Reconnect the serial port connection with the new
+        settings.
+        """
+        print("reconnect")
 
     def get_baud(self):
         """
@@ -95,6 +130,7 @@ class view_main(QtWidgets.QWidget):
         :returns:
             A list of the serial ports available on the system
         """
+
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
@@ -115,7 +151,7 @@ class view_main(QtWidgets.QWidget):
                 pass
         return result
 
-    def find_port():
+    def find_port(self):
         """
         Finds available port for Tornado / Flask
         :return: Available port
