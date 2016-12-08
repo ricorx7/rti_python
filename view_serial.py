@@ -2,10 +2,12 @@
 
 import sys
 import socket
+import glob
 from PySide2 import QtCore, QtGui, QtWidgets
 from AdcpSerialPortServer import AdcpSerialPortServer
 import serial
-import glob
+import threading
+from Ensemble import EnsembleReader
 
 class view_serial(QtWidgets.QWidget):
     """
@@ -14,7 +16,10 @@ class view_serial(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
-        self.serialServer = None
+        self.serial_server = None
+        self.serial_send_socket = None
+        self.ensemble_reader_thread = None
+        self.adcp_writer_thread = None
 
         self.tcp_port_combobox = QtWidgets.QComboBox()
         self.tcp_port_combobox.setEditable(True)
@@ -28,7 +33,6 @@ class view_serial(QtWidgets.QWidget):
         self.comm_baud_combobox.addItems(["921600", "115200", "19200", ""])
         self.comm_baud_combobox.setCurrentIndex(1)
 
-
         connect = QtWidgets.QPushButton("Connect")
         connect.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         connect.clicked.connect(self.start_adcp_server)
@@ -36,6 +40,12 @@ class view_serial(QtWidgets.QWidget):
         disconnect = QtWidgets.QPushButton("Reconnect")
         disconnect.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         disconnect.clicked.connect(self.reconnect_adcp_server)
+
+        self.command_txtbox = QtWidgets.QLineEdit()
+
+        send_cmd_btn = QtWidgets.QPushButton("Send")
+        send_cmd_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        send_cmd_btn.clicked.connect(self.send_cmd_adcp_server)
 
         quit = QtWidgets.QPushButton("Quit")
         quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
@@ -50,7 +60,9 @@ class view_serial(QtWidgets.QWidget):
         gridLayout.addWidget(self.comm_baud_combobox, 1, 1)
         gridLayout.addWidget(connect, 2, 0)
         gridLayout.addWidget(disconnect, 2, 1)
-        gridLayout.addWidget(quit, 3, 0)
+        gridLayout.addWidget(self.command_txtbox, 3, 0)
+        gridLayout.addWidget(send_cmd_btn, 3, 1)
+        gridLayout.addWidget(quit, 4, 0)
 
         gridLayout.setColumnStretch(1, 10)
         self.setLayout(gridLayout)
@@ -70,20 +82,53 @@ class view_serial(QtWidgets.QWidget):
         Start the ADCP Serial TCP server
         """
 
-        self.serialServer = AdcpSerialPortServer(self.get_tcp_port(),
-                                                 self.comm_port_combobox.currentText(),
-                                                 self.get_baud())
+        self.serial_server = AdcpSerialPortServer(self.get_tcp_port(),
+                                                  self.comm_port_combobox.currentText(),
+                                                  self.get_baud())
+
+        # Create an ensemble reader
+        #self.ensemble_reader_thread = threading.Thread(name='EnsembleReader', target=EnsembleReader.EnsembleReader(self.get_tcp_port())).start()
+
+        # Connect to serial server to send commands
+        self.adcp_writer_thread = threading.Thread(name='AdcpWriter', target=self.create_send_socket(self.get_tcp_port())).start()
+
         print("start server")
+
+    def create_send_socket(self, port):
+        """
+        Connect to the ADCP serial server.
+        """
+        try:
+            self.serial_send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.serial_send_socket.connect(('localhost', int(port)))
+        except ConnectionRefusedError as err:
+            print("Serial Send Socket: ", err)
+        except:
+            print('Serial Send Socket: ", Error Opening socket')
 
     def stop_adcp_server(self):
         """
         Stop the ADCP Serial TCP server
         """
-        if self.serialServer != None:
-            self.serialServer.close()
-            print("serial server topped")
+        if self.serial_server is not None:
+            self.serial_server.close()
+            print("serial server stopped")
         else:
             print('No serial connection')
+
+        if self.adcp_writer_thread is not None:
+            self.adcp_writer_thread.join()
+
+
+    def send_cmd_adcp_server(self):
+        """
+        Send the command to the socket
+        """
+        # Get the command from the txtbox
+        cmd = self.command_txtbox.text().strip()
+
+        # Encode the data to byte array and send to socket
+        self.serial_send_socket.send((cmd.strip()).encode())
 
     def reconnect_adcp_server(self):
         """

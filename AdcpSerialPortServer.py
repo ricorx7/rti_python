@@ -1,10 +1,11 @@
 '''Connect through TCP to receive serial data.  This will
 allow multiple TCP connections to one serial port.'''
 
+import threading
+import serial
 from twisted.internet import reactor, protocol, endpoints
 from twisted.protocols import basic
 from twisted.internet.serialport import SerialPort
-import threading
 
 class SerialDevice(basic.LineReceiver):
     """
@@ -53,15 +54,16 @@ class SerialTcpProtocol(basic.LineReceiver):
     def __init__(self, factory, comm_port, baud):
         self.factory = factory
 
-        # Create a Serial Port device to read in serial data
-        self.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
-        print('Serial Port started')
+        if self.factory.serial_port is None:
+            # Create a Serial Port device to read in serial data
+            self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
+            print('Serial Port started')
 
     def resetSerialConnection(self, comm_port, baud):
         """
         Reset the Serial Port device to read in serial data
         """
-        self.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
+        self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
         print('Serial Port Restarted')
 
     def connectionMade(self):
@@ -82,19 +84,8 @@ class SerialTcpProtocol(basic.LineReceiver):
         """
         Receive data from the TCP port and send the data to the serial port
         """
-
-        cmd = data.decode("ascii")
-
-        if "BREAK" in cmd:
-            self.serial_port.sendBreak()
-            print('Hardware BREAK')
-        if "RECONNECT" in cmd:
-            self.reconnect(cmd)
-        else:
-            self.serial_port.writeSomeData(data)
-
-        source = str(self.transport.getPeer())
-        print(source + " - " + 'TCP data received: ' + cmd)
+        # Parse command
+        self.parse_cmds(data)
 
     def lineReceived(self, line):
         print('TCP line received: ', line)
@@ -127,6 +118,40 @@ class SerialTcpProtocol(basic.LineReceiver):
         self.resetSerialConnection(comm_port, baud)
         print("Reconnect Serial to: " + comm_port + " baud: " + baud)
 
+    def parse_cmds(self, data):
+        """
+        Parse the commands given by the user.
+        """
+
+        print(data)
+
+        try:
+
+            # Decode the byte array to a string
+            cmd = data.decode()
+            cmd = cmd.strip()
+
+            if cmd in ('BREAK', 'break', 'Break'):
+                self.factory.serial_port.sendBreak()
+                print('Hardware BREAK')
+            if cmd in ('RECONNECT', 'reconnect'):
+                self.reconnect(cmd)
+            else:
+                self.factory.serial_port.write((cmd + "\r").encode())
+                print(data)
+                print(cmd)
+        except AttributeError as err:
+            print("Serial Port error: ", err)
+        except Exception as err:
+            print("Serial Port Error: ", err)
+        #except serial.portNotOpenError as err:
+        #    print("Serial Port is not open. ", err)
+        except:
+            print('Error writing data to serial port')
+
+        source = str(self.transport.getPeer())
+        print(source + " - " + 'TCP data received: ' + cmd)
+
 
 class AdcpFactory(protocol.Factory):
     """
@@ -135,6 +160,7 @@ class AdcpFactory(protocol.Factory):
     """
     def __init__(self, comm_port, baud):
         self.clients = set()
+        self.serial_port = None
         self.serial_comm_port = comm_port
         self.serial_baud = baud
 
@@ -156,7 +182,7 @@ class AdcpSerialPortServer():
         endpoints.serverFromString(reactor, self.port).listen(AdcpFactory(self.comm_port, self.baud))
         print("Serial port connected on", self.comm_port)
         print("TCP Port open on ", self.port)
-        
+
         #reactor.run()
         # Run the reactor in a thread
         self.thread = threading.Thread(name='AdcpSerialPort', target=reactor.run, args=(False,)).start()
