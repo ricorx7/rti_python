@@ -16,10 +16,16 @@ class view_serial(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
 
+        # Global variables
+
         self.serial_server = None
-        self.serial_send_socket = None
+        self.raw_serial_socket = None
+        self.raw_serial_alive = False
         self.ensemble_reader_thread = None
         self.adcp_writer_thread = None
+        self.serial_buffer = ""
+
+        # QT GUI
 
         self.tcp_port_combobox = QtWidgets.QComboBox()
         self.tcp_port_combobox.setEditable(True)
@@ -44,16 +50,23 @@ class view_serial(QtWidgets.QWidget):
         self.command_txtbox = QtWidgets.QLineEdit()
 
         send_cmd_btn = QtWidgets.QPushButton("Send")
-        send_cmd_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        #send_cmd_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
         send_cmd_btn.clicked.connect(self.send_cmd_adcp_server)
 
-        quit = QtWidgets.QPushButton("Quit")
-        quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
-        self.connect(quit, QtCore.SIGNAL("clicked()"),
-                     QtWidgets.qApp, QtCore.SLOT("quit()"))
+        send_break_btn = QtWidgets.QPushButton("BREAK")
+        #send_break_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        send_break_btn.clicked.connect(self.send_break_adcp_server)
+
+        #quit = QtWidgets.QPushButton("Quit")
+        #quit.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        #self.connect(quit, QtCore.SIGNAL("clicked()"),
+        #             QtWidgets.qApp, QtCore.SLOT("quit()"))
+
+        self.serial_txtbox = QtWidgets.QTextEdit()
+        self.serial_txtbox.setMinimumHeight(500)
 
 
-
+        # Add Widgets
         gridLayout = QtWidgets.QGridLayout()
         gridLayout.addWidget(self.tcp_port_combobox, 0, 0)
         gridLayout.addWidget(self.comm_port_combobox, 1, 0)
@@ -62,10 +75,34 @@ class view_serial(QtWidgets.QWidget):
         gridLayout.addWidget(disconnect, 2, 1)
         gridLayout.addWidget(self.command_txtbox, 3, 0)
         gridLayout.addWidget(send_cmd_btn, 3, 1)
-        gridLayout.addWidget(quit, 4, 0)
+        gridLayout.addWidget(send_break_btn, 3, 2)
+        gridLayout.addWidget(self.serial_txtbox, 4, 0, 2, 3)    # row, cl, rs, cs
+        #gridLayout.addWidget(quit, 4, 0)
 
-        gridLayout.setColumnStretch(1, 10)
+        # Set Spacing
+        #gridLayout.setColumnStretch(1, 10)
+        gridLayout.setRowStretch(4, 20)
+
+        # Add Menu
+        #self.createMenu()
+        #gridLayout.setMenuBar(self.createMenu())
+        gridLayout.addWidget(self.createMenu())
+
+        # Set Window attributes
         self.setLayout(gridLayout)
+        self.setWindowTitle("Echo - RoweTech Inc.")
+
+
+    def createMenu(self):
+        menuBar = QtWidgets.QMenuBar()
+
+        fileMenu = QtWidgets.QMenu("File")
+        exitAction = fileMenu.addAction("E&xit")
+        menuBar.addMenu(fileMenu)
+
+        #exitAction.triggered.connect(self.exit)
+
+        return menuBar
 
     def closeEvent(self, event):
         """
@@ -90,21 +127,52 @@ class view_serial(QtWidgets.QWidget):
         #self.ensemble_reader_thread = threading.Thread(name='EnsembleReader', target=EnsembleReader.EnsembleReader(self.get_tcp_port())).start()
 
         # Connect to serial server to send commands
-        self.adcp_writer_thread = threading.Thread(name='AdcpWriter', target=self.create_send_socket(self.get_tcp_port())).start()
+        self.adcp_writer_thread = threading.Thread(name='AdcpWriter', target=self.create_raw_serial_socket(self.get_tcp_port())).start()
 
         print("start server")
 
-    def create_send_socket(self, port):
+    def create_raw_serial_socket(self, port):
         """
         Connect to the ADCP serial server.
         """
         try:
-            self.serial_send_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.serial_send_socket.connect(('localhost', int(port)))
+            self.raw_serial_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.raw_serial_socket.connect(('localhost', int(port)))
         except ConnectionRefusedError as err:
             print("Serial Send Socket: ", err)
-        except:
-            print('Serial Send Socket: ", Error Opening socket')
+        except Exception as err:
+            print('Serial Send Socket: ", Error Opening socket', err)
+
+        # Start a thread to read the raw data
+        self.ensemble_reader_thread = ReadRawSerialThread(self.raw_serial_socket)
+        self.ensemble_reader_thread.raw_data.connect(self.on_raw_read)
+        self.ensemble_reader_thread.start()
+
+
+    @QtCore.Slot(object)
+    def on_raw_read(self, data):
+        """
+        Buffer up the data received from the serial port from
+        the TCP server.  Then set it to the text.
+        :param data: Data received from the TCP server which came from the
+                     serial port.
+        """
+        try:
+            self.serial_buffer += bytes(data).decode()
+        except Exception as err:
+            #print("error decoding", err)
+            # Decoding does not work for the binary data, only commands
+            self.serial_buffer += str(data).strip()
+
+        # Chop off the top portion of the message
+        slicer = slice(-1130, None)
+        self.serial_buffer = self.serial_buffer[slicer]
+
+        # Set the text to the textbox
+        self.serial_txtbox.setText(self.serial_buffer)
+
+
+
 
     def stop_adcp_server(self):
         """
@@ -119,6 +187,9 @@ class view_serial(QtWidgets.QWidget):
         if self.adcp_writer_thread is not None:
             self.adcp_writer_thread.join()
 
+        if self.ensemble_reader_thread is not None:
+            self.ensemble_reader_thread.join()
+
 
     def send_cmd_adcp_server(self):
         """
@@ -128,7 +199,16 @@ class view_serial(QtWidgets.QWidget):
         cmd = self.command_txtbox.text().strip()
 
         # Encode the data to byte array and send to socket
-        self.serial_send_socket.send((cmd.strip()).encode())
+        self.raw_serial_socket.send((cmd.strip()).encode())
+
+    def send_break_adcp_server(self):
+        """
+        Send the BREAK command to the socket
+        """
+        cmd = "BREAK"
+
+        # Encode the data to byte array and send to socket
+        self.raw_serial_socket.send((cmd.strip()).encode())
 
     def reconnect_adcp_server(self):
         """
@@ -217,3 +297,39 @@ class view_serial(QtWidgets.QWidget):
 
         print("FAILED AFTER 1000 PORT ATTEMPTS")
         sys.exit(1)
+
+
+class ReadRawSerialThread(QtCore.QThread):
+    """
+    Create a Read raw serial data from TCP port thread.
+    """
+
+    raw_data = QtCore.Signal(object)
+
+    def __init__(self, socket, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.socket = socket
+        print("Read Socket thread started")
+
+    def run(self):
+        """
+        Run the loop that views the data from the serial port.
+        :return:
+        """
+        self.exec()
+
+
+    def exec(self):
+        """
+        Run the loop to view data from the serial port.
+        Emit the data so the view can view the data.
+
+        """
+        while True:
+            # Read data from socket
+            data = self.socket.recv(1024)
+
+            # If data exist process
+            if len(data) > 0:
+                self.raw_data.emit(data)
+
