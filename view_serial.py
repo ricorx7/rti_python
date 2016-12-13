@@ -65,6 +65,9 @@ class view_serial(QtWidgets.QWidget):
         self.serial_txtbox = QtWidgets.QTextEdit()
         self.serial_txtbox.setMinimumHeight(500)
 
+        clear_btn = QtWidgets.QPushButton("Clear")
+        #send_break_btn.setFont(QtGui.QFont("Times", 18, QtGui.QFont.Bold))
+        clear_btn.clicked.connect(self.clear_serial)
 
         # Add Widgets
         gridLayout = QtWidgets.QGridLayout()
@@ -77,7 +80,7 @@ class view_serial(QtWidgets.QWidget):
         gridLayout.addWidget(send_cmd_btn, 3, 1)
         gridLayout.addWidget(send_break_btn, 3, 2)
         gridLayout.addWidget(self.serial_txtbox, 4, 0, 2, 3)    # row, cl, rs, cs
-        #gridLayout.addWidget(quit, 4, 0)
+        gridLayout.addWidget(clear_btn, 5, 2)
 
         # Set Spacing
         #gridLayout.setColumnStretch(1, 10)
@@ -111,6 +114,7 @@ class view_serial(QtWidgets.QWidget):
         """
         print('Closing serial')
         self.stop_adcp_server()
+
         # Close window
         event.accept()
 
@@ -138,6 +142,7 @@ class view_serial(QtWidgets.QWidget):
         try:
             self.raw_serial_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.raw_serial_socket.connect(('localhost', int(port)))
+            self.raw_serial_socket.settimeout(1)    # Set timeout to stop thread if terminated
         except ConnectionRefusedError as err:
             print("Serial Send Socket: ", err)
         except Exception as err:
@@ -184,11 +189,16 @@ class view_serial(QtWidgets.QWidget):
         else:
             print('No serial connection')
 
+        # Close the socket
+        self.raw_serial_socket.close()
+
         if self.adcp_writer_thread is not None:
             self.adcp_writer_thread.join()
 
         if self.ensemble_reader_thread is not None:
-            self.ensemble_reader_thread.join()
+            #self.ensemble_reader_thread.terminate()
+            #self.ensemble_reader_thread.setTerminationEnabled(True)
+            self.ensemble_reader_thread.stop()
 
 
     def send_cmd_adcp_server(self):
@@ -226,7 +236,8 @@ class view_serial(QtWidgets.QWidget):
         """
         try:
             baud = int(self.comm_baud_combobox.currentText())
-        except:
+        except Exception as err:
+            print("Error setting baud rate: ", err)
             self.comm_baud_combobox.setCurrentIndex(1)
             return "115200"
 
@@ -237,11 +248,12 @@ class view_serial(QtWidgets.QWidget):
         Convert the TCP port from string to int.
         If an error, set the default port to 55056
 
-        :returns: baud rate
+        :returns: TCP Port
         """
         try:
             port = int(self.tcp_port_combobox.currentText())
-        except:
+        except Exception as err:
+            print("Error setting TCP Port: ", err)
             self.tcp_port_combobox.setCurrentIndex(0)
             return "55056"
 
@@ -276,6 +288,13 @@ class view_serial(QtWidgets.QWidget):
                 pass
         return result
 
+    def clear_serial(self):
+        """
+        Clear the serial port display.
+        """
+        # Set the text to the textbox
+        self.serial_txtbox.setText("")
+
     def find_port(self):
         """
         Finds available port for Tornado / Flask
@@ -309,7 +328,14 @@ class ReadRawSerialThread(QtCore.QThread):
     def __init__(self, socket, parent=None):
         QtCore.QThread.__init__(self, parent)
         self.socket = socket
+        self.isAlive = True
         print("Read Socket thread started")
+
+    def stop(self):
+        """
+        Stop the thread by setting the isAlive flag.
+        """
+        self.isAlive = False
 
     def run(self):
         """
@@ -325,11 +351,18 @@ class ReadRawSerialThread(QtCore.QThread):
         Emit the data so the view can view the data.
 
         """
-        while True:
-            # Read data from socket
-            data = self.socket.recv(1024)
+        while self.isAlive:
+            try:
+                # Read data from socket
+                data = self.socket.recv(4096)
 
-            # If data exist process
-            if len(data) > 0:
-                self.raw_data.emit(data)
+                # If data exist process
+                if len(data) > 0:
+                    self.raw_data.emit(data)
+            except socket.timeout:
+                # Just a socket timeout, continue on
+                pass
+
+        print("Read Thread turned off")
+
 

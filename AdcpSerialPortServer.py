@@ -109,8 +109,8 @@ class SerialTcpProtocol(basic.LineReceiver):
         comm_port = params[1]
         try:
             baud = int(params[2])
-        except:
-            print('Baud rate must be an integer')
+        except Exception as err:
+            print('Baud rate must be an integer', err)
             return
 
 
@@ -147,7 +147,7 @@ class SerialTcpProtocol(basic.LineReceiver):
         #except serial.portNotOpenError as err:
         #    print("Serial Port is not open. ", err)
         except:
-            print('Error writing data to serial port')
+            print('Error writing data to serial port', err)
 
         source = str(self.transport.getPeer())
         print(source + " - " + 'TCP data received: ' + cmd)
@@ -177,6 +177,7 @@ class AdcpSerialPortServer():
         self.port = "tcp:" + port       # TCP Port
         self.comm_port = comm_port      # Serial Port
         self.baud = baud                # Baud Rate
+        self.thread = None
 
         # Set the TCP port to output ADCP data
         endpoints.serverFromString(reactor, self.port).listen(AdcpFactory(self.comm_port, self.baud))
@@ -185,17 +186,24 @@ class AdcpSerialPortServer():
 
         #reactor.run()
         # Run the reactor in a thread
-        self.thread = threading.Thread(name='AdcpSerialPort', target=reactor.run, args=(False,)).start()
+        if not reactor.running:
+            self.thread = threading.Thread(name='AdcpSerialPort', target=reactor.run, args=(False,)).start()
 
     def close(self):
         """
         Close the thread to the server
         """
         reactor.stop()
-        for t in threading.enumerate():
-            if t.getName() == 'AdcpSerialPort':
-                t.join()
-                print("Stop the ADP serial port thread")
+        print("Reactor Stopped")
+
+        if self.thread is not None:
+            self.thread.join()
+        print("ADCP Serial Port Thread stopped")
+
+        #for t in threading.enumerate():
+        #    if t.getName() == 'AdcpSerialPort':
+        #        t.join()
+        #        print("Stop the ADP serial port thread")
 
 # Set the PORT to output ADCP data
 #endpoints.serverFromString(reactor, "tcp:55056").listen(AdcpFactory('/dev/cu.usbserial-FTYNODPO', 115200))
