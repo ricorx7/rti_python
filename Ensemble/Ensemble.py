@@ -1,7 +1,4 @@
 
-from PyCRC.CRCCCITT import CRCCCITT
-
-
 class Ensemble():
     """
     RoweTech Binary Ensemble.
@@ -18,11 +15,11 @@ class Ensemble():
     def ensembleSize(self, payloadSize):
         return Ensemble.HeaderSize + payloadSize + Ensemble.ChecksumSize
 
-    def calcChecksum(data):
+    def ones_complement(self, val):
         """
-        Calculate the checksum of the ensemble.
-        Using CRC-CCITT calculation.
-        :param data: Raw ensemble data.
-        :return: Checksum value of the ensemble.
+        Calclaute the 1's compliment of a number.
+        :param val: Values to calculate.
+        :return: 1's compliment of value.
         """
-        return CRCCCITT.calculate(data)
+        mask = (1 << val.bit_length()) - 1
+        return int(hex(val ^ mask), 16)

@@ -28,7 +28,7 @@ class BinaryCodec():
         #print("EnsStart: ", ensStart)
         #print("Buffer Size: ", len(self.buffer))
 
-        if ensStart >= 0 and len(self.buffer) > 32 + ensStart:
+        if ensStart >= 0 and len(self.buffer) > Ensemble().HeaderSize + ensStart:
             #Decode the Ensemble
             self.decodeEnsemble(ensStart)
 
@@ -36,16 +36,16 @@ class BinaryCodec():
 
         # Check Ensemble number
         ensNum = struct.unpack("I", self.buffer[ensStart+16:ensStart+20])
-        ensNumInv = struct.unpack("I", self.buffer[ensStart+20:ensStart+24])
-        print(ensNum[0])
-        print(self.ones_complement(ensNumInv[0]))
+        #print(ensNum[0])
+        #ensNumInv = struct.unpack("I", self.buffer[ensStart+20:ensStart+24])
+        #print(self.ones_complement(ensNumInv[0]))
 
 
         # Check ensemble size
         payloadSize = struct.unpack("I", self.buffer[ensStart+24:ensStart+28])
-        payloadSizeInv = struct.unpack("I", self.buffer[ensStart+28:ensStart+32])
-        print(payloadSize[0])
-        print(self.ones_complement(payloadSizeInv[0]))
+        #print(payloadSize[0])
+        #payloadSizeInv = struct.unpack("I", self.buffer[ensStart+28:ensStart+32])
+        #print(self.ones_complement(payloadSizeInv[0]))
 
         # Ensure the entire ensemble is in the buffer
         if len(self.buffer) >= ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize:
@@ -54,17 +54,18 @@ class BinaryCodec():
             checksum = struct.unpack("I", self.buffer[checksumLoc:checksumLoc + Ensemble().ChecksumSize])
 
             # Calculate Checksum
-            ens = self.buffer[ensStart + Ensemble().HeaderSize:ensStart + Ensemble().ChecksumSize + payloadSize[0]]
+            # Use only the payload for the checksum
+            ens = self.buffer[ensStart + Ensemble().HeaderSize:ensStart + Ensemble().HeaderSize + payloadSize[0]]
             calcChecksum = CRCCCITT().calculate(input_data=bytes(ens))
-            print("Calc Checksum: ", calcChecksum)
-            print("Checksum: ", checksum[0])
+            #print("Calc Checksum: ", calcChecksum)
+            #print("Checksum: ", checksum[0])
+            #print("Checksum good: ", calcChecksum == checksum[0])
 
-            #print(checksum)
-            #print(calcChecksum)
+            if checksum[0] == calcChecksum:
+                print(ensNum[0])
+                # Decode data
 
-            # Decode data
-
-            # Stream data
+                # Stream data
 
             # Remove ensemble from buffer
             ensEnd = ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize
