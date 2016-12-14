@@ -8,10 +8,16 @@ Dependicencies
 ------------
 
 pip3 install pyserial
-install pyside2
+
+pip3 install twisted
+
+pip3 install pycrc
+
+install pyside2 (Instructions below)
 
 
 
+-------------
 #install pyside2
 
 #To Compile pyside2 from source for OSX

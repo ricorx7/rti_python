@@ -38,7 +38,7 @@ class EnsembleReader():
         try:
             while True:
                 # Receive a response
-                response = self.socket.recv(1024)
+                response = self.socket.recv()
                 #print('"%s"' % response)
 
                 # Decode the ensemble data

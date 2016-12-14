@@ -8,6 +8,8 @@ from AdcpSerialPortServer import AdcpSerialPortServer
 import serial
 import threading
 from Ensemble import EnsembleReader
+from Codecs.BinaryCodec import BinaryCodec
+
 
 class view_serial(QtWidgets.QWidget):
     """
@@ -331,6 +333,8 @@ class ReadRawSerialThread(QtCore.QThread):
         self.isAlive = True
         print("Read Socket thread started")
 
+        self.codec = BinaryCodec()
+
     def stop(self):
         """
         Stop the thread by setting the isAlive flag.
@@ -359,6 +363,9 @@ class ReadRawSerialThread(QtCore.QThread):
                 # If data exist process
                 if len(data) > 0:
                     self.raw_data.emit(data)
+
+                    # Pass data to the decoder
+                    self.codec.add(data)
             except socket.timeout:
                 # Just a socket timeout, continue on
                 pass
