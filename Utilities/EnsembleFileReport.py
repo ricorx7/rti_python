@@ -6,7 +6,8 @@ from Ensemble.Ensemble import Ensemble
 
 from PyCRC.CRCCCITT import CRCCCITT
 
-class EnsembleFileReport():
+
+class EnsembleFileReport:
     """
     Decode RoweTech ADCP Binary data.
     """
@@ -18,15 +19,14 @@ class EnsembleFileReport():
         self.FirstEnsembleNum = 0
         self.LastEnsembleNum = 0
 
+        self.NumGoodEnsembles = 0
+
         self.NumBadEnsNum = 0
         self.NumBadPayloadSize = 0
         self.NumBadChecksum = 0
         self.NumBadEnsembles = 0
 
-
-
-
-    def Report(self, infile):
+    def report(self, infile):
         """
         Read a Rowe DVL/ADCP ensemble file (.ENS)
         """
@@ -37,26 +37,74 @@ class EnsembleFileReport():
 
         with open(infile, 'rb') as f:
             raw = f.read()  # reads entire file. There's probably a smarter option.
-            delimiter = '\x80' * 16  # look for first 16 bytes of header
-            ensembles = raw.split(delimiter)
+            delimiter = b'\x80' * 16  # look for first 16 bytes of header
+            #ensembles = raw.split(delimiter)
 
-            self.NumEnsembles = len(ensembles)
+            raw_ba = bytearray()
+            raw_ba.extend(raw)
+
+            ens_list = list()
+
+            prev_ens_found = 0
+
+            # Look for the first ensemble
+            ens_found = raw_ba.find(delimiter)
+            while ens_found >= 0:
+                print(ens_found)
+                print(raw_ba[ens_found:ens_found+16])
+
+                # Add the ensemble found to the list
+                ens_list.append(ens_found)
+
+                # Remove ensemble header to find the next
+                del raw_ba[ens_found:ens_found+16]
+
+                # Find the next ensemble
+                ens_found = raw_ba.find(delimiter)
+
+            print(len(ens_list))
+            print(ens_list)
+
+            # Reload the bytearray
+            #raw_ba1 = bytearray()
+            #raw_ba1.extend(raw)
+
+            for index in range(len(ens_list)):
+                if index+1 < len(ens_list):
+                    data = raw_ba1[ens_list[index]:ens_list[index+1]]
+                    #print(raw_ba1[ens_list[index]:ens_list[index]+16])
+                    #self.decode_ensemble(data)
 
             # Decode all the ensembles and generate a report about the data
-            for ensemble_number, ensemble in enumerate(ensembles):
-                self.decodeEnsemble(ensemble)
+            #for ensemble_number, ensemble in enumerate(ensembles):
+            #
+            #    if len(ensemble) > 0:
+            #        print(len(ensemble))
+            #        ens_ba = bytearray()
+            #        ens_ba.extend(ensemble)
+
+            #       self.decode_ensemble(ens_ba)
 
             print("Number of Ensembles: ", self.NumEnsembles)
             print("First Ensemble Number: ", self.FirstEnsembleNum)
             print("Last Ensemble Number: ", self.LastEnsembleNum)
+            print("Number of Good Ensembles: ", self.NumGoodEnsembles)
             print("----------------------------------------")
-            print("Number of Bad Ensembles: ", self.NumBadEnsembles)
+            print("Number of Bad Ensemble Numbers: ", self.NumBadEnsNum)
             print("Number of Bad Payload Sizes: ", self.NumBadPayloadSize)
             print("Number of Bad Checksum: ", self.NumBadChecksum)
             print("Number of Bad Ensembles: ", self.NumBadEnsembles)
 
+    def decode_ensemble(self, ens):
+        """
+        Decode the ensemble.
+        :param ens: Ensemble byte array.
+        """
 
-    def decodeEnsemble(self, ens):
+        delimiter = b'\x80'*16 # look for first 16 bytes of header
+        ens_start = ens.find(delimiter)
+        print(ens_start)
+        print(ens[0:16])
 
         # Check Ensemble number
         ens_num = struct.unpack("I", ens[16:20])
@@ -65,7 +113,7 @@ class EnsembleFileReport():
         #print(self.ones_complement(ens_num_inv[0]))
         #print(ens_num[0])
         if ens_num[0] != ens_num_1scomp:
-            self.NumBadEnsembles += 1
+            self.NumBadEnsNum += 1
 
         # Check ensemble size
         payload_size = struct.unpack("I", ens[24:28])
@@ -79,8 +127,11 @@ class EnsembleFileReport():
         # Set first and last ensemble number
         if self.FirstEnsembleNum == 0:
             self.FirstEnsembleNum = ens_num[0]
+
         self.LastEnsembleNum = ens_num[0]
 
+        print("EnsNum: " + str(ens_num[0]) + " : " + str(ens_num_1scomp))
+        print("Payload Size: " + str(payload_size[0]) + " : " + str(payload_size_1scomp))
 
         # Ensure the entire ensemble is in the buffer
         if len(ens) >= Ensemble().HeaderSize + payload_size[0] + Ensemble().ChecksumSize:
@@ -98,29 +149,30 @@ class EnsembleFileReport():
 
             if checksum[0] != calcChecksum:
                 self.NumBadChecksum += 1
+            else:
+                self.NumGoodEnsembles += 1
 
 
 def main(argv):
-   inputfile = ''
-   outputfile = ''
-   try:
-      opts, args = getopt.getopt(argv,"hi:",["ifile="])
-   except getopt.GetoptError:
-      print('EnsembleFileReport.py -i <inputfile>')
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt == '-h':
-         print('EnsembleFileReport.py -i <inputfile>')
-         sys.exit()
-      elif opt in ("-i", "--ifile"):
-         inputfile = arg
-   print('Input file is: ', inputfile)
+    inputfile = ''
+    try:
+        opts, args = getopt.getopt(argv,"hi:",["ifile="])
+    except getopt.GetoptError:
+        print('EnsembleFileReport.py -i <inputfile>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('EnsembleFileReport.py -i <inputfile>')
+            sys.exit()
+        elif opt in ("-i", "--ifile"):
+            inputfile = arg
+    print('Input file is: ', inputfile)
 
-   # Run report on file
-   EnsembleFileReport().Report(inputfile)
+    # Run report on file
+    EnsembleFileReport().report(inputfile)
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
 
 
 

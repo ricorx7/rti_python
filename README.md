@@ -16,6 +16,12 @@ pip3 install pycrc
 install pyside2 (Instructions below)
 
 
+Run Utilties Apps
+----------------
+export PYTHONPATH=$PYTHONPATY:/path/to/rti-python
+
+python3 Utilities/EnsembleFileReport.py -i file
+
 
 -------------
 #install pyside2
