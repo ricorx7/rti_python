@@ -20,7 +20,7 @@ Run Utilties Apps
 ----------------
 export PYTHONPATH=$PYTHONPATY:/path/to/rti-python
 
-python3 Utilities/EnsembleFileReport.py -i file
+python3 Utilities/EnsembleFileReport.py -i file -v
 
 
 -------------

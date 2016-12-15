@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c3a35651-1035-47c1-b521-10f4b5ac7dea" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Utilities/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Utilities/EnsembleFileReport.py" afterPath="$PROJECT_DIR$/Utilities/EnsembleFileReport.py" />
@@ -30,11 +29,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+            <state relative-caret-position="285">
+              <caret line="22" column="46" lean-forward="false" selection-start-line="22" selection-start-column="46" selection-end-line="22" selection-end-column="46" />
               <folding />
             </state>
           </provider>
@@ -60,11 +59,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="EnsembleFileReport.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="EnsembleFileReport.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utilities/EnsembleFileReport.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
+            <state relative-caret-position="288">
+              <caret line="173" column="19" lean-forward="false" selection-start-line="173" selection-start-column="19" selection-end-line="173" selection-end-column="59" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -125,8 +124,8 @@
         <option value="$PROJECT_DIR$/Ensemble/EnsembleReader.py" />
         <option value="$PROJECT_DIR$/Codecs/BinaryCodec.py" />
         <option value="$PROJECT_DIR$/Ensemble/Ensemble.py" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/Utilities/EnsembleFileReport.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -632,14 +631,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Ensemble/EnsembleReader.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="533">
@@ -658,11 +649,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Utilities/EnsembleFileReport.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
+        <state relative-caret-position="288">
+          <caret line="173" column="19" lean-forward="false" selection-start-line="173" selection-start-column="19" selection-end-line="173" selection-end-column="59" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="22" column="46" lean-forward="false" selection-start-line="22" selection-start-column="46" selection-end-line="22" selection-end-column="46" />
+          <folding />
         </state>
       </provider>
     </entry>
