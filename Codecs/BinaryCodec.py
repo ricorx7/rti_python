@@ -64,12 +64,45 @@ class BinaryCodec():
             if checksum[0] == calcChecksum:
                 print(ensNum[0])
                 # Decode data
+                self.decodeDataSets(ens)
+
 
                 # Stream data
 
             # Remove ensemble from buffer
             ensEnd = ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize
             del self.buffer[0:ensEnd]
+
+    def decodeDataSets(self, ens):
+        print(ens)
+        packetPointer = 0
+        type = 0
+        numElements = 0
+        elementMultiplier = 0
+        imag = 0
+        nameLen = 0
+        name = ""
+        dataSetSize = 0
+
+        for x in range(Ensemble().MaxNumDataSets):
+            type = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 0), Ensemble().BytesInInt32, ens)
+            numElements = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 1), Ensemble().BytesInInt32, ens)
+            elementMultiplier = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 2), Ensemble().BytesInInt32, ens)
+            image = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 3), Ensemble().BytesInInt32, ens)
+            nameLen = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 4), Ensemble().BytesInInt32, ens)
+            name = str(ens[packetPointer+(Ensemble.BytesInInt32 * 5):packetPointer+(Ensemble.BytesInInt32 * 5)+8], 'UTF-8')
+
+            print(type)
+            print(numElements)
+            print(elementMultiplier)
+            print(name)
+
+    def getInt32(self, start, numBytes, ens):
+        #print(start)
+        #print(numBytes)
+        #print(ens[start:start + numBytes])
+        return struct.unpack("I", ens[start:start + numBytes])
+
 
     def ones_complement(self, val):
         mask = (1 << val.bit_length()) - 1

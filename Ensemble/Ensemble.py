@@ -12,6 +12,15 @@ class Ensemble():
     # Checksum size
     ChecksumSize = 4
 
+    # Maximum number of datasets.
+    MaxNumDataSets = 20
+
+    # Number of bytes in Int32
+    BytesInInt32 = 4
+
+    # Number of bytes in Float
+    BytesInFloat = 4
+
     def ensembleSize(self, payloadSize):
         return Ensemble.HeaderSize + payloadSize + Ensemble.ChecksumSize
 
