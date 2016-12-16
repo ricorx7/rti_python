@@ -1,6 +1,7 @@
 import struct
 
 from Ensemble.Ensemble import Ensemble
+from Ensemble.BeamVelocity import BeamVelocity
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -64,7 +65,8 @@ class BinaryCodec():
             if checksum[0] == calcChecksum:
                 print(ensNum[0])
                 # Decode data
-                self.decodeDataSets(ens)
+                #self.decodeDataSets(ens)
+                self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
 
                 # Stream data
@@ -74,8 +76,8 @@ class BinaryCodec():
             del self.buffer[0:ensEnd]
 
     def decodeDataSets(self, ens):
-        print(ens)
-        packetPointer = 0
+        #print(ens)
+        packetPointer = Ensemble().HeaderSize
         type = 0
         numElements = 0
         elementMultiplier = 0
@@ -84,32 +86,41 @@ class BinaryCodec():
         name = ""
         dataSetSize = 0
 
+        ensemble = Ensemble()
+
         for x in range(Ensemble().MaxNumDataSets):
-            type = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 0), Ensemble().BytesInInt32, ens)
-            numElements = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 1), Ensemble().BytesInInt32, ens)
-            elementMultiplier = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 2), Ensemble().BytesInInt32, ens)
-            image = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 3), Ensemble().BytesInInt32, ens)
-            nameLen = self.getInt32(packetPointer+(Ensemble.BytesInInt32 * 4), Ensemble().BytesInInt32, ens)
+            # Check if we are at the end of the payload
+            if packetPointer >= len(ens):
+                break;
+
+            # Get the dataset info
+            ds_type = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 0), Ensemble().BytesInInt32, ens)
+            num_elements = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 1), Ensemble().BytesInInt32, ens)
+            element_multiplier = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 2), Ensemble().BytesInInt32, ens)
+            image = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 3), Ensemble().BytesInInt32, ens)
+            name_len = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 4), Ensemble().BytesInInt32, ens)
             name = str(ens[packetPointer+(Ensemble.BytesInInt32 * 5):packetPointer+(Ensemble.BytesInInt32 * 5)+8], 'UTF-8')
 
-            print(type)
-            print(numElements)
-            print(elementMultiplier)
+            """
+            print(ds_type[0])
+            print(num_elements[0])
+            print(element_multiplier[0])
+            print(image[0])
+            print(name_len[0])
             print(name)
+            """
 
-    def getInt32(self, start, numBytes, ens):
-        #print(start)
-        #print(numBytes)
-        #print(ens[start:start + numBytes])
-        return struct.unpack("I", ens[start:start + numBytes])
+            # Calculate the dataset size
+            data_set_size = Ensemble.GetDataSetSize(ds_type[0], name_len[0], num_elements[0], element_multiplier[0])
+
+            if "E000001" in name:
+                print(name)
+                bv = BeamVelocity(num_elements[0], element_multiplier[0])
+                bv.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddBeamVelocity(bv)
 
 
-    def ones_complement(self, val):
-        mask = (1 << val.bit_length()) - 1
-        return int(hex(val ^ mask), 16)
+            # Move the next dataset
+            packetPointer += data_set_size
 
-    def twos_complement(self, val, nbits):
-        """compute the 2's compliment of int value val"""
-        if (val & (1 << (nbits - 1))) != 0:  # if sign bit is set e.g., 8bit: 128-255
-            val = val - (1 << nbits)  # compute negative value
-        return val
+
