@@ -1,9 +1,9 @@
 from Ensemble.Ensemble import Ensemble
 
 
-class BeamVelocity:
+class EarthVelocity:
     """
-    Beam Velocity DataSet.
+    Earth Velocity DataSet.
     [Bin x Beam] data.
     """
 
@@ -13,7 +13,7 @@ class BeamVelocity:
         self.element_multipiler = element_multipiler
         self.image = 0
         self.name_len = 8
-        self.name = "E000001"
+        self.name = "E000003"
         self.Velocities = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values

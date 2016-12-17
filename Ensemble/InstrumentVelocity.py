@@ -1,9 +1,9 @@
 from Ensemble.Ensemble import Ensemble
 
 
-class BeamVelocity:
+class InstrumentVelocity:
     """
-    Beam Velocity DataSet.
+    Instrument Velocity DataSet.
     [Bin x Beam] data.
     """
 
@@ -13,7 +13,7 @@ class BeamVelocity:
         self.element_multipiler = element_multipiler
         self.image = 0
         self.name_len = 8
-        self.name = "E000001"
+        self.name = "E000002"
         self.Velocities = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values
@@ -30,11 +30,11 @@ class BeamVelocity:
         the velocities.
         :param data: Bytearray for the dataset.
         """
-        packet_pointer = Ensemble.GetBaseDataSize(self.name_len)
+        packetpointer = Ensemble.GetBaseDataSize(self.name_len)
 
         for bin in range(self.num_elements):
             for beam in range(self.element_multipiler):
-                self.Velocities[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
-                packet_pointer += Ensemble().BytesInFloat
+                self.Velocities[bin][beam] = Ensemble.GetFloat(packetpointer, Ensemble().BytesInFloat, data)
+                packetpointer += Ensemble().BytesInFloat
 
         print(self.Velocities)

@@ -1,9 +1,9 @@
 from Ensemble.Ensemble import Ensemble
 
 
-class BeamVelocity:
+class Correlation:
     """
-    Beam Velocity DataSet.
+    Correlation DataSet.
     [Bin x Beam] data.
     """
 
@@ -13,8 +13,8 @@ class BeamVelocity:
         self.element_multipiler = element_multipiler
         self.image = 0
         self.name_len = 8
-        self.name = "E000001"
-        self.Velocities = []
+        self.name = "E000005"
+        self.Correlation = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values
         for bins in range(num_elements):
@@ -22,7 +22,7 @@ class BeamVelocity:
             for beams in range(element_multipiler):
                 bins.append([Ensemble().BadVelocity])
 
-            self.Velocities.append(bins)
+            self.Correlation.append(bins)
 
     def decode(self, data):
         """
@@ -34,7 +34,7 @@ class BeamVelocity:
 
         for bin in range(self.num_elements):
             for beam in range(self.element_multipiler):
-                self.Velocities[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
+                self.Correlation[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
                 packet_pointer += Ensemble().BytesInFloat
 
-        print(self.Velocities)
+        print(self.Correlation)

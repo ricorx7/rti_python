@@ -30,17 +30,91 @@ class Ensemble():
     BadVelocity = 88.888
 
     def __init__(self):
+        self.RawData = None
         self.IsBeamVelocity = False
         self.BeamVelocity = None
+        self.IsInstrumentVelocity = False
+        self.InstrumentVelocity = None
+        self.IsEarthVelocity = False
+        self.EarthVelocity = None
+        self.IsAmplitude = False
+        self.Amplitude = None
+        self.IsCorrelation = False
+        self.Correlation = None
+        self.IsGoodBeam = False
+        self.GoodBeam = None
+        self.IsGoodEarth = False
+        self.GoodEarth = None
 
-    def AddBeamVelocity(self, beamVel):
+    def AddRawData(self, data):
+        """
+        Add Raw bytearray data to the ensemble.
+        :param data: Raw data.
+        """
+        self.RawData = data
+
+    def AddBeamVelocity(self, ds):
         """
         Add a Beam Velocity object to the ensemble.
         Set the flag that the dataset is added.
-        :param beamVel: Beam Velocity object.
+        :param ds: Beam Velocity object.
         """
-        self.BeamVelocity = True
-        self.BeamVelocity = beamVel
+        self.IsBeamVelocity = True
+        self.BeamVelocity = ds
+
+    def AddInstrumentVelocity(self, ds):
+        """
+        Add a Instrument Velocity object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Instrument Velocity object.
+        """
+        self.IsInstrumentVelocity = True
+        self.InstrumentVelocity = ds
+
+    def AddEarthVelocity(self, ds):
+        """
+        Add a Earth Velocity object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Earth Velocity object.
+        """
+        self.IsEarthVelocity = True
+        self.EarthVelocity = ds
+
+    def AddAmplitude(self, ds):
+        """
+        Add a Amplitude object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Amplitude object.
+        """
+        self.IsAmplitude = True
+        self.Amplitude = ds
+
+    def AddCorrelation(self, ds):
+        """
+        Add a Correlation object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Correlation object.
+        """
+        self.IsCorrelation = True
+        self.Correlation = ds
+
+    def AddGoodBeam(self, ds):
+        """
+        Add a Good Beam object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: GoodBeam object.
+        """
+        self.IsGoodBeam = True
+        self.GoodBeam = ds
+
+    def AddGoodEarth(self, ds):
+        """
+        Add a Good Earth object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Good Earth object.
+        """
+        self.IsGoodEarth = True
+        self.GoodEarth = ds
 
     @staticmethod
     def GetInt32(start, numBytes, ens):
@@ -52,7 +126,7 @@ class Ensemble():
         :param ens: Buffer containing the bytearray data.
         :return: Int32 of the data in the buffer.
         """
-        return struct.unpack("I", ens[start:start + numBytes])
+        return struct.unpack("I", ens[start:start + numBytes])[0]
 
     @staticmethod
     def GetFloat(start, numBytes, ens):
@@ -64,7 +138,7 @@ class Ensemble():
         :param ens: Buffer containing the bytearray data.
         :return: Int32 of the data in the buffer.
         """
-        return struct.unpack("f", ens[start:start + numBytes])
+        return struct.unpack("f", ens[start:start + numBytes])[0]
 
     @staticmethod
     def GetDataSetSize(ds_type, name_len, num_elements, element_multipler):

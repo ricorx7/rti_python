@@ -2,6 +2,12 @@ import struct
 
 from Ensemble.Ensemble import Ensemble
 from Ensemble.BeamVelocity import BeamVelocity
+from Ensemble.InstrumentVelocity import InstrumentVelocity
+from Ensemble.EarthVelocity import EarthVelocity
+from Ensemble.Amplitude import Amplitude
+from Ensemble.Correlation import Correlation
+from Ensemble.GoodBeam import GoodBeam
+from Ensemble.GoodEarth import GoodEarth
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -65,9 +71,7 @@ class BinaryCodec():
             if checksum[0] == calcChecksum:
                 print(ensNum[0])
                 # Decode data
-                #self.decodeDataSets(ens)
-                self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
-
+                ensemble = self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
                 # Stream data
 
@@ -76,6 +80,11 @@ class BinaryCodec():
             del self.buffer[0:ensEnd]
 
     def decodeDataSets(self, ens):
+        """
+        Decode the datasets in the ensemble.
+        :param ens: Ensemble data.  Decode the dataset.
+        :return: Return the decoded ensemble.
+        """
         #print(ens)
         packetPointer = Ensemble().HeaderSize
         type = 0
@@ -86,8 +95,13 @@ class BinaryCodec():
         name = ""
         dataSetSize = 0
 
+        # Create the ensemble
         ensemble = Ensemble()
 
+        # Add the raw data to the ensemble
+        ensemble.AddRawData(ens)
+
+        # Decode the ensemble datasets
         for x in range(Ensemble().MaxNumDataSets):
             # Check if we are at the end of the payload
             if packetPointer >= len(ens):
@@ -101,26 +115,62 @@ class BinaryCodec():
             name_len = Ensemble.GetInt32(packetPointer + (Ensemble.BytesInInt32 * 4), Ensemble().BytesInInt32, ens)
             name = str(ens[packetPointer+(Ensemble.BytesInInt32 * 5):packetPointer+(Ensemble.BytesInInt32 * 5)+8], 'UTF-8')
 
-            """
-            print(ds_type[0])
-            print(num_elements[0])
-            print(element_multiplier[0])
-            print(image[0])
-            print(name_len[0])
-            print(name)
-            """
-
             # Calculate the dataset size
-            data_set_size = Ensemble.GetDataSetSize(ds_type[0], name_len[0], num_elements[0], element_multiplier[0])
+            data_set_size = Ensemble.GetDataSetSize(ds_type, name_len, num_elements, element_multiplier)
 
+            # Beam Velocity
             if "E000001" in name:
                 print(name)
-                bv = BeamVelocity(num_elements[0], element_multiplier[0])
+                bv = BeamVelocity(num_elements, element_multiplier)
                 bv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddBeamVelocity(bv)
+
+            # Instrument Velocity
+            if "E000002" in name:
+                print(name)
+                iv = InstrumentVelocity(num_elements, element_multiplier)
+                iv.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddInstrumentVelocity(iv)
+
+            # Earth Velocity
+            if "E000003" in name:
+                print(name)
+                ev = EarthVelocity(num_elements, element_multiplier)
+                ev.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddEarthVelocity(ev)
+
+            # Amplitude
+            if "E000004" in name:
+                print(name)
+                amp = Amplitude(num_elements, element_multiplier)
+                amp.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddAmplitude(amp)
+
+            # Correlation
+            if "E000005" in name:
+                print(name)
+                corr = Correlation(num_elements, element_multiplier)
+                corr.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddCorrelation(corr)
+
+            # Good Beam
+            if "E000006" in name:
+                print(name)
+                gb = GoodBeam(num_elements, element_multiplier)
+                gb.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddGoodBeam(gb)
+
+            # Good Earth
+            if "E000007" in name:
+                print(name)
+                ge = GoodEarth(num_elements, element_multiplier)
+                ge.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddGoodEarth(ge)
 
 
             # Move the next dataset
             packetPointer += data_set_size
+
+        return ensemble
 
 

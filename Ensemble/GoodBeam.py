@@ -1,28 +1,29 @@
 from Ensemble.Ensemble import Ensemble
 
 
-class BeamVelocity:
+class GoodBeam:
     """
-    Beam Velocity DataSet.
+    Good Beam DataSet.
+    Indicate if the beam data is good.
     [Bin x Beam] data.
     """
 
-    def __init__(self, num_elements, element_multipiler):
+    def __init__(self, num_elements, element_multiplier):
         self.ds_type = 10
         self.num_elements = num_elements
-        self.element_multipiler = element_multipiler
+        self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000001"
-        self.Velocities = []
+        self.name = "E000006"
+        self.GoodBeam = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values
         for bins in range(num_elements):
             bins = []
-            for beams in range(element_multipiler):
-                bins.append([Ensemble().BadVelocity])
+            for beams in range(element_multiplier):
+                bins.append([0])
 
-            self.Velocities.append(bins)
+            self.GoodBeam.append(bins)
 
     def decode(self, data):
         """
@@ -33,8 +34,8 @@ class BeamVelocity:
         packet_pointer = Ensemble.GetBaseDataSize(self.name_len)
 
         for bin in range(self.num_elements):
-            for beam in range(self.element_multipiler):
-                self.Velocities[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
-                packet_pointer += Ensemble().BytesInFloat
+            for beam in range(self.element_multiplier):
+                self.GoodBeam[bin][beam] = Ensemble.GetInt32(packet_pointer, Ensemble().BytesInInt32, data)
+                packet_pointer += Ensemble().BytesInInt32
 
-        print(self.Velocities)
+        print(self.GoodBeam)
