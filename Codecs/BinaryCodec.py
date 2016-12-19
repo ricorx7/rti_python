@@ -8,6 +8,7 @@ from Ensemble.Amplitude import Amplitude
 from Ensemble.Correlation import Correlation
 from Ensemble.GoodBeam import GoodBeam
 from Ensemble.GoodEarth import GoodEarth
+from Ensemble.EnsembleData import EnsembleData
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -166,6 +167,13 @@ class BinaryCodec():
                 ge = GoodEarth(num_elements, element_multiplier)
                 ge.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodEarth(ge)
+
+            # Ensemble Data
+            if "E000008" in name:
+                print(name)
+                ed = EnsembleData(num_elements, element_multiplier)
+                ed.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddEnsembleData(ed)
 
 
             # Move the next dataset

@@ -45,6 +45,8 @@ class Ensemble():
         self.GoodBeam = None
         self.IsGoodEarth = False
         self.GoodEarth = None
+        self.IsEnsembleData = False
+        self.EnsembleData = None
 
     def AddRawData(self, data):
         """
@@ -116,6 +118,15 @@ class Ensemble():
         self.IsGoodEarth = True
         self.GoodEarth = ds
 
+    def AddEnsembleData(self, ds):
+        """
+        Add a EnsembleData object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Ensemble Data object.
+        """
+        self.IsEnsembleData = True
+        self.EnsembleData = ds
+
     @staticmethod
     def GetInt32(start, numBytes, ens):
         """
@@ -127,6 +138,18 @@ class Ensemble():
         :return: Int32 of the data in the buffer.
         """
         return struct.unpack("I", ens[start:start + numBytes])[0]
+
+    @staticmethod
+    def GetUInt16(start, numBytes, ens):
+        """
+        Convert the bytes given into an uint16.
+        This will look in the ens given.
+        :param start: Start location.
+        :param numBytes: Number of bytes in the uint16.
+        :param ens: Buffer containing the bytearray data.
+        :return: uint16 of the data in the buffer.
+        """
+        return struct.unpack("b", ens[start:start + numBytes])[0]
 
     @staticmethod
     def GetFloat(start, numBytes, ens):
