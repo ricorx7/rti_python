@@ -47,6 +47,10 @@ class Ensemble():
         self.GoodEarth = None
         self.IsEnsembleData = False
         self.EnsembleData = None
+        self.IsAncillaryData = False
+        self.AncillaryData = None
+        self.IsBottomTrack = False
+        self.BottomTrack = None
 
     def AddRawData(self, data):
         """
@@ -126,6 +130,24 @@ class Ensemble():
         """
         self.IsEnsembleData = True
         self.EnsembleData = ds
+
+    def AddAncillaryData(self, ds):
+        """
+        Add a AncillaryData object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Ancillary Data object.
+        """
+        self.IsAncillaryData = True
+        self.AncillaryData = ds
+
+    def AddBottomTrack(self, ds):
+        """
+        Add a AncillaryData object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Ancillary Data object.
+        """
+        self.IsBottomTrack = True
+        self.BottomTrack = ds
 
     @staticmethod
     def GetInt32(start, numBytes, ens):

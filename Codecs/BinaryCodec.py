@@ -11,6 +11,8 @@ from Ensemble.Correlation import Correlation
 from Ensemble.GoodBeam import GoodBeam
 from Ensemble.GoodEarth import GoodEarth
 from Ensemble.EnsembleData import EnsembleData
+from Ensemble.AncillaryData import AncillaryData
+from Ensemble.BottomTrack import BottomTrack
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -197,6 +199,25 @@ class BinaryCodec():
                 ensemble.AddEnsembleData(ed)
                 # Send to UDP socket
                 self.socket.sendto(ed.toJSON().encode(), (self.udp_ip, self.udp_port))
+
+            # Ancillary Data
+            if "E000009" in name:
+                print(name)
+                print(type)
+                ad = AncillaryData(num_elements, element_multiplier)
+                ad.decode(ens[packetPointer:packetPointer+data_set_size])
+                ensemble.AddEnsembleData(ed)
+                # Send to UDP socket
+                self.socket.sendto(ad.toJSON().encode(), (self.udp_ip, self.udp_port))
+
+            # Bottom Track
+            if "E000010" in name:
+                print(name)
+                bt = BottomTrack(num_elements, element_multiplier)
+                bt.decode(ens[packetPointer:packetPointer + data_set_size])
+                ensemble.AddEnsembleData(ed)
+                # Send to UDP socket
+                self.socket.sendto(bt.toJSON().encode(), (self.udp_ip, self.udp_port))
 
 
             # Move the next dataset
