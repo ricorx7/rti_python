@@ -33,6 +33,10 @@ class view_serial(QtWidgets.QWidget):
         self.tcp_port_combobox.setEditable(True)
         self.tcp_port_combobox.addItems(["55056", ""])
 
+        self.ens_udp_port_combobox = QtWidgets.QComboBox()
+        self.ens_udp_port_combobox.setEditable(True)
+        self.ens_udp_port_combobox.addItems(["55057", ""])
+
         self.comm_port_combobox = QtWidgets.QComboBox()
         self.comm_port_combobox.addItems(self.serial_ports())
 
@@ -74,6 +78,7 @@ class view_serial(QtWidgets.QWidget):
         # Add Widgets
         gridLayout = QtWidgets.QGridLayout()
         gridLayout.addWidget(self.tcp_port_combobox, 0, 0)
+        gridLayout.addWidget(self.ens_udp_port_combobox, 0, 1)
         gridLayout.addWidget(self.comm_port_combobox, 1, 0)
         gridLayout.addWidget(self.comm_baud_combobox, 1, 1)
         gridLayout.addWidget(connect, 2, 0)
@@ -151,7 +156,7 @@ class view_serial(QtWidgets.QWidget):
             print('Serial Send Socket: ", Error Opening socket', err)
 
         # Start a thread to read the raw data
-        self.ensemble_reader_thread = ReadRawSerialThread(self.raw_serial_socket)
+        self.ensemble_reader_thread = ReadRawSerialThread(self.raw_serial_socket, int(self.ens_udp_port_combobox.currentText()))
         self.ensemble_reader_thread.raw_data.connect(self.on_raw_read)
         self.ensemble_reader_thread.start()
 
@@ -327,13 +332,13 @@ class ReadRawSerialThread(QtCore.QThread):
 
     raw_data = QtCore.Signal(object)
 
-    def __init__(self, socket, parent=None):
+    def __init__(self, tcp_socket, ens_port, parent=None):
         QtCore.QThread.__init__(self, parent)
-        self.socket = socket
+        self.socket = tcp_socket
         self.isAlive = True
         print("Read Socket thread started")
 
-        self.codec = BinaryCodec()
+        self.codec = BinaryCodec(ens_port)
 
     def stop(self):
         """

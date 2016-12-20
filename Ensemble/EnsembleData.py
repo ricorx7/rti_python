@@ -1,6 +1,6 @@
+import json
 import struct
 from Ensemble.Ensemble import Ensemble
-
 
 
 class EnsembleData:
@@ -63,16 +63,10 @@ class EnsembleData:
         self.HSec = Ensemble.GetInt32(packet_pointer + Ensemble().BytesInInt32 * 12, Ensemble().BytesInInt32, data)
 
         self.SerialNumber = str(data[packet_pointer+Ensemble().BytesInInt32*13:packet_pointer+Ensemble().BytesInInt32*21], "UTF-8")
-        #self.SysFirmware = str(data[packet_pointer+Ensemble().BytesInInt32*21:packet_pointer+Ensemble().BytesInInt32*22], "UTF-8")
-        #self.SubsystemConfig = str(data[packet_pointer+Ensemble().BytesInInt32*22:packet_pointer+Ensemble().BytesInInt32*23], "UTF-8")
         self.SysFirmwareRevision = struct.unpack("B", data[packet_pointer+Ensemble().BytesInInt32*21 + 0:packet_pointer+Ensemble().BytesInInt32*21 + 1])[0]
         self.SysFirmwareMinor = struct.unpack("B", data[packet_pointer+Ensemble().BytesInInt32*21 + 1:packet_pointer+Ensemble().BytesInInt32*21 + 2])[0]
         self.SysFirmwareMajor = struct.unpack("B", data[packet_pointer + Ensemble().BytesInInt32 * 21 + 2:packet_pointer + Ensemble().BytesInInt32 * 21 + 3])[0]
         self.SysFirmwareSubsystemCode = str(data[packet_pointer + Ensemble().BytesInInt32 * 21 + 3:packet_pointer + Ensemble().BytesInInt32 * 21 + 4], "UTF-8")
-        #self.SysFirmwareRevision = str(data[packet_pointer + Ensemble().BytesInInt32 * 21 + 0:packet_pointer + Ensemble().BytesInInt32 * 21 + 1], "UTF-8")
-        #self.SysFirmwareMinor = str(data[packet_pointer + Ensemble().BytesInInt32 * 21 + 1:packet_pointer + Ensemble().BytesInInt32 * 21 + 2], "UTF-8")
-        #self.SysFirmwareMinor = data[packet_pointer + Ensemble().BytesInInt32 * 21 + 1:packet_pointer + Ensemble().BytesInInt32 * 21 + 2]
-        #self.SysFirmwareMajor = data[packet_pointer + Ensemble().BytesInInt32 * 21 + 2:packet_pointer + Ensemble().BytesInInt32 * 21 + 3]
 
         self.SubsystemConfig = struct.unpack("B", data[packet_pointer + Ensemble().BytesInInt32 * 22 + 3:packet_pointer + Ensemble().BytesInInt32 * 22 + 4])[0]
 
@@ -81,5 +75,15 @@ class EnsembleData:
         print(self.SerialNumber)
         print(str(self.SysFirmwareMajor) + "." + str(self.SysFirmwareMinor) + "." + str(self.SysFirmwareRevision) + "-" + str(self.SysFirmwareSubsystemCode))
         print(self.SubsystemConfig)
+
+    def toJSON(self, pretty=False):
+        """
+        Convert to JSON.
+        :return: JSON string with indents.
+        """
+        if pretty is True:
+            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        else:
+            return json.dumps(self, default=lambda o: o.__dict__)
 
 

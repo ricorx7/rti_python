@@ -1,3 +1,5 @@
+import json
+
 from Ensemble.Ensemble import Ensemble
 
 
@@ -7,10 +9,10 @@ class BeamVelocity:
     [Bin x Beam] data.
     """
 
-    def __init__(self, num_elements, element_multipiler):
+    def __init__(self, num_elements, element_multiplier):
         self.ds_type = 10
         self.num_elements = num_elements
-        self.element_multipiler = element_multipiler
+        self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
         self.name = "E000001"
@@ -19,7 +21,7 @@ class BeamVelocity:
         # Initialize with bad values
         for bins in range(num_elements):
             bins = []
-            for beams in range(element_multipiler):
+            for beams in range(element_multiplier):
                 bins.append([Ensemble().BadVelocity])
 
             self.Velocities.append(bins)
@@ -33,8 +35,18 @@ class BeamVelocity:
         packet_pointer = Ensemble.GetBaseDataSize(self.name_len)
 
         for bin in range(self.num_elements):
-            for beam in range(self.element_multipiler):
+            for beam in range(self.element_multiplier):
                 self.Velocities[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
                 packet_pointer += Ensemble().BytesInFloat
 
         print(self.Velocities)
+
+    def toJSON(self, pretty=False):
+        """
+        Convert to JSON.
+        :return: JSON string with indents.
+        """
+        if pretty is True:
+            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        else:
+            return json.dumps(self, default=lambda o: o.__dict__)

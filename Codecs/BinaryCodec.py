@@ -1,4 +1,6 @@
+import json
 import struct
+import socket
 
 from Ensemble.Ensemble import Ensemble
 from Ensemble.BeamVelocity import BeamVelocity
@@ -17,9 +19,14 @@ class BinaryCodec():
     Decode RoweTech ADCP Binary data.
     """
 
-    def __init__(self):
-        print("codec")
+    def __init__(self, udp_port):
+        print("Binary codec - UDP Port: ", udp_port)
         self.buffer = bytearray()
+
+        # Create socket
+        self.udp_port = udp_port                                        # UDP Port
+        self.udp_ip = "127.0.0.1"                                       # UDP IP (Localhost)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
 
@@ -125,6 +132,8 @@ class BinaryCodec():
                 bv = BeamVelocity(num_elements, element_multiplier)
                 bv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddBeamVelocity(bv)
+                # Send to UDP socket
+                self.socket.sendto(bv.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Instrument Velocity
             if "E000002" in name:
@@ -132,6 +141,8 @@ class BinaryCodec():
                 iv = InstrumentVelocity(num_elements, element_multiplier)
                 iv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddInstrumentVelocity(iv)
+                # Send to UDP socket
+                self.socket.sendto(iv.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Earth Velocity
             if "E000003" in name:
@@ -139,6 +150,8 @@ class BinaryCodec():
                 ev = EarthVelocity(num_elements, element_multiplier)
                 ev.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEarthVelocity(ev)
+                # Send to UDP socket
+                self.socket.sendto(ev.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Amplitude
             if "E000004" in name:
@@ -146,6 +159,8 @@ class BinaryCodec():
                 amp = Amplitude(num_elements, element_multiplier)
                 amp.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddAmplitude(amp)
+                # Send to UDP socket
+                self.socket.sendto(amp.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Correlation
             if "E000005" in name:
@@ -153,6 +168,8 @@ class BinaryCodec():
                 corr = Correlation(num_elements, element_multiplier)
                 corr.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddCorrelation(corr)
+                # Send to UDP socket
+                self.socket.sendto(corr.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Good Beam
             if "E000006" in name:
@@ -160,6 +177,8 @@ class BinaryCodec():
                 gb = GoodBeam(num_elements, element_multiplier)
                 gb.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodBeam(gb)
+                # Send to UDP socket
+                self.socket.sendto(gb.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Good Earth
             if "E000007" in name:
@@ -167,6 +186,8 @@ class BinaryCodec():
                 ge = GoodEarth(num_elements, element_multiplier)
                 ge.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodEarth(ge)
+                # Send to UDP socket
+                self.socket.sendto(ge.toJSON().encode(), (self.udp_ip, self.udp_port))
 
             # Ensemble Data
             if "E000008" in name:
@@ -174,6 +195,8 @@ class BinaryCodec():
                 ed = EnsembleData(num_elements, element_multiplier)
                 ed.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEnsembleData(ed)
+                # Send to UDP socket
+                self.socket.sendto(ed.toJSON().encode(), (self.udp_ip, self.udp_port))
 
 
             # Move the next dataset

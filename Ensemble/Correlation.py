@@ -1,3 +1,4 @@
+import json
 from Ensemble.Ensemble import Ensemble
 
 
@@ -38,3 +39,13 @@ class Correlation:
                 packet_pointer += Ensemble().BytesInFloat
 
         print(self.Correlation)
+
+    def toJSON(self, pretty=False):
+        """
+        Convert to JSON.
+        :return: JSON string with indents.
+        """
+        if pretty is True:
+            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        else:
+            return json.dumps(self, default=lambda o: o.__dict__)

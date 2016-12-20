@@ -7,7 +7,7 @@ class AdcpCodec():
     """
 
     def __init__(self):
-        self.BinaryCodec = BinaryCodec()
+        self.BinaryCodec = BinaryCodec(55057)
 
     def Add(self, data):
         
