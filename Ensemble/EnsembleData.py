@@ -15,7 +15,7 @@ class EnsembleData:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000008"
+        self.Name = "E000008"
 
         self.EnsembleNumber = 0
         self.NumBins = 0
@@ -23,7 +23,6 @@ class EnsembleData:
         self.DesiredPingCount = 0
         self.ActualPingCount = 0
         self.SerialNumber = ""
-        self.SysFirmware = ""
         self.SysFirmwareMajor = ""
         self.SysFirmwareMinor = ""
         self.SysFirmwareRevision = ""
@@ -37,7 +36,6 @@ class EnsembleData:
         self.Minute = 0
         self.Second = 0
         self.HSec = 0
-        self.DateTime = None
 
 
     def decode(self, data):

@@ -15,7 +15,7 @@ class AncillaryData:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000009"
+        self.Name = "E000009"
 
         self.FirstBinRange = 0.0
         self.BinSize = 0.0

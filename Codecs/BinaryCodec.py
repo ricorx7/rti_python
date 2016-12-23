@@ -17,6 +17,35 @@ from Ensemble.BottomTrack import BottomTrack
 
 from PyCRC.CRCCCITT import CRCCCITT
 
+class EnsembleMetaData:
+    """
+    Meta Data for the ensemble.
+    THis includes the revision and host information.
+    """
+    def __init__(self):
+        self.Revision = "1.0"
+        self.Host = socket.gethostname()
+        self.HostIp = socket.gethostbyname(socket.gethostname())
+
+        # Get the external IP address of the computer
+        url = "http://checkip.dyndns.org"
+        request = requests.get(url)
+        clean = request.text.split(': ', 1)[1]
+        your_ip = clean.split('</body></html>', 1)[0]
+        self.HostExtIp = your_ip
+
+class ProjectInfo:
+    """
+    Information about the project that collected this data.
+    """
+    def __init__(self):
+        self.ProjectName = ""
+        self.Username = ""
+        self.Lat = ""
+        self.Lon = ""
+        self.DateCreated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        self.DateModified = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+
 
 class BinaryCodec:
     """
@@ -27,13 +56,8 @@ class BinaryCodec:
         print("Binary codec - UDP Port: ", udp_port)
         self.buffer = bytearray()
 
-        url = "http://checkip.dyndns.org"
-        request = requests.get(url)
-        clean = request.text.split(': ', 1)[1]
-        your_ip = clean.split('</body></html>', 1)[0]
-
-        self.Revision = "1.0"
-        self.Host = socket.gethostname() + " - " + socket.gethostbyname(socket.gethostname()) + " - " + your_ip
+        # Set meta data
+        self.Meta = EnsembleMetaData()
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port
@@ -236,6 +260,10 @@ class BinaryCodec:
         return ensemble
 
     def streamData(self, ens):
+        """
+        Stream the data to the UDP port.
+        :param ens: Ensemble data to stream.
+        """
         serial_number = ""
         ensemble_number = 0
         date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -250,84 +278,74 @@ class BinaryCodec:
                                           hour=ens.EnsembleData.Hour,
                                           minute=ens.EnsembleData.Minute,
                                           second=ens.EnsembleData.Second,
-                                          microsecond=round(ens.EnsembleData.HSec/10)).strftime("%Y-%m-%d %H:%M:%S.%f")
+                                          microsecond=round(ens.EnsembleData.HSec*10000)).strftime("%Y-%m-%d %H:%M:%S.%f")
 
             # Stream the data
             ens.EnsembleData.DateTime = date_time
-            ens.EnsembleData.Revision = self.Revision
-            ens.EnsembleData.Host = self.Host
+            ens.EnsembleData.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.EnsembleData).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsBeamVelocity:
             ens.BeamVelocity.EnsembleNumber = ensemble_number
             ens.BeamVelocity.SerialNumber = serial_number
             ens.BeamVelocity.DateTime = date_time
-            ens.BeamVelocity.Revision = self.Revision
-            ens.BeamVelocity.Host = self.Host
+            ens.BeamVelocity.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.BeamVelocity).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsInstrumentVelocity:
             ens.InstrumentVelocity.EnsembleNumber = ensemble_number
             ens.InstrumentVelocity.SerialNumber = serial_number
             ens.InstrumentVelocity.DateTime = date_time
-            ens.InstrumentVelocity.Revision = self.Revision
-            ens.InstrumentVelocity.Host = self.Host
+            ens.InstrumentVelocity.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.InstrumentVelocity).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsEarthVelocity:
             ens.EarthVelocity.EnsembleNumber = ensemble_number
             ens.EarthVelocity.SerialNumber = serial_number
             ens.EarthVelocity.DateTime = date_time
-            ens.EarthVelocity.Revision = self.Revision
-            ens.EarthVelocity.Host = self.Host
+            ens.EarthVelocity.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.EarthVelocity).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsAmplitude:
             ens.Amplitude.EnsembleNumber = ensemble_number
             ens.Amplitude.SerialNumber = serial_number
             ens.Amplitude.DateTime = date_time
-            ens.Amplitude.Revision = self.Revision
-            ens.Amplitude.Host = self.Host
+            ens.Amplitude.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.Amplitude).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsCorrelation:
             ens.Correlation.EnsembleNumber = ensemble_number
             ens.Correlation.SerialNumber = serial_number
             ens.Correlation.DateTime = date_time
-            ens.Correlation.Revision = self.Revision
-            ens.Correlation.Host = self.Host
+            ens.Correlation.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.Correlation).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsGoodBeam:
             ens.GoodBeam.EnsembleNumber = ensemble_number
             ens.GoodBeam.SerialNumber = serial_number
             ens.GoodBeam.DateTime = date_time
-            ens.GoodBeam.Revision = self.Revision
-            ens.GoodBeam.Host = self.Host
+            ens.GoodBeam.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.GoodBeam).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsGoodEarth:
             ens.GoodEarth.EnsembleNumber = ensemble_number
             ens.GoodEarth.SerialNumber = serial_number
             ens.GoodEarth.DateTime = date_time
-            ens.GoodEarth.Revision = self.Revision
-            ens.GoodEarth.Host = self.Host
+            ens.GoodEarth.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.GoodEarth).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsAncillaryData:
             ens.AncillaryData.EnsembleNumber = ensemble_number
             ens.AncillaryData.SerialNumber = serial_number
             ens.AncillaryData.DateTime = date_time
-            ens.AncillaryData.Revision = self.Revision
-            ens.AncillaryData.Host = self.Host
+            ens.AncillaryData.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.AncillaryData).encode(), (self.udp_ip, self.udp_port))
 
         if ens.IsBottomTrack:
             ens.BottomTrack.EnsembleNumber = ensemble_number
             ens.BottomTrack.SerialNumber = serial_number
             ens.BottomTrack.DateTime = date_time
-            ens.BottomTrack.Revision = self.Revision
-            ens.BottomTrack.Host = self.Host
+            ens.BottomTrack.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.BottomTrack).encode(), (self.udp_ip, self.udp_port))
 
 

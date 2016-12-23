@@ -15,7 +15,7 @@ class GoodEarth:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000007"
+        self.Name = "E000007"
         self.GoodEarth = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values

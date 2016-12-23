@@ -15,7 +15,7 @@ class BottomTrack:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000010"
+        self.Name = "E000010"
 
         self.FirstPingTime = 0.0
         self.LastPingTime = 0.0

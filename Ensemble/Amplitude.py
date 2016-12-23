@@ -14,7 +14,7 @@ class Amplitude:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000004"
+        self.Name = "E000004"
         self.Amplitude = []
 
         #self.EnsembleNumber = ensemble_number

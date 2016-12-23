@@ -23,6 +23,22 @@ export PYTHONPATH=$PYTHONPATY:/path/to/rti-python
 python3 Utilities/EnsembleFileReport.py -i file -v
 
 
+AWS DynamoDB
+----------------
+Install AWS CLI
+
+pip3 install awscli
+
+
+Setup a configuration
+
+aws configure
+
+Add a User to IAM in AWS Console
+
+Create Access key and Secret key and add to 'aws configure'
+
+
 -------------
 #install pyside2
 

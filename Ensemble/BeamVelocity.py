@@ -15,7 +15,7 @@ class BeamVelocity:
         self.element_multiplier = element_multiplier
         self.image = 0
         self.name_len = 8
-        self.name = "E000001"
+        self.Name = "E000001"
         self.Velocities = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values

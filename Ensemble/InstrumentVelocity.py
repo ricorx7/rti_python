@@ -14,7 +14,7 @@ class InstrumentVelocity:
         self.element_multipiler = element_multipiler
         self.image = 0
         self.name_len = 8
-        self.name = "E000002"
+        self.Name = "E000002"
         self.Velocities = []
         # Create enough entries for all the (bins x beams)
         # Initialize with bad values
