@@ -1,16 +1,34 @@
 import socket
 import sys, getopt
+import json
+import abc
+import logging
+
+logger = logging.getLogger("EnsembleReceiver")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class EnsembleReceiver():
     """
-    Create a TCP reader class
+    Create a UDP reader class
     """
-    def __init__(self, udp_port):
-        print("Ensemble Receiver: ", udp_port)
-        self.port = udp_port
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        self.port = 55057   # Default port
         self.socket = None
-        self.reconnect(port)
+
+
+    def connect(self, udp_port):
+        """
+        Connect to the UDP port and begin reading data.
+        """
+        self.port = udp_port
+        logger.info("Ensemble Receiver: " + str(udp_port))
+
+        self.reconnect(self.port)
         self.read()
 
     def reconnect(self, udp_port):
@@ -21,8 +39,9 @@ class EnsembleReceiver():
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
             self.socket.settimeout(10)
             self.socket.bind(('localhost', udp_port))
+            self.file_socket = self.socket.makefile()
         except ConnectionRefusedError as err:
-            print(err)
+            logger.error(err)
             sys.exit(2)
         except Exception as err:
             print('Error Opening socket: ', err)
@@ -35,11 +54,21 @@ class EnsembleReceiver():
         while True:
             try:
                 # Receive a response
-                response = self.socket.recvfrom(5120)
-                print('"%s"' % str(response[0], "UTF-8"))
+                #response = self.socket.recvfrom(5120)
+                response = self.file_socket.readline()
+                #print('"%s"' % str(response[0], "UTF-8"))
+                #print(response)
+                jsonResponse = json.loads(response)
+                #print(jsonResponse)
+                #logger.info(jsonResponse["Name"])
+
+                # Send the JSON data to the abstract class to process
+                # the JSON data.
+                self.process(jsonResponse)
+
 
                 if len(response) == 0:
-                    print("Disconnected")
+                    logger.info("Disconnected")
 
                     # Close the socket
                     self.close()
@@ -62,6 +91,14 @@ class EnsembleReceiver():
         """
         self.socket.close()
 
+    @abc.abstractmethod
+    def process(self, jsonData):
+        """
+        Process the JSON data.
+        :param jsonData: JSON data.
+        """
+        #return
+
 if __name__ == '__main__':
     argv = sys.argv[1:]
     port = 55057
@@ -78,6 +115,7 @@ if __name__ == '__main__':
             port = int(arg)
 
     # Read from TCP port
-    reader = EnsembleReceiver(port)
+    reader = EnsembleReceiver()
+    reader.connect(port)
     reader.close()
-    print("Socket Closed")
+    logger.info("Socket Closed")

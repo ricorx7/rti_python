@@ -28,11 +28,11 @@ class EnsembleMetaData:
         self.HostIp = socket.gethostbyname(socket.gethostname())
 
         # Get the external IP address of the computer
-        url = "http://checkip.dyndns.org"
-        request = requests.get(url)
-        clean = request.text.split(': ', 1)[1]
-        your_ip = clean.split('</body></html>', 1)[0]
-        self.HostExtIp = your_ip
+        #url = "http://checkip.dyndns.org"
+        #request = requests.get(url)
+        #clean = request.text.split(': ', 1)[1]
+        #your_ip = clean.split('</body></html>', 1)[0]
+        #self.HostExtIp = your_ip
 
 class ProjectInfo:
     """

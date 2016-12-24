@@ -157,9 +157,9 @@ class Ensemble:
         :return: JSON string with indents.
         """
         if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4) + "\n"
         else:
-            return json.dumps(self, default=lambda o: o.__dict__)
+            return json.dumps(self, default=lambda o: o.__dict__) + "\n"
 
     @staticmethod
     def GetInt32(start, numBytes, ens):
