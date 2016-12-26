@@ -71,7 +71,7 @@ class LivePlot(EnsembleReceiver):
         if self.IsAmpSpline:
             if "E000004" in jsonData["Name"]:
                 fig, ax = plt.subplots()
-                cax = ax.imshow(jsonData["Amplitude"], interpolation=self.methods[1], cmap=cm.coolwarm, vmin=0, vmax=120)
+                cax = ax.imshow(jsonData["Amplitude"], interpolation=self.methods[1], cmap=cm.coolwarm, vmin=0, vmax=12)
                 ax.set_title('Amplitude Data')
                 # Move left and bottom spines outward by 10 points
                 ax.spines['left'].set_position(('outward', 10))
@@ -82,6 +82,7 @@ class LivePlot(EnsembleReceiver):
                 # Only show ticks on the left and bottom spines
                 ax.yaxis.set_ticks_position('left')
                 ax.xaxis.set_ticks_position('bottom')
+
                 plt.colorbar(cax)
                 plt.xticks(range(0, int(plt.xticks()[0][-1]) + 1, 1))
                 plt.pause(0.05)

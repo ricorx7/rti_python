@@ -1,12 +1,14 @@
 
 
 # Load the files in the top level folder
-import sys, os
+import os
+import sys
+
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
 
-from AdcpSerialPortServer import AdcpSerialPortServer
+from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 
 
 if __name__ == '__main__':

@@ -1,14 +1,13 @@
-
-
-import sys
-import socket
 import glob
-from PySide2 import QtCore, QtGui, QtWidgets
-from AdcpSerialPortServer import AdcpSerialPortServer
-import serial
+import socket
+import sys
 import threading
-from Ensemble import EnsembleReader
+
+import serial
+from PySide2 import QtCore, QtGui, QtWidgets
+
 from Codecs.BinaryCodec import BinaryCodec
+from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 
 
 class view_serial(QtWidgets.QWidget):

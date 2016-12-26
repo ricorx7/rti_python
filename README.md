@@ -7,21 +7,20 @@ RoweTech Inc Python library
 Dependicencies
 ------------
 
-pip3 install pyserial
-
-pip3 install twisted
-
-pip3 install pycrc
+```python
+pip3 install -r requirements.txt -UI
+```
 
 install pyside2 (Instructions below)
 
 
 Run Utilties Apps
 ----------------
+```python
 export PYTHONPATH=$PYTHONPATY:/path/to/rti-python
 
 python3 Utilities/EnsembleFileReport.py -i file -v
-
+```
 
 AWS DynamoDB
 ----------------

@@ -2,11 +2,11 @@
 Start the main view of the application.
 '''
 
-
 import sys
-from PySide2 import QtWidgets, QtCore
-from view_serial import view_serial
 
+from PySide2 import QtWidgets
+
+from Comm.view_serial import view_serial
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

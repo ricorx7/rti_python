@@ -97,7 +97,7 @@ class EnsembleReceiver():
         Process the JSON data.
         :param jsonData: JSON data.
         """
-        #return
+        return jsonData
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
