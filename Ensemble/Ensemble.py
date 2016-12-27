@@ -28,7 +28,7 @@ class Ensemble:
     NUM_DATASET_HEADER_ELEMENTS = 6
 
     # Bad Velocity
-    BadVelocity = 88.888
+    BadVelocity = float(88.888)
 
     def __init__(self):
         self.RawData = None
@@ -241,3 +241,15 @@ class Ensemble:
         """
         mask = (1 << val.bit_length()) - 1
         return int(hex(val ^ mask), 16)
+
+    @staticmethod
+    def is_float_close(a, b, rel_tol=1e-09, abs_tol=0.0):
+        """
+        Check if the float values are the same.
+        :param a: First float value
+        :param b: Second float value
+        :param rel_tol: Value within this
+        :param abs_tol: Absolute value within this
+        :return:
+        """
+        return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
