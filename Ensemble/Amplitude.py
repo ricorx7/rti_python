@@ -1,5 +1,10 @@
-import json
+import logging
 from Ensemble.Ensemble import Ensemble
+
+logger = logging.getLogger("Amplitude")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class Amplitude:
@@ -43,4 +48,4 @@ class Amplitude:
                 self.Amplitude[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
                 packet_pointer += Ensemble().BytesInFloat
 
-        print(self.Amplitude)
+        logger.debug(self.Amplitude)

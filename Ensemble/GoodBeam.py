@@ -1,5 +1,10 @@
-import json
+import logging
 from Ensemble.Ensemble import Ensemble
+
+logger = logging.getLogger("Good Beam")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class GoodBeam:
@@ -39,14 +44,5 @@ class GoodBeam:
                 self.GoodBeam[bin][beam] = Ensemble.GetInt32(packet_pointer, Ensemble().BytesInInt32, data)
                 packet_pointer += Ensemble().BytesInInt32
 
-        print(self.GoodBeam)
+        logger.debug(self.GoodBeam)
 
-    def toJSON(self, pretty=False):
-        """
-        Convert to JSON.
-        :return: JSON string with indents.
-        """
-        if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        else:
-            return json.dumps(self, default=lambda o: o.__dict__)

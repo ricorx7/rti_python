@@ -6,7 +6,7 @@ import threading
 import serial
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from Codecs.BinaryCodec import BinaryCodec
+from Codecs.AdcpCodec import AdcpCodec
 from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 
 
@@ -337,7 +337,8 @@ class ReadRawSerialThread(QtCore.QThread):
         self.isAlive = True
         print("Read Socket thread started")
 
-        self.codec = BinaryCodec(ens_port)
+        self.codec = AdcpCodec(ens_port)
+        self.codec.enable_waveforce_codec()
 
     def stop(self):
         """

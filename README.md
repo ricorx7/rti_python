@@ -16,8 +16,8 @@ install pyside2 (Instructions below)
 
 Run Utilties Apps
 ----------------
-```python
-export PYTHONPATH=$PYTHONPATY:/path/to/rti-python
+```javascript
+export PYTHONPATH=$PYTHONPATH:/path/to/rti-python
 
 python3 Utilities/EnsembleFileReport.py -i file -v
 ```

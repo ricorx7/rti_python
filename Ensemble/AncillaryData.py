@@ -1,6 +1,10 @@
-import json
-import struct
+import logging
 from Ensemble.Ensemble import Ensemble
+
+logger = logging.getLogger("Ancillary Data")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class AncillaryData:
@@ -31,7 +35,6 @@ class AncillaryData:
         self.TransducerDepth = 0.0
         self.SpeedOfSound = 0.0
 
-
     def decode(self, data):
         """
         Take the data bytearray.  Decode the data to populate
@@ -54,24 +57,13 @@ class AncillaryData:
         self.TransducerDepth = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 11, Ensemble().BytesInFloat, data)
         self.SpeedOfSound = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 12, Ensemble().BytesInFloat, data)
 
+        logger.debug(self.FirstBinRange)
+        logger.debug(self.BinSize)
+        logger.debug(self.Heading)
+        logger.debug(self.Pitch)
+        logger.debug(self.Roll)
+        logger.debug(self.Salinity)
+        logger.debug(self.SpeedOfSound)
 
-        print(self.FirstBinRange)
-        print(self.BinSize)
-        print(self.Heading)
-        print(self.Pitch)
-        print(self.Roll)
-        print(self.Salinity)
-        print(self.SpeedOfSound)
-
-
-    def toJSON(self, pretty=False):
-        """
-        Convert to JSON.
-        :return: JSON string with indents.
-        """
-        if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        else:
-            return json.dumps(self, default=lambda o: o.__dict__)
 
 

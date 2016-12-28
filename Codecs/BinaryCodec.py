@@ -2,6 +2,7 @@ import struct
 import socket
 import datetime
 import requests
+from Utilities.events import EventHandler
 
 from Ensemble.Ensemble import Ensemble
 from Ensemble.BeamVelocity import BeamVelocity
@@ -16,6 +17,14 @@ from Ensemble.AncillaryData import AncillaryData
 from Ensemble.BottomTrack import BottomTrack
 
 from PyCRC.CRCCCITT import CRCCCITT
+
+
+import logging
+logger = logging.getLogger("Binary Codec")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
+
 
 class EnsembleMetaData:
     """
@@ -53,8 +62,10 @@ class BinaryCodec:
     """
 
     def __init__(self, udp_port):
-        print("Binary codec - UDP Port: ", udp_port)
+        logger.debug("Binary codec - UDP Port: " + str(udp_port))
         self.buffer = bytearray()
+
+        self.EnsembleEvent = EventHandler(self)
 
         # Set meta data
         self.Meta = EnsembleMetaData()
@@ -65,15 +76,23 @@ class BinaryCodec:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
-
-        # Add to buffer and Decode
+        """
+        Add to buffer and Decode
+        :param data: Raw byte data.
+        """
         self.buffer.extend(data)
 
         self.findEnsemble()
 
     def findEnsemble(self):
+        """
+        Find the start of an ensemble.  Then find the end of the ensemble.
+        Then remove the ensemble from the buffer and process the raw data.
+        :return:
+        """
 
-        delimiter = b'\x80'*16 # look for first 16 bytes of header
+        # Look for first 16 bytes of header
+        delimiter = b'\x80'*16
         ensStart = self.buffer.find(delimiter)
 
         #print("EnsStart: ", ensStart)
@@ -84,11 +103,15 @@ class BinaryCodec:
             self.decodeEnsemble(ensStart)
 
     def decodeEnsemble(self, ensStart):
+        """
+        Decode the raw ensemble data.  This will check the checksum and verify it is correct,
+        then decode each datasets.  Then remove the data from the buffer.
+        :param ensStart: Stare of the ensemble in the buffer.
+        """
 
         # Check Ensemble number
         ensNum = struct.unpack("I", self.buffer[ensStart+16:ensStart+20])
         #print(ensNum[0])
-        #ensNumInv = struct.unpack("I", self.buffer[ensStart+20:ensStart+24])
         #print(self.ones_complement(ensNumInv[0]))
 
 
@@ -113,12 +136,16 @@ class BinaryCodec:
             #print("Checksum good: ", calcChecksum == checksum[0])
 
             if checksum[0] == calcChecksum:
-                print(ensNum[0])
+                logger.debug(ensNum[0])
                 # Decode data
                 ensemble = self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
+                # ************************
                 # Stream data
                 self.streamData(ensemble)
+
+                # Pass to event handler
+                self.EnsembleEvent(ensemble)
 
             # Remove ensemble from buffer
             ensEnd = ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize
@@ -144,7 +171,7 @@ class BinaryCodec:
         ensemble = Ensemble()
 
         # Add the raw data to the ensemble
-        ensemble.AddRawData(ens)
+        #ensemble.AddRawData(ens)
 
         # Decode the ensemble datasets
         for x in range(Ensemble().MaxNumDataSets):
@@ -165,7 +192,7 @@ class BinaryCodec:
 
             # Beam Velocity
             if "E000001" in name:
-                print(name)
+                logger.debug(name)
                 bv = BeamVelocity(num_elements, element_multiplier)
                 bv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddBeamVelocity(bv)
@@ -174,7 +201,7 @@ class BinaryCodec:
 
             # Instrument Velocity
             if "E000002" in name:
-                print(name)
+                logger.debug(name)
                 iv = InstrumentVelocity(num_elements, element_multiplier)
                 iv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddInstrumentVelocity(iv)
@@ -183,7 +210,7 @@ class BinaryCodec:
 
             # Earth Velocity
             if "E000003" in name:
-                print(name)
+                logger.debug(name)
                 ev = EarthVelocity(num_elements, element_multiplier)
                 ev.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEarthVelocity(ev)
@@ -192,7 +219,7 @@ class BinaryCodec:
 
             # Amplitude
             if "E000004" in name:
-                print(name)
+                logger.debug(name)
                 amp = Amplitude(num_elements, element_multiplier)
                 amp.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddAmplitude(amp)
@@ -201,7 +228,7 @@ class BinaryCodec:
 
             # Correlation
             if "E000005" in name:
-                print(name)
+                logger.debug(name)
                 corr = Correlation(num_elements, element_multiplier)
                 corr.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddCorrelation(corr)
@@ -210,7 +237,7 @@ class BinaryCodec:
 
             # Good Beam
             if "E000006" in name:
-                print(name)
+                logger.debug(name)
                 gb = GoodBeam(num_elements, element_multiplier)
                 gb.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodBeam(gb)
@@ -219,7 +246,7 @@ class BinaryCodec:
 
             # Good Earth
             if "E000007" in name:
-                print(name)
+                logger.debug(name)
                 ge = GoodEarth(num_elements, element_multiplier)
                 ge.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodEarth(ge)
@@ -228,7 +255,7 @@ class BinaryCodec:
 
             # Ensemble Data
             if "E000008" in name:
-                print(name)
+                logger.debug(name)
                 ed = EnsembleData(num_elements, element_multiplier)
                 ed.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEnsembleData(ed)
@@ -237,8 +264,8 @@ class BinaryCodec:
 
             # Ancillary Data
             if "E000009" in name:
-                print(name)
-                print(type)
+                logger.debug(name)
+                #logger.debug(type)
                 ad = AncillaryData(num_elements, element_multiplier)
                 ad.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEnsembleData(ed)
@@ -247,7 +274,7 @@ class BinaryCodec:
 
             # Bottom Track
             if "E000010" in name:
-                print(name)
+                logger.debug(name)
                 bt = BottomTrack(num_elements, element_multiplier)
                 bt.decode(ens[packetPointer:packetPointer + data_set_size])
                 ensemble.AddEnsembleData(ed)

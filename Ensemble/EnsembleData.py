@@ -1,6 +1,11 @@
-import json
 import struct
+import logging
 from Ensemble.Ensemble import Ensemble
+
+logger = logging.getLogger("Ensemble Data")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class EnsembleData:
@@ -37,7 +42,6 @@ class EnsembleData:
         self.Second = 0
         self.HSec = 0
 
-
     def decode(self, data):
         """
         Take the data bytearray.  Decode the data to populate
@@ -68,20 +72,11 @@ class EnsembleData:
 
         self.SubsystemConfig = struct.unpack("B", data[packet_pointer + Ensemble().BytesInInt32 * 22 + 3:packet_pointer + Ensemble().BytesInInt32 * 22 + 4])[0]
 
-        print(self.EnsembleNumber)
-        print(str(self.Month) + "/" + str(self.Day) + "/" + str(self.Year) + "  " + str(self.Hour) + ":" + str(self.Minute) + ":" + str(self.Second) + "." + str(self.HSec))
-        print(self.SerialNumber)
-        print(str(self.SysFirmwareMajor) + "." + str(self.SysFirmwareMinor) + "." + str(self.SysFirmwareRevision) + "-" + str(self.SysFirmwareSubsystemCode))
-        print(self.SubsystemConfig)
+        logger.debug(self.EnsembleNumber)
+        logger.debug(str(self.Month) + "/" + str(self.Day) + "/" + str(self.Year) + "  " + str(self.Hour) + ":" + str(self.Minute) + ":" + str(self.Second) + "." + str(self.HSec))
+        logger.debug(self.SerialNumber)
+        logger.debug(str(self.SysFirmwareMajor) + "." + str(self.SysFirmwareMinor) + "." + str(self.SysFirmwareRevision) + "-" + str(self.SysFirmwareSubsystemCode))
+        logger.debug(self.SubsystemConfig)
 
-    def toJSON(self, pretty=False):
-        """
-        Convert to JSON.
-        :return: JSON string with indents.
-        """
-        if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        else:
-            return json.dumps(self, default=lambda o: o.__dict__)
 
 

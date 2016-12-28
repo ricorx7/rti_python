@@ -1,5 +1,10 @@
-import json
+import logging
 from Ensemble.Ensemble import Ensemble
+
+logger = logging.getLogger("Instrument Velocity")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class InstrumentVelocity:
@@ -38,14 +43,4 @@ class InstrumentVelocity:
                 self.Velocities[bin][beam] = Ensemble.GetFloat(packetpointer, Ensemble().BytesInFloat, data)
                 packetpointer += Ensemble().BytesInFloat
 
-        print(self.Velocities)
-
-    def toJSON(self, pretty=False):
-        """
-        Convert to JSON.
-        :return: JSON string with indents.
-        """
-        if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        else:
-            return json.dumps(self, default=lambda o: o.__dict__)
+        logger.debug(self.Velocities)

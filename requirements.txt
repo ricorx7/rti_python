@@ -1,4 +1,6 @@
 pyserial
 twisted
 pycrc
+bokeh
+awscli
 

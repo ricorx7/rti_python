@@ -1,7 +1,10 @@
-import json
-import struct
+import logging
 from Ensemble.Ensemble import Ensemble
 
+logger = logging.getLogger("Bottom Track")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 class BottomTrack:
     """
@@ -112,24 +115,14 @@ class BottomTrack:
         for beams in range(numBeam):
             self.EarthGood.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
 
-        print(self.FirstPingTime)
-        print(self.LastPingTime)
-        print(self.Heading)
-        print(self.Pitch)
-        print(self.Roll)
-        print(self.Salinity)
-        print(self.SpeedOfSound)
-        print(self.EarthVelocity)
+        logger.debug(self.FirstPingTime)
+        logger.debug(self.LastPingTime)
+        logger.debug(self.Heading)
+        logger.debug(self.Pitch)
+        logger.debug(self.Roll)
+        logger.debug(self.Salinity)
+        logger.debug(self.SpeedOfSound)
+        logger.debug(self.EarthVelocity)
 
-
-    def toJSON(self, pretty=False):
-        """
-        Convert to JSON.
-        :return: JSON string with indents.
-        """
-        if pretty is True:
-            return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        else:
-            return json.dumps(self, default=lambda o: o.__dict__)
 
 

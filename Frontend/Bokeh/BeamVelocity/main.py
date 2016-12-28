@@ -16,7 +16,12 @@ FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
-class BeamVelocityLivePlot():
+class BeamVelocityLivePlot:
+    """
+    Plot Beam Velocity data live using Bokeh server.
+
+    bokeh serve .
+    """
 
     def __init__(self, udp_port):
         """
