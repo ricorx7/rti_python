@@ -28,11 +28,12 @@ class AdcpCodec:
         """
         self.binary_codec.add(data)
 
-    def enable_waveforce_codec(self):
+    def enable_waveforce_codec(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3):
         """
         Enable the WaveForce codec.  This data will be encoded
         into the Matlab format.
         """
+        self.WaveForceCodec.init(ens_in_burst, path, lat, lon, bin1, bin2, bin3)
         self.IsWfcEnabled = True
         self.binary_codec.EnsembleEvent += self.process_ensemble
 
@@ -44,4 +45,4 @@ class AdcpCodec:
         logger.debug("Received processed ensemble")
         if self.IsWfcEnabled:
             logger.debug("Send to WaveForce Codec")
-            self.WaveForceCodec.process(ens)
+            self.WaveForceCodec.add(ens)

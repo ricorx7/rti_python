@@ -43,6 +43,7 @@ class EnsembleMetaData:
         #your_ip = clean.split('</body></html>', 1)[0]
         #self.HostExtIp = your_ip
 
+
 class ProjectInfo:
     """
     Information about the project that collected this data.
@@ -55,6 +56,19 @@ class ProjectInfo:
         self.DateCreated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         self.DateModified = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
+
+class WaveBurstInfo:
+    """
+    Information about the waves burst setup.
+    """
+
+    def __init__(self):
+        self.SamplesPerBurst = 0
+        self.Lat = ""
+        self.Lon = ""
+        self.Bin1 = 0
+        self.Bin2 = 0
+        self.Bin3 = 0
 
 class BinaryCodec:
     """
@@ -69,6 +83,9 @@ class BinaryCodec:
 
         # Set meta data
         self.Meta = EnsembleMetaData()
+
+        # Set ProjectInfo
+        #self.ProjectInfo = ProjectInfo()
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port

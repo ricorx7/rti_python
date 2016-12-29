@@ -52,6 +52,8 @@ class Ensemble:
         self.AncillaryData = None
         self.IsBottomTrack = False
         self.BottomTrack = None
+        self.IsWavesInfo = False
+        self.WavesInfo = None
 
     def AddRawData(self, data):
         """

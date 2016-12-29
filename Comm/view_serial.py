@@ -338,7 +338,7 @@ class ReadRawSerialThread(QtCore.QThread):
         print("Read Socket thread started")
 
         self.codec = AdcpCodec(ens_port)
-        self.codec.enable_waveforce_codec()
+        self.codec.enable_waveforce_codec(100, "/Users/rico/capture/", 32.865, -117.26, 1, 2, 3)
 
     def stop(self):
         """
