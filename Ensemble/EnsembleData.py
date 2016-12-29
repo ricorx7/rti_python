@@ -78,5 +78,10 @@ class EnsembleData:
         logger.debug(str(self.SysFirmwareMajor) + "." + str(self.SysFirmwareMinor) + "." + str(self.SysFirmwareRevision) + "-" + str(self.SysFirmwareSubsystemCode))
         logger.debug(self.SubsystemConfig)
 
-
+    def datetime_str(self):
+        """
+        Return the date and time as a string.
+        :return: Date time string.  2013/07/30 21:00:00.00
+        """
+        return str(self.Year) + "/" + str(self.Month) + "/" + str(self.Day) + " " + str(self.Hour) + ":" + str(self.Minute) + ":" + str(self.Second) + "." + str(self.HSec)
 

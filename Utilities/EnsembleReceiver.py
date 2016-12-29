@@ -2,8 +2,14 @@ import socket
 import sys, getopt
 import json
 import abc
-import logging
 
+
+import configparser
+settings = configparser.ConfigParser()
+settings._interpolation = configparser.ExtendedInterpolation()
+settings.read('settings.ini')
+
+import logging
 logger = logging.getLogger("EnsembleReceiver")
 logger.setLevel(logging.DEBUG)
 FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
@@ -17,7 +23,7 @@ class EnsembleReceiver():
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
-        self.port = 55057   # Default port
+        self.port = int(settings.get('SerialServerSection', 'JsonEnsUdpPort'))   # Default port
         self.socket = None
 
 
@@ -38,7 +44,7 @@ class EnsembleReceiver():
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
             self.socket.settimeout(10)
-            self.socket.bind(('localhost', udp_port))
+            self.socket.bind(('', udp_port))
             self.file_socket = self.socket.makefile()
         except ConnectionRefusedError as err:
             logger.error(err)
@@ -60,7 +66,7 @@ class EnsembleReceiver():
                 #print(response)
                 jsonResponse = json.loads(response)
                 #print(jsonResponse)
-                #logger.info(jsonResponse["Name"])
+                logger.debug(jsonResponse["Name"])
 
                 # Send the JSON data to the abstract class to process
                 # the JSON data.

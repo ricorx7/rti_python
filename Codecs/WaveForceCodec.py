@@ -1,5 +1,6 @@
 import logging
 import struct
+import threading
 
 logger = logging.getLogger("WaveForce Codec")
 logger.setLevel(logging.ERROR)
@@ -70,7 +71,9 @@ class WaveForceCodec:
                 self.BufferCount = 0
 
                 # Process the buffer
-                self.process(ens_buff)
+                #self.process(ens_buff)
+                th = threading.Thread(target=self.process, args=[ens_buff])
+                th.start()
 
     def process(self, ens_buff):
         """
@@ -82,8 +85,8 @@ class WaveForceCodec:
         ba = bytearray()
 
         ba.extend(self.process_txt(ens_buff[0]))
-        #ba.extend(self.process_lat(ens_buff[0]))
-        #ba.extend(self.process_lon(ens_buff[0]))
+        ba.extend(self.process_lat(ens_buff[0]))
+        ba.extend(self.process_lon(ens_buff[0]))
 
         # Write the file
         self.write_file(ba)
@@ -113,20 +116,25 @@ class WaveForceCodec:
         :param ens: Ensemble data.
         :return: Byte array of the data in MATLAB format.
         """
-        txt = " "
+        txt = ens.EnsembleData.datetime_str() + ", "
+        txt += "Record No. " + str(self.RecordCount) + ", "
+        txt += "SN" + ens.EnsembleData.SerialNumber
 
         ba = bytearray()
-        ba.extend(struct.pack('i', 0))      # Indicate double
-        ba.extend(struct.pack('i', 1))      # Rows - 1 per record
-        ba.extend(struct.pack("i", 1))      # Columns - 1 per record
-        ba.extend(struct.pack("i", 0))      # Imaginary
-        ba.extend(struct.pack("i", 4))      # Name Length
-        #ba.extend(struct.pack("c", 't'))
-        #ba.extend(struct.pack("c", 'x'))
-        #ba.extend(struct.pack("c", 't'))
-        #ba.extend(struct.pack("c", ''))
-        ba.extend("txt ".encode())          # Name
-        #ba.extend(txt.encode())             # Txt Value
+        ba.extend(struct.pack('i', 11))         # Indicate string
+        ba.extend(struct.pack('i', 1))          # Rows - 1 per record
+        ba.extend(struct.pack("i", len(txt)))   # Columns - Length of the txt
+        ba.extend(struct.pack("i", 0))          # Imaginary, if 1, then the matrix has an imaginary part
+        ba.extend(struct.pack("i", 4))          # Name Length
+
+        for code in map(ord, 'txt '):           # Name
+            ba.extend([code])
+
+        for code in map(ord, txt):              # Txt Value
+            ba.extend([code])
+
+
+
         return ba
 
     def process_lat(self, ens):
@@ -142,15 +150,20 @@ class WaveForceCodec:
         lat = 0.0
         if ens.IsWavesInfo:
             lat = ens.WavesInfo.Lat
+        else:
+            lat = self.Lat
 
         ba = bytearray()
-        ba.extend(struct.unpack("4b", struct.pack("I", 0)))     # Indicate double
-        ba.extend(struct.unpack("4b", struct.pack("I", 1)))     # Rows - 1 per record
-        ba.extend(struct.unpack("4b", struct.pack("I", 1)))     # Columns - 1 per record
-        ba.extend(struct.unpack("4b", struct.pack("I", 0)))     # Imaginary
-        ba.extend(struct.unpack("4b", struct.pack("I", 4)))     # Name Length
-        ba.extend(struct.unpack("4b", 'lat'))                   # Name
-        ba.extend(struct.unpack("d", lat))                      # Lat Value
+        ba.extend(struct.pack('i', 0))      # Indicate double
+        ba.extend(struct.pack('i', 1))      # Rows - 1 per record
+        ba.extend(struct.pack("i", 1))      # Columns - 1 per record
+        ba.extend(struct.pack("i", 0))      # Imaginary, if 1, then the matrix has an imaginary part
+        ba.extend(struct.pack("i", 4))      # Name Length
+
+        for code in map(ord, 'lat '):       # Name
+            ba.extend([code])
+
+        ba.extend(struct.pack("d", lat))    # Lat Value
 
         return ba
 
@@ -167,14 +180,19 @@ class WaveForceCodec:
         lon = 0.0
         if ens.IsWavesInfo:
             lon = ens.WavesInfo.Lat
+        else:
+            lon = self.Lon
 
         ba = bytearray()
-        ba.append(struct.unpack("4b", struct.pack("I", 0)))     # Indicate double
-        ba.append(struct.unpack("4b", struct.pack("I", 1)))     # Rows - 1 per record
-        ba.append(struct.unpack("4b", struct.pack("I", 1)))     # Columns - 1 per record
-        ba.append(struct.unpack("4b", struct.pack("I", 0)))     # Imaginary
-        ba.append(struct.unpack("4b", struct.pack("I", 4)))     # Name Length
-        ba.append(struct.unpack("4b", 'lon'))                   # Name
-        ba.append(struct.unpack("d", lon))                      # Lat Value
+        ba.extend(struct.pack('i', 0))      # Indicate double
+        ba.extend(struct.pack('i', 1))      # Rows - 1 per record
+        ba.extend(struct.pack("i", 1))      # Columns - 1 per record
+        ba.extend(struct.pack("i", 0))      # Imaginary
+        ba.extend(struct.pack("i", 4))      # Name Length
+
+        for code in map(ord, 'lon '):       # Name
+            ba.extend([code])
+
+        ba.extend(struct.pack("d", lon))    # Lon Value
 
         return ba

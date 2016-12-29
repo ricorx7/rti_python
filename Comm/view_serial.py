@@ -9,6 +9,11 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from Codecs.AdcpCodec import AdcpCodec
 from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 
+import configparser
+settings = configparser.ConfigParser()
+settings._interpolation = configparser.ExtendedInterpolation()
+settings.read('settings.ini')
+
 
 class view_serial(QtWidgets.QWidget):
     """
@@ -26,15 +31,18 @@ class view_serial(QtWidgets.QWidget):
         self.adcp_writer_thread = None
         self.serial_buffer = ""
 
+        raw_serial_tcp_port = settings.get('SerialServerSection', 'RawSerialTcpPort')
+        ens_udp_port = settings.get('SerialServerSection', 'JsonEnsUdpPort')
+
         # QT GUI
 
         self.tcp_port_combobox = QtWidgets.QComboBox()
         self.tcp_port_combobox.setEditable(True)
-        self.tcp_port_combobox.addItems(["55056", ""])
+        self.tcp_port_combobox.addItems([raw_serial_tcp_port, ""])
 
         self.ens_udp_port_combobox = QtWidgets.QComboBox()
         self.ens_udp_port_combobox.setEditable(True)
-        self.ens_udp_port_combobox.addItems(["55057", ""])
+        self.ens_udp_port_combobox.addItems([ens_udp_port, ""])
 
         self.comm_port_combobox = QtWidgets.QComboBox()
         self.comm_port_combobox.addItems(self.serial_ports())
@@ -337,8 +345,10 @@ class ReadRawSerialThread(QtCore.QThread):
         self.isAlive = True
         print("Read Socket thread started")
 
+        filepath = settings.get('SerialServerSection', 'WaveCaptureFilePath')
+
         self.codec = AdcpCodec(ens_port)
-        self.codec.enable_waveforce_codec(100, "/Users/rico/capture/", 32.865, -117.26, 1, 2, 3)
+        self.codec.enable_waveforce_codec(10, filepath, 32.865, -117.26, 1, 2, 3)
 
     def stop(self):
         """

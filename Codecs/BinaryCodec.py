@@ -89,7 +89,8 @@ class BinaryCodec:
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port
-        self.udp_ip = "127.0.0.1"                                       # UDP IP (Localhost)
+        #self.udp_ip = "127.0.0.1"                                       # UDP IP (Localhost)
+        self.udp_ip = ''
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
@@ -158,8 +159,14 @@ class BinaryCodec:
                 ensemble = self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
                 # ************************
-                # Stream data
-                self.streamData(ensemble)
+                try:
+                    # Stream data
+                    self.streamData(ensemble)
+                    logger.debug("Stream ensemble data")
+                except ConnectionRefusedError as err:
+                    logger.error("Error streaming ensemble data", err)
+                except Exception as err:
+                    logger.error("Error streaming ensemble data", err)
 
                 # Pass to event handler
                 self.EnsembleEvent(ensemble)
