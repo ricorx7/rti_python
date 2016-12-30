@@ -7,13 +7,13 @@ logger.setLevel(logging.ERROR)
 FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
+
 class WaveForceCodec:
     """
     Decode the ensemble data into a WaveForce Matlab file format.
     """
 
     def __init__(self):
-        #self.Txt = ""
         self.Lat = 0.0
         self.Lon = 0.0
         self.EnsInBurst = 0
@@ -25,6 +25,8 @@ class WaveForceCodec:
         self.Bin1 = 0
         self.Bin2 = 0
         self.Bin3 = 0
+        self.firstTime = 0
+        self.secondTime = 0         # Used to calculate the sample timing
 
     def init(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3):
         """
@@ -47,6 +49,9 @@ class WaveForceCodec:
         self.Bin2 = bin2
         self.Bin3 = bin3
         self.RecordCount = 0
+
+        self.firstTime = 0
+        self.secondTime = 0         # Used to calculate the sample timing
 
     def add(self, ens):
         """
@@ -71,7 +76,6 @@ class WaveForceCodec:
                 self.BufferCount = 0
 
                 # Process the buffer
-                #self.process(ens_buff)
                 th = threading.Thread(target=self.process, args=[ens_buff])
                 th.start()
 
@@ -87,6 +91,8 @@ class WaveForceCodec:
         ba.extend(self.process_txt(ens_buff[0]))
         ba.extend(self.process_lat(ens_buff[0]))
         ba.extend(self.process_lon(ens_buff[0]))
+        ba.extend(self.process_wft(ens_buff[0]))
+        ba.extend(self.process_wdt(ens_buff))
 
         # Write the file
         self.write_file(ba)
@@ -197,7 +203,7 @@ class WaveForceCodec:
 
     def process_wft(self, ens):
         """
-        First sample time of the burst. The value is in hours of a day. WFT * 24 = hours.
+        First sample time of the burst in seconds. The value is in hours of a day. WFT  * 24 =
 
         Data Type: Double
         Rows: 1
@@ -205,7 +211,7 @@ class WaveForceCodec:
         wft = 7.3545e+05
         :param ens: Ensemble data.
         """
-        wft = 0.0
+        self.firstTime = self.time_stamp_seconds(ens)
 
         ba = bytearray()
         ba.extend(struct.pack('i', 0))      # Indicate double
@@ -217,6 +223,93 @@ class WaveForceCodec:
         for code in map(ord, 'wft '):       # Name
             ba.extend([code])
 
-        ba.extend(struct.pack("d", wft))    # WFT Value
+        ba.extend(struct.pack("d", self.firstTime))    # WFT Value
 
         return ba
+
+
+    def process_wdt(self, ens_buff):
+        """
+        Time between each sample.  The time is in seconds.
+
+        Data Type: Double
+        Rows: 1
+        Columns: 1
+        wft = 0.5000
+        :param ens: Ensemble data.
+        """
+        # Find the first and second time
+        # Make sure that if we are interleaved,
+        # that we take the next sample that is like the original subsystem config
+
+        ba = bytearray()
+
+        if len(ens_buff) >= 4:
+            # Get the first 4 Beam sample
+            if ens_buff[0].IsEnsembleData:
+                subcfg = ens_buff[0].EnsembleData.SubsystemConfig
+                subcode =ens_buff[0].EnsembleData.SysFirmwareSubsystemCode
+                self.firstTime = self.time_stamp_seconds(ens_buff[0])
+
+                # Check if both subsystems match
+                # If they do match, then there is no interleaving and we can take the next sample
+                # If there is interleaving, then we have to wait for the next sample, because the first 2 go together
+                if ens_buff[1].EnsembleData.SubsystemConfig == subcfg and ens_buff[1].EnsembleData.SysFirmwareSubsystemCode == subcode:
+                    self.secondTime = self.time_stamp_seconds(ens_buff[1])
+                else:
+                    self.secondTime = self.time_stamp_seconds(ens_buff[2])
+
+            wdt = self.secondTime - self.firstTime
+
+            ba.extend(struct.pack('i', 0))      # Indicate double
+            ba.extend(struct.pack('i', 1))      # Rows - 1 per record
+            ba.extend(struct.pack("i", 1))      # Columns - 1 per record
+            ba.extend(struct.pack("i", 0))      # Imaginary
+            ba.extend(struct.pack("i", 4))      # Name Length
+
+            for code in map(ord, 'wdt '):       # Name
+                ba.extend([code])
+
+            ba.extend(struct.pack("d", wdt))    # WDT Value
+
+        return ba
+
+
+    def time_stamp_seconds(self, ens):
+        """
+        Calcualte the timestamp.  This is the number of seconds for the given
+        date and time.
+        :param ens: Ensemble to get the timestamp.
+        :return: Timestamp in seconds.
+        """
+
+        ts = 0.0
+
+        if ens.IsEnsembleData:
+            year = ens.EnsembleData.Year
+            month = ens.EnsembleData.Month
+            day = ens.EnsembleData.Day
+            hour = ens.EnsembleData.Hour
+            minute = ens.EnsembleData.Minute
+            second = ens.EnsembleData.Second
+            hsec = ens.EnsembleData.HSec
+            jdn = self.julian_day_number(year, month, day)
+
+            ts = (24.0 * 3600.0 * jdn) + (3600.0 * hour) + (60.0 * minute) + second + (hsec / 100.0)
+
+        return ts
+
+    def julian_day_number(self,year, month, day):
+        """
+        Count the number of calendar days there are for the given
+        year, month and day.
+        :param year: Years.
+        :param month: Months.
+        :param day: Days.
+        :return: Number of days.
+        """
+        a = (14 - month) / 12
+        y = year + 4800 - a
+        m = month - 12 * a - 3
+
+        return day + (153 * m + 2) / 5 + (365 * y) + y / 4 - y / 100 + y / 400 - 32045

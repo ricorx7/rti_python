@@ -83,5 +83,5 @@ class EnsembleData:
         Return the date and time as a string.
         :return: Date time string.  2013/07/30 21:00:00.00
         """
-        return str(self.Year) + "/" + str(self.Month) + "/" + str(self.Day) + " " + str(self.Hour) + ":" + str(self.Minute) + ":" + str(self.Second) + "." + str(self.HSec)
+        return str(self.Year).zfill(4) + "/" + str(self.Month).zfill(2) + "/" + str(self.Day).zfill(2) + " " + str(self.Hour).zfill(2) + ":" + str(self.Minute).zfill(2) + ":" + str(self.Second).zfill(2) + "." + str(self.HSec).zfill(2)
 

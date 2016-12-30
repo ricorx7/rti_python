@@ -345,10 +345,18 @@ class ReadRawSerialThread(QtCore.QThread):
         self.isAlive = True
         print("Read Socket thread started")
 
-        filepath = settings.get('SerialServerSection', 'WaveCaptureFilePath')
-
+        # Initialize the ADCP Codec
         self.codec = AdcpCodec(ens_port)
-        self.codec.enable_waveforce_codec(10, filepath, 32.865, -117.26, 1, 2, 3)
+
+        # Setup Waves
+        ens_in_burst = settings.get('WavesProjectSection', 'EnsemblesInBurst')
+        file_path = settings.get('WavesProjectSection', 'CaptureFilePath')
+        lat = settings.get('WavesProjectSection', 'Lat')
+        lon = settings.get('WavesProjectSection', 'Lon')
+        bin1 = settings.get('WavesProjectSection', 'Bin1')
+        bin2 = settings.get('WavesProjectSection', 'Bin2')
+        bin3 = settings.get('WavesProjectSection', 'Bin3')
+        self.codec.enable_waveforce_codec(int(ens_in_burst), file_path, float(lat), float(lon), int(bin1), int(bin2), int(bin3))
 
     def stop(self):
         """
