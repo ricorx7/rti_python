@@ -6,7 +6,7 @@ settings._interpolation = configparser.ExtendedInterpolation()
 settings.read('../settings.ini')
 
 filepath = settings.get('SerialServerSection', 'WaveCaptureFilePath')
-filepath += "D00001.mat"
+filepath += "D00007.mat"
 
 #for code in map(ord, 'txt '):
 #    print(code)

@@ -27,6 +27,8 @@ class EnsembleFileReport:
         self.NumBadEnsembles = 0
         self.ContainsMultipleRuns = False
 
+        self.HeadersFound = 0
+
         self.prevEnsNum = 0
 
         self.verbose = verbose
@@ -59,6 +61,9 @@ class EnsembleFileReport:
 
             # Process the found ensemble
             while ens_found >= 0:
+
+                # Count number of headers found
+                self.HeadersFound += 1
 
                 if len(ens_start_list) > 0:
                     # Create byte array to hold ensemble
@@ -95,6 +100,9 @@ class EnsembleFileReport:
             print("Number of Bad Ensembles: ", self.NumBadEnsembles)
             if self.ContainsMultipleRuns:
                 print("* File contains multiple runs, ensemble numbers restarted")
+
+            print("----------------------------------------")
+            print("Number of Headers Found: ", self.HeadersFound)
 
     def decode_ensemble(self, ens):
         """

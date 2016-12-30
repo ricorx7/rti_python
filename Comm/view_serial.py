@@ -12,7 +12,7 @@ from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 import configparser
 settings = configparser.ConfigParser()
 settings._interpolation = configparser.ExtendedInterpolation()
-settings.read('settings.ini')
+settings.read('../settings.ini')
 
 
 class view_serial(QtWidgets.QWidget):

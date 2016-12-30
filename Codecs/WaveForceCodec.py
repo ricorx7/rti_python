@@ -121,7 +121,7 @@ class WaveForceCodec:
         txt += "SN" + ens.EnsembleData.SerialNumber
 
         ba = bytearray()
-        ba.extend(struct.pack('i', 11))         # Indicate string
+        ba.extend(struct.pack('i', 11))         # Indicate float string
         ba.extend(struct.pack('i', 1))          # Rows - 1 per record
         ba.extend(struct.pack("i", len(txt)))   # Columns - Length of the txt
         ba.extend(struct.pack("i", 0))          # Imaginary, if 1, then the matrix has an imaginary part
@@ -131,9 +131,7 @@ class WaveForceCodec:
             ba.extend([code])
 
         for code in map(ord, txt):              # Txt Value
-            ba.extend([code])
-
-
+            ba.extend(struct.pack('f', float(code)))
 
         return ba
 
@@ -194,5 +192,31 @@ class WaveForceCodec:
             ba.extend([code])
 
         ba.extend(struct.pack("d", lon))    # Lon Value
+
+        return ba
+
+    def process_wft(self, ens):
+        """
+        First sample time of the burst. The value is in hours of a day. WFT * 24 = hours.
+
+        Data Type: Double
+        Rows: 1
+        Columns: 1
+        wft = 7.3545e+05
+        :param ens: Ensemble data.
+        """
+        wft = 0.0
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 0))      # Indicate double
+        ba.extend(struct.pack('i', 1))      # Rows - 1 per record
+        ba.extend(struct.pack("i", 1))      # Columns - 1 per record
+        ba.extend(struct.pack("i", 0))      # Imaginary
+        ba.extend(struct.pack("i", 4))      # Name Length
+
+        for code in map(ord, 'wft '):       # Name
+            ba.extend([code])
+
+        ba.extend(struct.pack("d", wft))    # WFT Value
 
         return ba
