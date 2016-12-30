@@ -3,4 +3,6 @@ twisted
 pycrc
 bokeh
 awscli
+configparser
+scipy
 
