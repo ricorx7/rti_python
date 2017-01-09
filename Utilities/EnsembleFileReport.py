@@ -128,7 +128,7 @@ class EnsembleFileReport:
         logger.debug("Ensemble Number 1sComp: " + str(ens_num_inv[0]))
 
         if len(ens_num_inv) != 0:
-            ens_num_1s_comp = Ensemble().ones_complement(ens_num_inv[0])
+            ens_num_1s_comp = Ensemble.ones_complement(ens_num_inv[0])
 
             if ens_num[0] != ens_num_1s_comp:
                 self.NumBadEnsNum += 1
@@ -143,7 +143,7 @@ class EnsembleFileReport:
         # Check ensemble size
         payload_size = struct.unpack("I", ens[24:28])
         payload_size_inv = struct.unpack("I", ens[28:32])
-        payload_size_1s_comp = Ensemble().ones_complement(payload_size_inv[0])
+        payload_size_1s_comp = Ensemble.ones_complement(payload_size_inv[0])
 
         if payload_size[0] != payload_size_1s_comp:
             self.NumBadPayloadSize += 1
@@ -154,8 +154,8 @@ class EnsembleFileReport:
 
         self.LastEnsembleNum = ens_num[0]
 
-        self.printVerbose("EnsNum: " + str(ens_num[0]) + " : " + str(ens_num_1scomp))
-        self.printVerbose("Payload Size: " + str(payload_size[0]) + " : " + str(payload_size_1scomp))
+        self.printVerbose("EnsNum: " + str(ens_num[0]) + " : " + str(ens_num_1s_comp))
+        self.printVerbose("Payload Size: " + str(payload_size[0]) + " : " + str(payload_size_1s_comp))
 
         # Ensure the entire ensemble is in the buffer
         if len(ens) >= Ensemble().HeaderSize + payload_size[0] + Ensemble().ChecksumSize:
