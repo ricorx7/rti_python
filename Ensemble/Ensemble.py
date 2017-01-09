@@ -235,7 +235,7 @@ class Ensemble:
         return Ensemble.HeaderSize + payloadSize + Ensemble.ChecksumSize
 
     @staticmethod
-    def ones_complement(self, val):
+    def ones_complement(val):
         """
         Calclaute the 1's compliment of a number.
         :param val: Values to calculate.
