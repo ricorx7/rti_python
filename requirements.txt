@@ -5,3 +5,5 @@ bokeh
 awscli
 configparser
 scipy
+pyinstaller
+

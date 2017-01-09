@@ -111,6 +111,10 @@ class EnsembleFileReport:
         """
         self.NumEnsembles += 1
 
+        # Ensure enough data is present to check the header
+        if len(ens) < Ensemble().HeaderSize:
+            return
+
         # Check Ensemble number
         ens_num = struct.unpack("I", ens[16:20])
         ens_num_inv = struct.unpack("I", ens[20:24])
