@@ -1,4 +1,5 @@
 import struct
+import logging
 import os.path
 import sys
 import getopt
@@ -6,6 +7,11 @@ from Ensemble.Ensemble import Ensemble
 
 from PyCRC.CRCCCITT import CRCCCITT
 
+
+logger = logging.getLogger("Ensemble File Report")
+logger.setLevel(logging.ERROR)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 class EnsembleFileReport:
     """
@@ -118,9 +124,15 @@ class EnsembleFileReport:
         # Check Ensemble number
         ens_num = struct.unpack("I", ens[16:20])
         ens_num_inv = struct.unpack("I", ens[20:24])
-        ens_num_1scomp = Ensemble().ones_complement(ens_num_inv[0])
+        logger.debug("Ensemble Number: " + str(ens_num[0]))
+        logger.debug("Ensemble Number 1sComp: " + str(ens_num_inv[0]))
 
-        if ens_num[0] != ens_num_1scomp:
+        if len(ens_num_inv) != 0:
+            ens_num_1s_comp = Ensemble().ones_complement(ens_num_inv[0])
+
+            if ens_num[0] != ens_num_1s_comp:
+                self.NumBadEnsNum += 1
+        else:
             self.NumBadEnsNum += 1
 
         if self.prevEnsNum != 0 and ens_num[0] == self.prevEnsNum+1:
@@ -131,9 +143,9 @@ class EnsembleFileReport:
         # Check ensemble size
         payload_size = struct.unpack("I", ens[24:28])
         payload_size_inv = struct.unpack("I", ens[28:32])
-        payload_size_1scomp = Ensemble().ones_complement(payload_size_inv[0])
+        payload_size_1s_comp = Ensemble().ones_complement(payload_size_inv[0])
 
-        if payload_size[0] != payload_size_1scomp:
+        if payload_size[0] != payload_size_1s_comp:
             self.NumBadPayloadSize += 1
 
         # Set first and last ensemble number
