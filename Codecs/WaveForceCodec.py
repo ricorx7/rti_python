@@ -84,7 +84,7 @@ class WaveForceCodec:
 
         ba = bytearray()
 
-        ba.extend(self.process_txt(ens_buff[0]))
+        #ba.extend(self.process_txt(ens_buff[0]))
         ba.extend(self.process_lat(ens_buff[0]))
         ba.extend(self.process_lon(ens_buff[0]))
 
