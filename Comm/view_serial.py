@@ -136,7 +136,6 @@ class view_serial(QtWidgets.QWidget):
         """
         Start the ADCP Serial TCP server
         """
-
         self.serial_server = AdcpSerialPortServer(self.get_tcp_port(),
                                                   self.comm_port_combobox.currentText(),
                                                   self.get_baud())
@@ -167,7 +166,6 @@ class view_serial(QtWidgets.QWidget):
         self.ensemble_reader_thread.raw_data.connect(self.on_raw_read)
         self.ensemble_reader_thread.start()
 
-
     @QtCore.Slot(object)
     def on_raw_read(self, data):
         """
@@ -190,9 +188,6 @@ class view_serial(QtWidgets.QWidget):
         # Set the text to the textbox
         self.serial_txtbox.setText(self.serial_buffer)
 
-
-
-
     def stop_adcp_server(self):
         """
         Stop the ADCP Serial TCP server
@@ -213,7 +208,6 @@ class view_serial(QtWidgets.QWidget):
             #self.ensemble_reader_thread.terminate()
             #self.ensemble_reader_thread.setTerminationEnabled(True)
             self.ensemble_reader_thread.stop()
-
 
     def send_cmd_adcp_server(self):
         """

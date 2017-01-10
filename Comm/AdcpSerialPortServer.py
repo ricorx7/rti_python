@@ -1,11 +1,11 @@
-'''Connect through TCP to receive serial data.  This will
-allow multiple TCP connections to one serial port.'''
-
+import glob
 import threading
 import serial
+import sys
 from twisted.internet import reactor, protocol, endpoints
 from twisted.protocols import basic
 from twisted.internet.serialport import SerialPort
+
 
 class SerialDevice(basic.LineReceiver):
     """
@@ -168,7 +168,7 @@ class AdcpFactory(protocol.Factory):
         return SerialTcpProtocol(self, self.serial_comm_port, self.serial_baud)
 
 
-class AdcpSerialPortServer():
+class AdcpSerialPortServer:
     """
     Create a serial connection and allow TCP
     clients to view the data
@@ -204,6 +204,38 @@ class AdcpSerialPortServer():
         #    if t.getName() == 'AdcpSerialPort':
         #        t.join()
         #        print("Stop the ADP serial port thread")
+
+    @staticmethod
+    def list_serial_ports():
+        """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+        """
+
+        if sys.platform.startswith('win'):
+            ports = ['COM%s' % (i + 1) for i in range(256)]
+        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+            # this excludes your current terminal "/dev/tty"
+            ports = glob.glob('/dev/tty[A-Za-z]*')
+        elif sys.platform.startswith('darwin'):
+            ports = glob.glob('/dev/tty.*')
+        else:
+            raise EnvironmentError('Unsupported platform')
+
+        result = []
+        for port in ports:
+            try:
+                s = serial.Serial(port)
+                s.close()
+                result.append(port)
+                print(port)
+            except (OSError, serial.SerialException):
+                pass
+
+        return result
 
 # Set the PORT to output ADCP data
 #endpoints.serverFromString(reactor, "tcp:55056").listen(AdcpFactory('/dev/cu.usbserial-FTYNODPO', 115200))

@@ -9,7 +9,7 @@ from PyCRC.CRCCCITT import CRCCCITT
 
 
 logger = logging.getLogger("Ensemble File Report")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
