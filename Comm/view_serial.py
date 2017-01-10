@@ -12,7 +12,7 @@ from Comm.AdcpSerialPortServer import AdcpSerialPortServer
 import configparser
 settings = configparser.ConfigParser()
 settings._interpolation = configparser.ExtendedInterpolation()
-settings.read('settings.ini')
+settings.read('../settings.ini')
 
 
 class view_serial(QtWidgets.QWidget):
@@ -136,7 +136,6 @@ class view_serial(QtWidgets.QWidget):
         """
         Start the ADCP Serial TCP server
         """
-
         self.serial_server = AdcpSerialPortServer(self.get_tcp_port(),
                                                   self.comm_port_combobox.currentText(),
                                                   self.get_baud())
@@ -167,7 +166,6 @@ class view_serial(QtWidgets.QWidget):
         self.ensemble_reader_thread.raw_data.connect(self.on_raw_read)
         self.ensemble_reader_thread.start()
 
-
     @QtCore.Slot(object)
     def on_raw_read(self, data):
         """
@@ -190,9 +188,6 @@ class view_serial(QtWidgets.QWidget):
         # Set the text to the textbox
         self.serial_txtbox.setText(self.serial_buffer)
 
-
-
-
     def stop_adcp_server(self):
         """
         Stop the ADCP Serial TCP server
@@ -213,7 +208,6 @@ class view_serial(QtWidgets.QWidget):
             #self.ensemble_reader_thread.terminate()
             #self.ensemble_reader_thread.setTerminationEnabled(True)
             self.ensemble_reader_thread.stop()
-
 
     def send_cmd_adcp_server(self):
         """
@@ -345,10 +339,18 @@ class ReadRawSerialThread(QtCore.QThread):
         self.isAlive = True
         print("Read Socket thread started")
 
-        filepath = settings.get('SerialServerSection', 'WaveCaptureFilePath')
-
+        # Initialize the ADCP Codec
         self.codec = AdcpCodec(ens_port)
-        self.codec.enable_waveforce_codec(10, filepath, 32.865, -117.26, 1, 2, 3)
+
+        # Setup Waves
+        ens_in_burst = settings.get('WavesProjectSection', 'EnsemblesInBurst')
+        file_path = settings.get('WavesProjectSection', 'CaptureFilePath')
+        lat = settings.get('WavesProjectSection', 'Lat')
+        lon = settings.get('WavesProjectSection', 'Lon')
+        bin1 = settings.get('WavesProjectSection', 'Bin1')
+        bin2 = settings.get('WavesProjectSection', 'Bin2')
+        bin3 = settings.get('WavesProjectSection', 'Bin3')
+        self.codec.enable_waveforce_codec(int(ens_in_burst), file_path, float(lat), float(lon), int(bin1), int(bin2), int(bin3))
 
     def stop(self):
         """
