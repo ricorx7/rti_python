@@ -109,7 +109,7 @@ class SerialTcpProtocol(basic.LineReceiver):
         """
         params = cmd.split(',')
         if len(params) < 3:
-            print('Missing parameters to command: ' + cmd)
+            logger.error('Missing parameters to command: ' + cmd)
             return
 
         comm_port = params[1]
@@ -118,7 +118,6 @@ class SerialTcpProtocol(basic.LineReceiver):
         except Exception as err:
             logger.error('Baud rate must be an integer', err)
             return
-
 
         # Reset the serial port
         self.resetSerialConnection(comm_port, baud)
@@ -129,23 +128,25 @@ class SerialTcpProtocol(basic.LineReceiver):
         Parse the commands given by the user.
         """
 
-        logger.debug(data)
+        logger.debug("Data: " + str(data))
+        logger.debug("Command: " + str(data.decode()))
 
         try:
-
             # Decode the byte array to a string
             cmd = data.decode()
             cmd = cmd.strip()
+            logger.debug("Command: " + cmd)
 
             if cmd in ('BREAK', 'break', 'Break'):
-                self.factory.serial_port.sendBreak()
+                self.factory.serial_port.send_break()
                 logger.debug('Hardware BREAK')
-            if cmd in ('RECONNECT', 'reconnect'):
+            elif cmd in ('RECONNECT', 'reconnect'):
                 self.reconnect(cmd)
+                logger.debug('RECONNECT')
             else:
                 self.factory.serial_port.write((cmd + "\r").encode())
-                logger.debug(data)
-                logger.debug(cmd)
+                logger.debug("Data: " + str(data))
+                logger.debug("Command: " + cmd)
         except AttributeError as err:
             logger.error("Serial Port error: ", err)
         except Exception as err:
@@ -153,7 +154,7 @@ class SerialTcpProtocol(basic.LineReceiver):
         #except serial.portNotOpenError as err:
         #    print("Serial Port is not open. ", err)
         #except:
-        #    logger.error('Error writing data to serial port', err)
+        #    logger.error('Error writing data to serial port')
 
         source = str(self.transport.getPeer())
         logger.debug(source + " - " + 'TCP data received: ' + cmd)
@@ -187,10 +188,9 @@ class AdcpSerialPortServer:
 
         # Set the TCP port to output ADCP data
         endpoints.serverFromString(reactor, self.port).listen(AdcpFactory(self.comm_port, self.baud))
-        logger.debug("Serial port connected on " + str(self.comm_port))
-        logger.debug("TCP Port open on " +  str(self.port))
+        logger.debug("Serial port connected on " + str(self.comm_port) + " baud: " + str(baud))
+        logger.debug("TCP Port open on " + str(self.port))
 
-        #reactor.run()
         # Run the reactor in a thread
         if not reactor.running:
             self.thread = threading.Thread(name='AdcpSerialPort', target=reactor.run, args=(False,)).start()
