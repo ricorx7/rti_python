@@ -2,6 +2,7 @@ import glob
 import socket
 import sys
 import threading
+import logging
 
 import serial
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -14,6 +15,10 @@ settings = configparser.ConfigParser()
 settings._interpolation = configparser.ExtendedInterpolation()
 settings.read('../settings.ini')
 
+logger = logging.getLogger("Ensemble File Report")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 class view_serial(QtWidgets.QWidget):
     """
@@ -126,7 +131,7 @@ class view_serial(QtWidgets.QWidget):
         Override the close event for the QWidget.
         If a serial port is open, close the connection.
         """
-        print('Closing serial')
+        logger.debug('Closing serial')
         self.stop_adcp_server()
 
         # Close window
@@ -146,7 +151,7 @@ class view_serial(QtWidgets.QWidget):
         # Connect to serial server to send commands
         self.adcp_writer_thread = threading.Thread(name='AdcpWriter', target=self.create_raw_serial_socket(self.get_tcp_port())).start()
 
-        print("start server")
+        logger.debug("start server")
 
     def create_raw_serial_socket(self, port):
         """
@@ -157,9 +162,9 @@ class view_serial(QtWidgets.QWidget):
             self.raw_serial_socket.connect(('localhost', int(port)))
             self.raw_serial_socket.settimeout(1)    # Set timeout to stop thread if terminated
         except ConnectionRefusedError as err:
-            print("Serial Send Socket: ", err)
+            logger.error("Serial Send Socket: ", err)
         except Exception as err:
-            print('Serial Send Socket: ", Error Opening socket', err)
+            logger.error('Serial Send Socket: ", Error Opening socket', err)
 
         # Start a thread to read the raw data
         self.ensemble_reader_thread = ReadRawSerialThread(self.raw_serial_socket, int(self.ens_udp_port_combobox.currentText()))
@@ -194,9 +199,9 @@ class view_serial(QtWidgets.QWidget):
         """
         if self.serial_server is not None:
             self.serial_server.close()
-            print("serial server stopped")
+            logger.debug("serial server stopped")
         else:
-            print('No serial connection')
+            logger.debug('No serial connection')
 
         # Close the socket
         self.raw_serial_socket.close()
@@ -245,7 +250,7 @@ class view_serial(QtWidgets.QWidget):
         try:
             baud = int(self.comm_baud_combobox.currentText())
         except Exception as err:
-            print("Error setting baud rate: ", err)
+            logger.error("Error setting baud rate: ", err)
             self.comm_baud_combobox.setCurrentIndex(1)
             return "115200"
 
@@ -261,7 +266,7 @@ class view_serial(QtWidgets.QWidget):
         try:
             port = int(self.tcp_port_combobox.currentText())
         except Exception as err:
-            print("Error setting TCP Port: ", err)
+            logger.error("Error setting TCP Port: ", err)
             self.tcp_port_combobox.setCurrentIndex(0)
             return "55056"
 
@@ -292,7 +297,11 @@ class view_serial(QtWidgets.QWidget):
                 s = serial.Serial(port)
                 s.close()
                 result.append(port)
-            except (OSError, serial.SerialException):
+            except OSError as err:
+                logger.error(err)
+                pass
+            except serial.SerialException as err:
+                logger.error(err)
                 pass
         return result
 
@@ -317,12 +326,13 @@ class view_serial(QtWidgets.QWidget):
                 sock.bind(('localhost', 0))
                 app_port = sock.getsockname()[1]
                 sock.close()
-                print("PORT: " + str(app_port))
+                logger.debug("PORT: " + str(app_port))
                 return app_port
-            except:
+            except Exception as err:
                 port_attempts += 1
+                logger.error(err)
 
-        print("FAILED AFTER 1000 PORT ATTEMPTS")
+        logger.error("FAILED AFTER 1000 PORT ATTEMPTS")
         sys.exit(1)
 
 
@@ -337,7 +347,7 @@ class ReadRawSerialThread(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self.socket = tcp_socket
         self.isAlive = True
-        print("Read Socket thread started")
+        logger.debug("Read Socket thread started")
 
         # Initialize the ADCP Codec
         self.codec = AdcpCodec(ens_port)
@@ -387,6 +397,6 @@ class ReadRawSerialThread(QtCore.QThread):
                 # Just a socket timeout, continue on
                 pass
 
-        print("Read Thread turned off")
+        logger.debug("Read Thread turned off")
 
 

@@ -31,6 +31,7 @@ class EnsembleFileReport:
         self.NumBadPayloadSize = 0
         self.NumBadChecksum = 0
         self.NumBadEnsembles = 0
+        self.NumIncompleteEnsembles = 0
         self.ContainsMultipleRuns = False
 
         self.HeadersFound = 0
@@ -71,6 +72,9 @@ class EnsembleFileReport:
                 # Count number of headers found
                 self.HeadersFound += 1
 
+                # Add the ensemble found to the list
+                ens_start_list.append(ens_found)
+
                 if len(ens_start_list) > 0:
                     # Create byte array to hold ensemble
                     # Ensemble lost its header, so add it back in
@@ -80,9 +84,6 @@ class EnsembleFileReport:
                     prev_ens_found = ens_start_list[len(ens_list)-1]
                     ens_ba.extend(raw_ba[prev_ens_found:ens_found])
                     ens_list.append(ens_ba)
-
-                # Add the ensemble found to the list
-                ens_start_list.append(ens_found)
 
                 # Remove ensemble header to find the next
                 del raw_ba[ens_found:ens_found+16]
@@ -104,6 +105,7 @@ class EnsembleFileReport:
             print("Number of Bad Payload Sizes: ", self.NumBadPayloadSize)
             print("Number of Bad Checksum: ", self.NumBadChecksum)
             print("Number of Bad Ensembles: ", self.NumBadEnsembles)
+            print("Number of Incomplete Ensembles: ", self.NumIncompleteEnsembles)
             if self.ContainsMultipleRuns:
                 print("* File contains multiple runs, ensemble numbers restarted")
 
@@ -119,6 +121,7 @@ class EnsembleFileReport:
 
         # Ensure enough data is present to check the header
         if len(ens) < Ensemble().HeaderSize:
+            self.NumIncompleteEnsembles += 1
             return
 
         # Check Ensemble number
@@ -135,8 +138,10 @@ class EnsembleFileReport:
         else:
             self.NumBadEnsNum += 1
 
-        if self.prevEnsNum != 0 and ens_num[0] == self.prevEnsNum+1:
+        if self.prevEnsNum != 0 and ens_num[0] != self.prevEnsNum+1:
             self.ContainsMultipleRuns = True
+            print("Cur ENS Num: " + str(ens_num[0]))
+            print("Prev ENS Num: " + str(self.prevEnsNum))
 
         self.prevEnsNum = ens_num[0]
 
@@ -174,6 +179,9 @@ class EnsembleFileReport:
                 self.NumBadChecksum += 1
             else:
                 self.NumGoodEnsembles += 1
+        else:
+            # Not a complete ensemble
+            self.NumIncompleteEnsembles += 1
 
     def printVerbose(self, msg):
         """

@@ -1,10 +1,16 @@
 import glob
 import threading
 import serial
+import logging
 import sys
 from twisted.internet import reactor, protocol, endpoints
 from twisted.protocols import basic
 from twisted.internet.serialport import SerialPort
+
+logger = logging.getLogger("Ensemble File Report")
+logger.setLevel(logging.DEBUG)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logging.basicConfig(format=FORMAT)
 
 
 class SerialDevice(basic.LineReceiver):
@@ -20,14 +26,14 @@ class SerialDevice(basic.LineReceiver):
         """
         Connect the serial port
         """
-        print('Serial Connection made!')
+        logger.debug('Serial Connection made!')
 
     def connectionLost(self, reason):
         """
         Disconnect the serial port
         """
         #self.factory.clients.remove(self)
-        print('Serial Connection lost')
+        logger.debug('Serial Connection lost')
 
     def dataReceived(self, data):
         """Send data to all the clients
@@ -39,10 +45,10 @@ class SerialDevice(basic.LineReceiver):
             #c.sendLine(data)
 
     def lineReceived(self, line):
-        print('Serial line received: ', line)
+        logger.debug('Serial line received: ', line)
 
     def rawDataReceived(self, data):
-        print('Serial Raw Data received: ', data)
+        logger.debug('Serial Raw Data received: ', data)
 
 
 class SerialTcpProtocol(basic.LineReceiver):
@@ -57,28 +63,28 @@ class SerialTcpProtocol(basic.LineReceiver):
         if self.factory.serial_port is None:
             # Create a Serial Port device to read in serial data
             self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
-            print('Serial Port started')
+            logger.debug('Serial Port started')
 
     def resetSerialConnection(self, comm_port, baud):
         """
         Reset the Serial Port device to read in serial data
         """
         self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
-        print('Serial Port Restarted')
+        logger.debug('Serial Port Restarted')
 
     def connectionMade(self):
         """
         Add TCP connections
         """
         self.factory.clients.add(self)
-        print('TCP Connection made')
+        logger.debug('TCP Connection made')
 
     def connectionLost(self, reason):
         """
         Disconnect TCP Connections
         """
         self.factory.clients.remove(self)
-        print('TCP Connection lost')
+        logger.debug('TCP Connection lost')
 
     def dataReceived(self, data):
         """
@@ -88,14 +94,14 @@ class SerialTcpProtocol(basic.LineReceiver):
         self.parse_cmds(data)
 
     def lineReceived(self, line):
-        print('TCP line received: ', line)
+        logger.debug('TCP line received: ', line)
         #for c in self.factory.clients:
             #source = u"<{}> ".format(self.transport.getHost()).encode("ascii")
             #c.sendLine(source + line)
             #print('line received: ', line)
 
     def rawDataReceived(self, data):
-        print('TCP Raw data received: ', data)
+        logger.debug('TCP Raw data received: ', data)
 
     def reconnect(self, cmd):
         """
@@ -110,20 +116,20 @@ class SerialTcpProtocol(basic.LineReceiver):
         try:
             baud = int(params[2])
         except Exception as err:
-            print('Baud rate must be an integer', err)
+            logger.error('Baud rate must be an integer', err)
             return
 
 
         # Reset the serial port
         self.resetSerialConnection(comm_port, baud)
-        print("Reconnect Serial to: " + comm_port + " baud: " + baud)
+        logger.debug("Reconnect Serial to: " + comm_port + " baud: " + str(baud))
 
     def parse_cmds(self, data):
         """
         Parse the commands given by the user.
         """
 
-        print(data)
+        logger.debug(data)
 
         try:
 
@@ -133,24 +139,24 @@ class SerialTcpProtocol(basic.LineReceiver):
 
             if cmd in ('BREAK', 'break', 'Break'):
                 self.factory.serial_port.sendBreak()
-                print('Hardware BREAK')
+                logger.debug('Hardware BREAK')
             if cmd in ('RECONNECT', 'reconnect'):
                 self.reconnect(cmd)
             else:
                 self.factory.serial_port.write((cmd + "\r").encode())
-                print(data)
-                print(cmd)
+                logger.debug(data)
+                logger.debug(cmd)
         except AttributeError as err:
-            print("Serial Port error: ", err)
+            logger.error("Serial Port error: ", err)
         except Exception as err:
-            print("Serial Port Error: ", err)
+            logger.error("Serial Port Error: ", err)
         #except serial.portNotOpenError as err:
         #    print("Serial Port is not open. ", err)
-        except:
-            print('Error writing data to serial port', err)
+        #except:
+        #    logger.error('Error writing data to serial port', err)
 
         source = str(self.transport.getPeer())
-        print(source + " - " + 'TCP data received: ' + cmd)
+        logger.debug(source + " - " + 'TCP data received: ' + cmd)
 
 
 class AdcpFactory(protocol.Factory):
@@ -181,8 +187,8 @@ class AdcpSerialPortServer:
 
         # Set the TCP port to output ADCP data
         endpoints.serverFromString(reactor, self.port).listen(AdcpFactory(self.comm_port, self.baud))
-        print("Serial port connected on", self.comm_port)
-        print("TCP Port open on ", self.port)
+        logger.debug("Serial port connected on " + str(self.comm_port))
+        logger.debug("TCP Port open on " +  str(self.port))
 
         #reactor.run()
         # Run the reactor in a thread
@@ -194,11 +200,11 @@ class AdcpSerialPortServer:
         Close the thread to the server
         """
         reactor.stop()
-        print("Reactor Stopped")
+        logger.debug("Reactor Stopped")
 
         if self.thread is not None:
             self.thread.join()
-        print("ADCP Serial Port Thread stopped")
+        logger.debug("ADCP Serial Port Thread stopped")
 
         #for t in threading.enumerate():
         #    if t.getName() == 'AdcpSerialPort':
@@ -232,7 +238,11 @@ class AdcpSerialPortServer:
                 s.close()
                 result.append(port)
                 print(port)
-            except (OSError, serial.SerialException):
+            except OSError as err:
+                logger.error(err)
+                pass
+            except serial.SerialException as err:
+                logger.error(err)
                 pass
 
         return result
