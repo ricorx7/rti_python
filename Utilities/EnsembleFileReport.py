@@ -19,8 +19,6 @@ class EnsembleFileReport:
     """
 
     def __init__(self, verbose=False):
-        print("codec")
-
         self.NumEnsembles = 0
         self.FirstEnsembleNum = 0
         self.LastEnsembleNum = 0
@@ -46,7 +44,7 @@ class EnsembleFileReport:
         """
         # Check if file exist
         if not os.path.isfile(infile):
-            print("File path does not exist: ", infile)
+            logger.error("File path does not exist: ", infile)
             sys.exit()
 
         with open(infile, 'rb') as f:
@@ -117,12 +115,13 @@ class EnsembleFileReport:
         Decode the ensemble.
         :param ens: Ensemble byte array.
         """
-        self.NumEnsembles += 1
-
         # Ensure enough data is present to check the header
         if len(ens) < Ensemble().HeaderSize:
             self.NumIncompleteEnsembles += 1
             return
+
+        self.NumEnsembles += 1
+
 
         # Check Ensemble number
         ens_num = struct.unpack("I", ens[16:20])
@@ -140,8 +139,8 @@ class EnsembleFileReport:
 
         if self.prevEnsNum != 0 and ens_num[0] != self.prevEnsNum+1:
             self.ContainsMultipleRuns = True
-            print("Cur ENS Num: " + str(ens_num[0]))
-            print("Prev ENS Num: " + str(self.prevEnsNum))
+            logger.info("Cur ENS Num: " + str(ens_num[0]))
+            logger.info("Prev ENS Num: " + str(self.prevEnsNum))
 
         self.prevEnsNum = ens_num[0]
 
