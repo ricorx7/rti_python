@@ -3,6 +3,9 @@ import threading
 import serial
 import logging
 import sys
+import codecs
+import binascii
+import struct
 from twisted.internet import reactor, protocol, endpoints
 from twisted.protocols import basic
 from twisted.internet.serialport import SerialPort
@@ -106,15 +109,20 @@ class SerialTcpProtocol(basic.LineReceiver):
     def reconnect(self, cmd):
         """
         Decode the RECONNECT command to configure a new serial port.
+        RECONNECT, COM12, 115200
         """
         params = cmd.split(',')
         if len(params) < 3:
             logger.error('Missing parameters to command: ' + cmd)
             return
 
+        # Comm Port
         comm_port = params[1]
+        logger.debug("COMM Port: " + comm_port)
+
         try:
             baud = int(params[2])
+            logger.debug("Baud Rate: " + str(baud))
         except Exception as err:
             logger.error('Baud rate must be an integer', err)
             return
@@ -127,22 +135,19 @@ class SerialTcpProtocol(basic.LineReceiver):
         """
         Parse the commands given by the user.
         """
-
         logger.debug("Data: " + str(data))
-        logger.debug("Command: " + str(data.decode()))
-
         try:
             # Decode the byte array to a string
-            cmd = data.decode()
-            cmd = cmd.strip()
+            cmd = data.decode('utf-16').strip()
             logger.debug("Command: " + cmd)
 
             if cmd in ('BREAK', 'break', 'Break'):
-                self.factory.serial_port.send_break()
+                self.factory.serial_port.sendBreak()
                 logger.debug('Hardware BREAK')
             elif cmd in ('RECONNECT', 'reconnect'):
+                logger.debug("Attempt to reconnect...")
                 self.reconnect(cmd)
-                logger.debug('RECONNECT')
+                logger.debug('RECONNECTED')
             else:
                 self.factory.serial_port.write((cmd + "\r").encode())
                 logger.debug("Data: " + str(data))

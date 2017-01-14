@@ -32,6 +32,10 @@ class EnsembleFileReport:
         self.NumIncompleteEnsembles = 0
         self.ContainsMultipleRuns = False
 
+        self.IsMissingEnsembles = False
+        self.NumMissingEnsembles = 0
+        self.MissingEnsembles = []
+
         self.HeadersFound = 0
 
         self.prevEnsNum = 0
@@ -106,6 +110,10 @@ class EnsembleFileReport:
             print("Number of Incomplete Ensembles: ", self.NumIncompleteEnsembles)
             if self.ContainsMultipleRuns:
                 print("* File contains multiple runs, ensemble numbers restarted")
+            if self.IsMissingEnsembles:
+                print("* Missing Ensembles: " + str(self.NumMissingEnsembles))
+                for num in self.MissingEnsembles:
+                    print("\t" + str(num))
 
             print("----------------------------------------")
             print("Number of Headers Found: ", self.HeadersFound)
@@ -141,6 +149,11 @@ class EnsembleFileReport:
             self.ContainsMultipleRuns = True
             logger.info("Cur ENS Num: " + str(ens_num[0]))
             logger.info("Prev ENS Num: " + str(self.prevEnsNum))
+
+            self.IsMissingEnsembles = True
+            self.NumMissingEnsembles += 1
+            self.MissingEnsembles.append(self.prevEnsNum + 1)
+
 
         self.prevEnsNum = ens_num[0]
 
