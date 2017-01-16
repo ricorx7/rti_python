@@ -231,14 +231,18 @@ class view_serial(QtWidgets.QWidget):
         cmd = "BREAK"
 
         # Encode the data to byte array and send to socket
-        self.raw_serial_socket.send((cmd.strip()).encode())
+        self.raw_serial_socket.send((cmd.strip()).encode("utf-16"))
 
     def reconnect_adcp_server(self):
         """
         Reconnect the serial port connection with the new
         settings.
         """
-        print("reconnect")
+        logger.debug("reconnect")
+        cmd = "RECONNECT, " + self.comm_port_combobox.currentText() + "," + self.comm_baud_combobox.currentText()
+
+        # Encode the data to byte array and send to socket
+        self.raw_serial_socket.send((cmd.strip()).encode("utf-16"))
 
     def get_baud(self):
         """
