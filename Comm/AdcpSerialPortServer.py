@@ -19,7 +19,8 @@ logging.basicConfig(format=FORMAT)
 class SerialDevice(basic.LineReceiver):
     """
     Serial device that will send data to
-    all the TCP clients connected
+    all the TCP clients connected.
+    Custom serial protocol for the serial port.
     """
     def __init__(self, factory, tcp_server):
         self.factory = factory
@@ -62,6 +63,8 @@ class SerialTcpProtocol(basic.LineReceiver):
 
     def __init__(self, factory, comm_port, baud):
         self.factory = factory
+        self.comm_port = comm_port
+        self.baud = baud
 
         if self.factory.serial_port is None:
             # Create a Serial Port device to read in serial data
@@ -72,7 +75,15 @@ class SerialTcpProtocol(basic.LineReceiver):
         """
         Reset the Serial Port device to read in serial data
         """
-        self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
+        self.comm_port = comm_port.strip()
+        self.baud = baud
+        logger.debug("comm_port: " + self.comm_port)
+        logger.debug("Baud: " + str(self.baud))
+
+        logger.debug("Disconnect serial port")
+        self.factory.serial_port.loseConnection()
+
+        self.factory.serial_port = SerialPort(SerialDevice(self, self), self.comm_port, reactor, baudrate=self.baud)
         logger.debug('Serial Port Restarted')
 
     def connectionMade(self):
@@ -117,11 +128,11 @@ class SerialTcpProtocol(basic.LineReceiver):
             return
 
         # Comm Port
-        comm_port = params[1]
+        comm_port = params[1].strip()
         logger.debug("COMM Port: " + comm_port)
 
         try:
-            baud = int(params[2])
+            baud = int(params[2].strip())
             logger.debug("Baud Rate: " + str(baud))
         except Exception as err:
             logger.error('Baud rate must be an integer', err)
@@ -131,6 +142,28 @@ class SerialTcpProtocol(basic.LineReceiver):
         self.resetSerialConnection(comm_port, baud)
         logger.debug("Reconnect Serial to: " + comm_port + " baud: " + str(baud))
 
+    def change_baud(self, cmd):
+        """
+        Decode the BAUD command to configure a new serial port.
+        This will reuse the last serial port comm port used.
+        BAUD, 115200
+        """
+        params = cmd.split(',')
+        if len(params) < 2:
+            logger.error('Missing parameters to command: ' + cmd)
+            return
+
+        try:
+            baud = int(params[1].strip())
+            logger.debug("Baud Rate: " + str(baud))
+        except Exception as err:
+            logger.error('Baud rate must be an integer', err)
+            return
+
+        # Reset the serial port
+        self.resetSerialConnection(self.comm_port, baud)
+        logger.debug("Change Serial baud to: " + self.comm_port + " baud: " + str(baud))
+
     def parse_cmds(self, data):
         """
         Parse the commands given by the user.
@@ -139,19 +172,29 @@ class SerialTcpProtocol(basic.LineReceiver):
         try:
             # Decode the byte array to a string
             cmd = data.decode('utf-16').strip()
+
+            # Split the commands
+            cmd_split = cmd.split(',')
             logger.debug("Command: " + cmd)
 
-            if cmd in ('BREAK', 'break', 'Break'):
-                self.factory.serial_port.sendBreak()
-                logger.debug('Hardware BREAK')
-            elif cmd in ('RECONNECT', 'reconnect'):
-                logger.debug("Attempt to reconnect...")
-                self.reconnect(cmd)
-                logger.debug('RECONNECTED')
-            else:
-                self.factory.serial_port.write((cmd + "\r").encode())
-                logger.debug("Data: " + str(data))
-                logger.debug("Command: " + cmd)
+            if len(cmd_split) > 0:
+                # Make command upper case so do not have to try every combination
+                cur_cmd = cmd_split[0].strip().upper()
+
+                if 'BREAK' in cur_cmd:
+                    self.factory.serial_port.sendBreak()
+                    logger.debug('Hardware BREAK')
+                elif 'RECONNECT' in cur_cmd:
+                    logger.debug("Attempt to reconnect...")
+                    self.reconnect(cmd)
+                elif 'BAUD' in cur_cmd:
+                    logger.debug("Attempt to change baud...")
+                    self.change_baud(cmd)
+                    logger.debug('Baud Changed')
+                else:
+                    self.factory.serial_port.write((cmd + "\r").encode())
+                    logger.debug("Data: " + str(data))
+                    logger.debug("Command: " + cmd)
         except AttributeError as err:
             logger.error("Serial Port error: ", err)
         except Exception as err:
