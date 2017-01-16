@@ -145,16 +145,23 @@ class EnsembleFileReport:
         else:
             self.NumBadEnsNum += 1
 
-        if self.prevEnsNum != 0 and ens_num[0] != self.prevEnsNum+1:
+        # Check if ensemble numbers started over
+        if self.prevEnsNum > ens_num[0]:
             self.ContainsMultipleRuns = True
+
+        # Check for missing ensembles
+        if self.prevEnsNum != 0 and ens_num[0] != self.prevEnsNum+1:
             logger.info("Cur ENS Num: " + str(ens_num[0]))
             logger.info("Prev ENS Num: " + str(self.prevEnsNum))
+            print("Cur ENS Num: " + str(ens_num[0]))
+            print("Prev ENS Num: " + str(self.prevEnsNum))
 
             self.IsMissingEnsembles = True
-            self.NumMissingEnsembles += 1
-            self.MissingEnsembles.append(self.prevEnsNum + 1)
+            self.NumMissingEnsembles += (ens_num[0] - self.prevEnsNum - 1)
+            for x in range(self.prevEnsNum+1, ens_num[0]):
+                self.MissingEnsembles.append(x)
 
-
+        # Set Previous Ensemble
         self.prevEnsNum = ens_num[0]
 
         # Check ensemble size
