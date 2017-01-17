@@ -45,7 +45,7 @@ class EnsembleData:
     def decode(self, data):
         """
         Take the data bytearray.  Decode the data to populate
-        the velocities.
+        the values.
         :param data: Bytearray for the dataset.
         """
         packet_pointer = Ensemble.GetBaseDataSize(self.name_len)

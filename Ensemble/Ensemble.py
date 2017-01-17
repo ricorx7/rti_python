@@ -54,6 +54,8 @@ class Ensemble:
         self.BottomTrack = None
         self.IsWavesInfo = False
         self.WavesInfo = None
+        self.IsRangeTracking = False
+        self.RangeTracking = None
 
     def AddRawData(self, data):
         """
@@ -145,12 +147,21 @@ class Ensemble:
 
     def AddBottomTrack(self, ds):
         """
-        Add a AncillaryData object to the ensemble.
+        Add a Bottom Track Data object to the ensemble.
         Set the flag that the dataset is added.
-        :param ds: Ancillary Data object.
+        :param ds: Bottom Track Data object.
         """
         self.IsBottomTrack = True
         self.BottomTrack = ds
+
+    def AddRangeTracking(self, ds):
+        """
+        Add a Range Tracking object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: Range Tracking Data object.
+        """
+        self.IsRangeTracking = True
+        self.RangeTracking = ds
 
     @staticmethod
     def toJSON(self, pretty=False):

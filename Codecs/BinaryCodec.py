@@ -15,6 +15,7 @@ from Ensemble.GoodEarth import GoodEarth
 from Ensemble.EnsembleData import EnsembleData
 from Ensemble.AncillaryData import AncillaryData
 from Ensemble.BottomTrack import BottomTrack
+from Ensemble.RangeTracking import RangeTracking
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -292,7 +293,7 @@ class BinaryCodec:
                 #logger.debug(type)
                 ad = AncillaryData(num_elements, element_multiplier)
                 ad.decode(ens[packetPointer:packetPointer+data_set_size])
-                ensemble.AddEnsembleData(ed)
+                ensemble.AddEnsembleData(ad)
                 # Send to UDP socket
                 #self.socket.sendto(Ensemble().toJSON(ad).encode(), (self.udp_ip, self.udp_port))
 
@@ -301,7 +302,16 @@ class BinaryCodec:
                 logger.debug(name)
                 bt = BottomTrack(num_elements, element_multiplier)
                 bt.decode(ens[packetPointer:packetPointer + data_set_size])
-                ensemble.AddEnsembleData(ed)
+                ensemble.AddEnsembleData(bt)
+                # Send to UDP socket
+                #self.socket.sendto(Ensemble().toJSON(bt).encode(), (self.udp_ip, self.udp_port))
+
+            # Range Tracking
+            if "E000015" in name:
+                logger.debug(name)
+                rt = RangeTracking(num_elements, element_multiplier)
+                rt.decode(ens[packetPointer:packetPointer + data_set_size])
+                ensemble.AddRangeTracking(rt)
                 # Send to UDP socket
                 #self.socket.sendto(Ensemble().toJSON(bt).encode(), (self.udp_ip, self.udp_port))
 
@@ -398,6 +408,13 @@ class BinaryCodec:
             ens.BottomTrack.DateTime = date_time
             ens.BottomTrack.Meta = self.Meta
             self.socket.sendto(Ensemble().toJSON(ens.BottomTrack).encode(), (self.udp_ip, self.udp_port))
+
+        if ens.IsRangeTracking:
+            ens.RangeTracking.EnsembleNumber = ensemble_number
+            ens.RangeTracking.SerialNumber = serial_number
+            ens.RangeTracking.DateTime = date_time
+            ens.RangeTracking.Meta = self.Meta
+            self.socket.sendto(Ensemble().toJSON(ens.RangeTracking).encode(), (self.udp_ip, self.udp_port))
 
 
 
