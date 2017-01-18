@@ -1,11 +1,10 @@
 import logging
-
 from Codecs.BinaryCodec import BinaryCodec
 from Codecs.WaveForceCodec import WaveForceCodec
 
 logger = logging.getLogger("ADCP Codec")
-logger.setLevel(logging.DEBUG)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+logger.setLevel(logging.ERROR)
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(name)s:%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
 class AdcpCodec:
@@ -15,7 +14,7 @@ class AdcpCodec:
     codecs to decode the data.
     """
 
-    def __init__(self, udp_port):
+    def __init__(self, udp_port=55057):
         self.binary_codec = BinaryCodec(udp_port)
 
         self.WaveForceCodec = WaveForceCodec()

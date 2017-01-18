@@ -1,10 +1,5 @@
-import logging
 from Ensemble.Ensemble import Ensemble
-
-logger = logging.getLogger("Ancillary Data")
-logger.setLevel(logging.DEBUG)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
-logging.basicConfig(format=FORMAT)
+from log import logger
 
 
 class AncillaryData:

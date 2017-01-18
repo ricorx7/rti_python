@@ -1,10 +1,11 @@
 import logging
 import struct
 import threading
+from Waves.WaveEnsemble import WaveEnsemble
 
 logger = logging.getLogger("WaveForce Codec")
 logger.setLevel(logging.ERROR)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
+FORMAT = '[%(asctime)-15s][%(levelname)s][%(name)s:%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 
 
@@ -86,8 +87,14 @@ class WaveForceCodec:
         """
         logger.debug("Process Waves Burst")
 
+        ens_waves_buff = []
+        # Convert the buffer to wave ensembles
+        for ens in len(ens_buff):
+            ens_waves_buff.append(WaveEnsemble().add(ens))
+
         ba = bytearray()
 
+        # Get the position time from the first ensemble
         #ba.extend(self.process_txt(ens_buff[0]))
         ba.extend(self.process_lat(ens_buff[0]))
         ba.extend(self.process_lon(ens_buff[0]))
@@ -255,9 +262,9 @@ class WaveForceCodec:
                 # If they do match, then there is no interleaving and we can take the next sample
                 # If there is interleaving, then we have to wait for the next sample, because the first 2 go together
                 if ens_buff[1].EnsembleData.SubsystemConfig == subcfg and ens_buff[1].EnsembleData.SysFirmwareSubsystemCode == subcode:
-                    self.secondTime = self.time_stamp_seconds(ens_buff[1])
+                    self.secondTime = WaveForceCodec.time_stamp_seconds(ens_buff[1])
                 else:
-                    self.secondTime = self.time_stamp_seconds(ens_buff[2])
+                    self.secondTime = WaveForceCodec.time_stamp_seconds(ens_buff[2])
 
             wdt = self.secondTime - self.firstTime
 
@@ -274,8 +281,8 @@ class WaveForceCodec:
 
         return ba
 
-
-    def time_stamp_seconds(self, ens):
+    @staticmethod
+    def time_stamp_seconds(ens):
         """
         Calcualte the timestamp.  This is the number of seconds for the given
         date and time.
@@ -293,13 +300,14 @@ class WaveForceCodec:
             minute = ens.EnsembleData.Minute
             second = ens.EnsembleData.Second
             hsec = ens.EnsembleData.HSec
-            jdn = self.julian_day_number(year, month, day)
+            jdn = WaveForceCodec.julian_day_number(year, month, day)
 
             ts = (24.0 * 3600.0 * jdn) + (3600.0 * hour) + (60.0 * minute) + second + (hsec / 100.0)
 
         return ts
 
-    def julian_day_number(self,year, month, day):
+    @staticmethod
+    def julian_day_number(year, month, day):
         """
         Count the number of calendar days there are for the given
         year, month and day.

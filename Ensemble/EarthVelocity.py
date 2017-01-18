@@ -1,10 +1,6 @@
-import logging
 from Ensemble.Ensemble import Ensemble
+from log import logger
 
-logger = logging.getLogger("Earth Velocity")
-logger.setLevel(logging.DEBUG)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
-logging.basicConfig(format=FORMAT)
 
 class EarthVelocity:
     """

@@ -19,12 +19,7 @@ from Ensemble.RangeTracking import RangeTracking
 
 from PyCRC.CRCCCITT import CRCCCITT
 
-
-import logging
-logger = logging.getLogger("Binary Codec")
-logger.setLevel(logging.DEBUG)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
-logging.basicConfig(format=FORMAT)
+from log import logger
 
 
 class EnsembleMetaData:
@@ -70,6 +65,7 @@ class WaveBurstInfo:
         self.Bin1 = 0
         self.Bin2 = 0
         self.Bin3 = 0
+
 
 class BinaryCodec:
     """
@@ -293,7 +289,7 @@ class BinaryCodec:
                 #logger.debug(type)
                 ad = AncillaryData(num_elements, element_multiplier)
                 ad.decode(ens[packetPointer:packetPointer+data_set_size])
-                ensemble.AddEnsembleData(ad)
+                ensemble.AddAncillaryData(ad)
                 # Send to UDP socket
                 #self.socket.sendto(Ensemble().toJSON(ad).encode(), (self.udp_ip, self.udp_port))
 
