@@ -13,8 +13,13 @@ class EnsembleFileReader:
     def __init__(self):
         self.ens_receiver = None
         self.ens_reader = None
+
+        # Codec to decode the data from the file
         self.codec = AdcpCodec(55057)
+        self.codec.EnsembleEvent += self.process_ensemble_codec
+
         self.ens_count = 0
+        self.ens_codec_count = 0
 
     def process(self, file_path):
         """
@@ -38,7 +43,8 @@ class EnsembleFileReader:
         self.ens_receiver.close()
 
         logger.info("Completed File reader")
-        logger.info("Ensemble Count: " + str(self.ens_count))
+        logger.info("Ensemble UDP Count: " + str(self.ens_count))
+        logger.info("Ensemble Codec Count: " + str(self.ens_codec_count))
 
     def process_file(self, file_path):
         """
@@ -70,12 +76,26 @@ class EnsembleFileReader:
 
     def process_ensemble(self, sender, ens):
         """
-        Process the incoming ensemble.
+        Receive and process the incoming ensemble from the UDP port.
+        This data has been processed through the codec then passed over
+        the UDP port as JSON data.  The JSON datasets were then collected
+        and assembled as a JSON ensemble.
         :param sender: Sender of the ensemble.
         :param ens: Ensemble data.
         """
-        print(ens.EnsembleNumber)
+        print("UDP: " + str(ens.EnsembleNumber))
         self.ens_count += 1
+
+    def process_ensemble_codec(self, sender, ens):
+        """
+        Receive and process the incoming ensemble directly from the codec.
+        This data was process and passed as an Ensemble object.
+        :param sender: Sender of the ensemble.
+        :param ens: Ensemble data.
+        """
+        if ens.IsEnsembleData:
+            print("Codec: " + str(ens.EnsembleData.EnsembleNumber))
+            self.ens_codec_count += 1
 
 
 

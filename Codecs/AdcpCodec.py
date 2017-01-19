@@ -1,6 +1,7 @@
 import logging
 from Codecs.BinaryCodec import BinaryCodec
 from Codecs.WaveForceCodec import WaveForceCodec
+from Utilities.events import EventHandler
 
 logger = logging.getLogger("ADCP Codec")
 logger.setLevel(logging.ERROR)
@@ -16,9 +17,13 @@ class AdcpCodec:
 
     def __init__(self, udp_port=55057):
         self.binary_codec = BinaryCodec(udp_port)
+        self.binary_codec.EnsembleEvent += self.binary_ensemble
 
         self.WaveForceCodec = WaveForceCodec()
         self.IsWfcEnabled = False
+
+        # Event to receive the ensembles
+        self.EnsembleEvent = EventHandler(self)
 
     def add(self, data):
         """
@@ -45,3 +50,13 @@ class AdcpCodec:
         if self.IsWfcEnabled:
             logger.debug("Send to WaveForce Codec")
             self.WaveForceCodec.add(ens)
+
+    def binary_ensemble(self, sender, ens):
+        """
+        Take the binary codec event and pass it to all subscribers
+        of the ensemble data.
+        :param sender: Sender of the data.
+        :param ens: Ensemble data.
+        """
+        self.EnsembleEvent(ens)
+
