@@ -2,18 +2,19 @@ import os.path
 import sys
 import getopt
 import threading
-import socket
-from Codecs.AdcpCodec import AdcpCodec
+import json
 from log import logger
+from Comm.EnsembleReceiver import EnsembleReceiver
+from Codecs.AdcpCodec import AdcpCodec
 
 
 class EnsembleFileReader:
 
     def __init__(self):
-        self.codec = None
+        self.ens_receiver = None
         self.ens_reader = None
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
-        self.socket.bind(('', 55057))
+        self.codec = AdcpCodec(55057)
+        self.ens_count = 0
 
     def process(self, file_path):
         """
@@ -21,16 +22,23 @@ class EnsembleFileReader:
         :param file_path: File  path the read files
         :return:
         """
+
+        # Create ensemble receiver
+        self.ens_receiver = EnsembleReceiver()
+        self.ens_receiver.EnsembleEvent += self.process_ensemble
+
         # Start thread to monitor incoming ensembles
         # Connect to ensemble server
-        self.ens_reader = threading.Thread(name='EnsFileReader', target=self.process_ensembles).start()
-
-        self.codec = AdcpCodec()
+        self.ens_reader = threading.Thread(name='EnsFileReader', target=self.ens_receiver.connect, args=[55057]).start()
 
         # Process the file
         self.process_file(file_path)
 
-        logger.debug("Completed File reader")
+        # Stop the receiver
+        self.ens_receiver.close()
+
+        logger.info("Completed File reader")
+        logger.info("Ensemble Count: " + str(self.ens_count))
 
     def process_file(self, file_path):
         """
@@ -41,7 +49,7 @@ class EnsembleFileReader:
         # Check if the file exist
         if os.path.exists(file_path):
 
-            logger.debug("Open file: " + file_path)
+            logger.info("Open file: " + file_path)
 
             # Open the file
             f = open(file_path, "rb")
@@ -60,13 +68,17 @@ class EnsembleFileReader:
         else:
             logger.error("File does not exist")
 
-    def process_ensembles(self):
-        logger.debug("Prepared to receive UDP data.")
-        print("Prepared to receive UDP data.")
-        while True:
-            recv_data, addr = self.socket.recvfrom(4096)
-            logger.debug(".")
-            print(".")
+    def process_ensemble(self, sender, ens):
+        """
+        Process the incoming ensemble.
+        :param sender: Sender of the ensemble.
+        :param ens: Ensemble data.
+        """
+        print(ens.EnsembleNumber)
+        self.ens_count += 1
+
+
+
 
 
 def main(argv):

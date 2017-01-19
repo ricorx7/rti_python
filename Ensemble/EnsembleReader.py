@@ -1,8 +1,8 @@
-
+from log import logger
 import socket
 
 
-class EnsembleReader():
+class EnsembleReader:
     """
     Read in data from the given TCP.  Then decode the data
     and pass it on to another TCP port
@@ -11,6 +11,7 @@ class EnsembleReader():
     def __init__(self, port):
         # Open a TCP port to read in the ensemble data
         self.port = port
+        self.is_alive = True
         self.socket = None
         self.reconnect(port)
         self.read()
@@ -19,7 +20,9 @@ class EnsembleReader():
         """
         Connect to the server.
         """
-        print("Ensemble Reader: ", tcp_port)
+        logger.debug("Ensemble Reader: ", tcp_port)
+
+        self.is_alive = True
 
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,14 +39,14 @@ class EnsembleReader():
         Read data from the serial port
         """
         try:
-            while True:
+            while self.is_alive:
                 # Receive a response
                 response = self.socket.recv()
                 #print('"%s"' % response)
 
                 # Decode the ensemble data
 
-
+                # Reconnect
                 if len(response) == 0:
                     print("Disconnected")
 
@@ -62,10 +65,15 @@ class EnsembleReader():
         except:
             pass
 
+        # Close the socket
+        self.close()
+
     def close(self):
         """
         Close the socket.
         """
+        self.is_alive = False
+
         self.socket.close()
 
 

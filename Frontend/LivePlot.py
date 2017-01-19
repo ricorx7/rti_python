@@ -1,11 +1,11 @@
+import getopt
 import logging
-import json
-import sys, getopt
+import sys
 
 import matplotlib.pyplot as plt
-from matplotlib import colors, cm
+from matplotlib import cm
 
-from Utilities.EnsembleReceiver import EnsembleReceiver
+from Comm.EnsembleReceiver import EnsembleReceiver
 
 logger = logging.getLogger("EnsembleReceiver")
 logger.setLevel(logging.DEBUG)

@@ -1,14 +1,11 @@
-from bokeh.io import curdoc
-from bokeh.models import ColumnDataSource
-from bokeh.plotting import Figure, show
-from bokeh.client import push_session
-
-from Comm.ADCP import ADCP
-
 import logging
 import threading
 
-from Utilities.EnsembleReceiver import EnsembleReceiver
+from bokeh.client import push_session
+from bokeh.io import curdoc
+from bokeh.plotting import Figure
+
+from Comm.EnsembleJsonData import ADCP
 
 logger = logging.getLogger("EnsembleReceiver")
 logger.setLevel(logging.DEBUG)

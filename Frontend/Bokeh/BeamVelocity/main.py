@@ -1,14 +1,12 @@
+import logging
+import threading
+
 from bokeh.io import curdoc
 from bokeh.models import ColumnDataSource
 from bokeh.plotting import Figure
 
-from Comm.ADCP import ADCP
+from Comm.EnsembleJsonData import ADCP
 from Ensemble.Ensemble import Ensemble
-
-import logging
-import threading
-
-from Utilities.EnsembleReceiver import EnsembleReceiver
 
 logger = logging.getLogger("EnsembleReceiver")
 logger.setLevel(logging.DEBUG)

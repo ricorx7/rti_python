@@ -2,6 +2,7 @@ import struct
 import socket
 import datetime
 import requests
+import pickle
 from Utilities.events import EventHandler
 
 from Ensemble.Ensemble import Ensemble
@@ -86,8 +87,7 @@ class BinaryCodec:
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port
-        #self.udp_ip = "127.0.0.1"                                       # UDP IP (Localhost)
-        self.udp_ip = ''
+        self.udp_ip = ''                                                # UDP IP (Localhost)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
@@ -97,9 +97,9 @@ class BinaryCodec:
         """
         self.buffer.extend(data)
 
-        self.findEnsemble()
+        self.find_ensemble()
 
-    def findEnsemble(self):
+    def find_ensemble(self):
         """
         Find the start of an ensemble.  Then find the end of the ensemble.
         Then remove the ensemble from the buffer and process the raw data.
@@ -115,9 +115,9 @@ class BinaryCodec:
 
         if ensStart >= 0 and len(self.buffer) > Ensemble().HeaderSize + ensStart:
             #Decode the Ensemble
-            self.decodeEnsemble(ensStart)
+            self.decode_ensemble(ensStart)
 
-    def decodeEnsemble(self, ensStart):
+    def decode_ensemble(self, ensStart):
         """
         Decode the raw ensemble data.  This will check the checksum and verify it is correct,
         then decode each datasets.  Then remove the data from the buffer.
@@ -159,6 +159,14 @@ class BinaryCodec:
                 try:
                     # Stream data
                     self.streamData(ensemble)
+
+                    #data = pickle.dumps(ensemble)
+
+                    #logger.debug("ENS Pickled size: " + str(len(data)))
+                    #print(str(ensemble.EnsembleData.EnsembleNumber) + " ENS Pickled size: " + str(len(data)))
+
+                    #self.socket.sendto(struct.pack('>I', len(data)) + data, (self.udp_ip, self.udp_port))
+
                     logger.debug("Stream ensemble data")
                 except ConnectionRefusedError as err:
                     logger.error("Error streaming ensemble data", err)
@@ -340,78 +348,92 @@ class BinaryCodec:
             # Stream the data
             ens.EnsembleData.DateTime = date_time
             ens.EnsembleData.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.EnsembleData).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.EnsembleData).encode())
 
         if ens.IsBeamVelocity:
             ens.BeamVelocity.EnsembleNumber = ensemble_number
             ens.BeamVelocity.SerialNumber = serial_number
             ens.BeamVelocity.DateTime = date_time
             ens.BeamVelocity.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.BeamVelocity).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.BeamVelocity).encode())
 
         if ens.IsInstrumentVelocity:
             ens.InstrumentVelocity.EnsembleNumber = ensemble_number
             ens.InstrumentVelocity.SerialNumber = serial_number
             ens.InstrumentVelocity.DateTime = date_time
             ens.InstrumentVelocity.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.InstrumentVelocity).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.InstrumentVelocity).encode())
 
         if ens.IsEarthVelocity:
             ens.EarthVelocity.EnsembleNumber = ensemble_number
             ens.EarthVelocity.SerialNumber = serial_number
             ens.EarthVelocity.DateTime = date_time
             ens.EarthVelocity.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.EarthVelocity).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.EarthVelocity).encode())
 
         if ens.IsAmplitude:
             ens.Amplitude.EnsembleNumber = ensemble_number
             ens.Amplitude.SerialNumber = serial_number
             ens.Amplitude.DateTime = date_time
             ens.Amplitude.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.Amplitude).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.Amplitude).encode())
 
         if ens.IsCorrelation:
             ens.Correlation.EnsembleNumber = ensemble_number
             ens.Correlation.SerialNumber = serial_number
             ens.Correlation.DateTime = date_time
             ens.Correlation.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.Correlation).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.Correlation).encode())
 
         if ens.IsGoodBeam:
             ens.GoodBeam.EnsembleNumber = ensemble_number
             ens.GoodBeam.SerialNumber = serial_number
             ens.GoodBeam.DateTime = date_time
             ens.GoodBeam.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.GoodBeam).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.GoodBeam).encode())
 
         if ens.IsGoodEarth:
             ens.GoodEarth.EnsembleNumber = ensemble_number
             ens.GoodEarth.SerialNumber = serial_number
             ens.GoodEarth.DateTime = date_time
             ens.GoodEarth.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.GoodEarth).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.GoodEarth).encode())
 
         if ens.IsAncillaryData:
             ens.AncillaryData.EnsembleNumber = ensemble_number
             ens.AncillaryData.SerialNumber = serial_number
             ens.AncillaryData.DateTime = date_time
             ens.AncillaryData.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.AncillaryData).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.AncillaryData).encode())
 
         if ens.IsBottomTrack:
             ens.BottomTrack.EnsembleNumber = ensemble_number
             ens.BottomTrack.SerialNumber = serial_number
             ens.BottomTrack.DateTime = date_time
             ens.BottomTrack.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.BottomTrack).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.BottomTrack).encode())
 
         if ens.IsRangeTracking:
             ens.RangeTracking.EnsembleNumber = ensemble_number
             ens.RangeTracking.SerialNumber = serial_number
             ens.RangeTracking.DateTime = date_time
             ens.RangeTracking.Meta = self.Meta
-            self.socket.sendto(Ensemble().toJSON(ens.RangeTracking).encode(), (self.udp_ip, self.udp_port))
+            self.send_udp(Ensemble().toJSON(ens.RangeTracking).encode())
 
+    def send_udp(self, data):
+        """
+        Send the data to the UDP port.
+        Append the length of the data to the front.
+        This will be 4 bytes long.  First look at the first
+        4 bytes to get the length.  Then wait for the remaining
+        data to get a complete message.
+        :param data: Data to send.
+        """
+        # Get the length of the data
+        #data_len = struct.pack('>I', len(data))
+
+        #self.socket.sendto(data_len + data, (self.udp_ip, self.udp_port))
+        self.socket.sendto(data, (self.udp_ip, self.udp_port))
 
 
 
