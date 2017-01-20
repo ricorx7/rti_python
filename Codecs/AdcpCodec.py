@@ -17,8 +17,9 @@ class AdcpCodec:
 
     def __init__(self, udp_port=55057):
         self.binary_codec = BinaryCodec(udp_port)
-        self.binary_codec.EnsembleEvent += self.binary_ensemble
+        self.binary_codec.EnsembleEvent += self.process_ensemble
 
+        # WaveForce codec
         self.WaveForceCodec = WaveForceCodec()
         self.IsWfcEnabled = False
 
@@ -39,24 +40,23 @@ class AdcpCodec:
         """
         self.WaveForceCodec.init(ens_in_burst, path, lat, lon, bin1, bin2, bin3)
         self.IsWfcEnabled = True
-        self.binary_codec.EnsembleEvent += self.process_ensemble
 
     def process_ensemble(self, sender, ens):
         """
-        If the WaveForce codec is enabled, then process the ensemble data.
+        Take the ensemble from the codec and pass it to all the subscribers.
+        If the WaveForce codec is enabled, pass the ensemble to the WaveForce
+        codec to process.
         :param ens: Ensemble data.
         """
         logger.debug("Received processed ensemble")
+
+        # If the WaveForce codec is enabled, then pass the ensemble data to the WaveForce codec
         if self.IsWfcEnabled:
             logger.debug("Send to WaveForce Codec")
             self.WaveForceCodec.add(ens)
 
-    def binary_ensemble(self, sender, ens):
-        """
-        Take the binary codec event and pass it to all subscribers
-        of the ensemble data.
-        :param sender: Sender of the data.
-        :param ens: Ensemble data.
-        """
+        # Pass ensemble to all subscribers of the ensemble data.
         self.EnsembleEvent(ens)
+
+
 

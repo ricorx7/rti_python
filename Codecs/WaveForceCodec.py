@@ -28,6 +28,7 @@ class WaveForceCodec:
         self.Bin3 = 0
         self.firstTime = 0
         self.secondTime = 0         # Used to calculate the sample timing
+        self.selected_bin = []
 
     def init(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3):
         """
@@ -50,6 +51,10 @@ class WaveForceCodec:
         self.Bin2 = bin2
         self.Bin3 = bin3
         self.RecordCount = 0
+
+        self.selected_bin.append(bin1)
+        self.selected_bin.append(bin2)
+        self.selected_bin.append(bin3)
 
         self.firstTime = 0
         self.secondTime = 0         # Used to calculate the sample timing
@@ -89,13 +94,14 @@ class WaveForceCodec:
 
         ens_waves_buff = []
         # Convert the buffer to wave ensembles
-        for ens in len(ens_buff):
-            ens_waves_buff.append(WaveEnsemble().add(ens))
+        for ens in ens_buff:
+            ens_waves_buff.append(WaveEnsemble().add(ens, self.selected_bin))
 
+        
         ba = bytearray()
 
         # Get the position time from the first ensemble
-        #ba.extend(self.process_txt(ens_buff[0]))
+        ba.extend(self.process_txt(ens_buff[0]))
         ba.extend(self.process_lat(ens_buff[0]))
         ba.extend(self.process_lon(ens_buff[0]))
         ba.extend(self.process_wft(ens_buff[0]))

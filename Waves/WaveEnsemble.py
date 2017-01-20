@@ -173,7 +173,7 @@ class WaveEnsemble:
         # Get the number of bins
         num_bins = len(selected_bins)
 
-        self.time_stamp_seconds = self.time_stamp_seconds(ens)
+        self.time_stamp_seconds = self.calc_time_stamp_seconds(ens)
 
         if ens.IsEnsembleData:
             self.ensemble_number = ens.EnsembleData.EnsembleNumber
@@ -219,8 +219,8 @@ class WaveEnsemble:
             # Vertical Beam velocity
             if ens.IsBeamVelocity and ens.IsCorrelation:
                 # Check the correlation against the correlation threshold
-                if ens.Correlation[selected_bins[bins], 0] >= corr_thresh:
-                    self.vert_beam_vel.append(ens.BeamVelocity[selected_bins[bins], 0])
+                if ens.Correlation.Correlation[selected_bins[bins]][0] >= corr_thresh:
+                    self.vert_beam_vel.append(ens.BeamVelocity[selected_bins[bins]][0])
                 else:
                     self.vert_beam_vel.append(Ensemble.BadVelocity)
 
@@ -270,8 +270,8 @@ class WaveEnsemble:
                 # Vertical Beam velocity
                 if ens.IsBeamVelocity and ens.IsCorrelation:
                     # Check the correlation against the correlation threshold
-                    if ens.Correlation[selected_bins[bins], beam] >= corr_thresh:
-                        beam_data.append(ens.BeamVelocity[selected_bins[bins], beam])
+                    if ens.Correlation.Correlation[selected_bins[bins]][beam] >= corr_thresh:
+                        beam_data.append(ens.BeamVelocity.Velocities[selected_bins[bins]][beam])
                     else:
 
                         beam_data.append(Ensemble.BadVelocity)
@@ -281,9 +281,9 @@ class WaveEnsemble:
 
             # Earth Velocity
             if ens.IsEarthVelocity:
-                self.east_vel.append(ens.EarthVelocity[selected_bins[bins], 0])
-                self.north_vel.append(ens.EarthVelocity[selected_bins[bins], 1])
-                self.vertical_vel.append(ens.EarthVelocity[selected_bins[bins], 2])
+                self.east_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][0])
+                self.north_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][1])
+                self.vertical_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][2])
 
         avg_range_ct = 0
         avg_range = 0.0
@@ -353,7 +353,7 @@ class WaveEnsemble:
             self.height = self.pressure
 
     @staticmethod
-    def time_stamp_seconds(ens):
+    def calc_time_stamp_seconds(ens):
         """
         Calcualte the timestamp.  This is the number of seconds for the given
         date and time.
