@@ -74,6 +74,7 @@ class SerialDataRecorder:
             # Create a file
             self.create_file_writer()
 
+            # Create socket
             self.raw_serial_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.raw_serial_socket.connect(('localhost', int(port)))
             self.raw_serial_socket.settimeout(1)    # Set timeout to stop thread if terminated

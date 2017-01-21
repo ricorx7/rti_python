@@ -97,7 +97,9 @@ class WaveForceCodec:
         for ens in ens_buff:
             ens_waves_buff.append(WaveEnsemble().add(ens, self.selected_bin))
 
-        
+        # Need to get the first bin type of the burst
+        # This will determine the time between each burst type
+
         ba = bytearray()
 
         # Get the position time from the first ensemble
