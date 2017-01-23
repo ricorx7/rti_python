@@ -17,7 +17,7 @@ class ProcessWavesFile:
         # Codec to decode the data from the file
         self.codec = AdcpCodec(55057)
         self.codec.EnsembleEvent += self.process_ensemble_codec
-        self.codec.enable_waveforce_codec(20, "recorder/", 32.123, 117.234, 1, 2, 3)
+        self.codec.enable_waveforce_codec(20, "recorder/", 32.123, 117.234, 1, 2, 3) # Enable WaveForce codec
 
         self.ens_count = 0
         self.ens_codec_count = 0
@@ -108,11 +108,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hvi:",["ifile=","verbose"])
     except getopt.GetoptError:
-        print('EnsembleFileReader.py -i <inputfile> -v')
+        print('ProcessWavesFile.py -i <inputfile> -v')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('EnsembleFileReader.py -i <inputfile> -v')
+            print('ProcessWavesFile.py -i <inputfile> -v')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg

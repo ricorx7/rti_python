@@ -92,22 +92,47 @@ class WaveForceCodec:
         """
         logger.debug("Process Waves Burst")
 
+        # Local variables
+        num_bins = len(self.selected_bin)
+
+        num_4beam_ens = 0
+        num_vert_ens = 0
+
+        wus_buff = []
+        wvs_buff = []
+        wzs_buff = []
+
         ens_waves_buff = []
         # Convert the buffer to wave ensembles
         for ens in ens_buff:
-            ens_waves_buff.append(WaveEnsemble().add(ens, self.selected_bin))
+            # Create a waves ensemble
+            ens_wave = WaveEnsemble()
+            ens_wave.add(ens, self.selected_bin)
 
-        # Need to get the first bin type of the burst
-        # This will determine the time between each burst type
+            # Add the waves ensemble to the list
+            ens_waves_buff.append(ens_wave)
+
+            print(ens_wave)
+
+            if ens_wave.is_vertical_ens:
+                num_vert_ens += 1
+            else:
+                num_4beam_ens += 1
+
+            for sel_bin in range(num_bins):
+                wus_buff.append(ens_wave.east_vel[sel_bin])
+                wvs_buff.append(ens_wave.north_vel[sel_bin])
+                wzs_buff.append(ens_wave.vertical_vel[sel_bin])
+
 
         ba = bytearray()
 
-        # Get the position time from the first ensemble
-        ba.extend(self.process_txt(ens_buff[0]))
-        ba.extend(self.process_lat(ens_buff[0]))
-        ba.extend(self.process_lon(ens_buff[0]))
-        ba.extend(self.process_wft(ens_buff[0]))
-        ba.extend(self.process_wdt(ens_buff))
+        ba.extend(self.process_txt(ens_buff[0]))                            # Txt to describe burst
+        ba.extend(self.process_lat(ens_buff[0]))                            # Latitude
+        ba.extend(self.process_lon(ens_buff[0]))                            # Longitude
+        ba.extend(self.process_wft(ens_buff[0]))                            # Time from the first ensemble
+        ba.extend(self.process_wdt(ens_buff))                               # Time between ensembles
+        ba.extend(self.process_wus(wus_buff, num_4beam_ens, num_bins))      # East Velocity
 
         # Write the file
         self.write_file(ba)
@@ -242,7 +267,6 @@ class WaveForceCodec:
 
         return ba
 
-
     def process_wdt(self, ens_buff):
         """
         Time between each sample.  The time is in seconds.
@@ -286,6 +310,34 @@ class WaveForceCodec:
                 ba.extend([code])
 
             ba.extend(struct.pack("d", wdt))    # WDT Value
+
+        return ba
+
+    def process_wus(self, wus, num_4beam_ens, num_selected_bins):
+        """
+        East velocity data for each selected bin.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: Number of selected bins
+        wus = 7.3, 7,2, 7.5
+        :param wus: East velocity data in byte array for each selected bin.
+        :param num_4beam_ens: Number of 4 Beam ensembles.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - 1 per record
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - 1 per record
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wus '):                   # Name
+            ba.extend([code])
+
+        ba.extend(wus)                                  # WUS Values
 
         return ba
 

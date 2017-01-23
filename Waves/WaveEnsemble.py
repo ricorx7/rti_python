@@ -1,3 +1,4 @@
+import struct
 from Ensemble.Ensemble import Ensemble
 
 
@@ -5,6 +6,7 @@ class WaveEnsemble:
     """
     Ensemble data specific to a wave ensemble.
     This will not need all the data that the entire ensemble will have.
+    The float values will be converted to a byte array.
     """
 
     def __init__(self):
@@ -16,7 +18,7 @@ class WaveEnsemble:
         Set flag if this data is a vertical ensemble.
         TRUE = Vertical beam ensemble.
         """
-        self.is_vertical_sample = False
+        self.is_vertical_ens = False
 
         """
         WZBM
@@ -106,11 +108,21 @@ class WaveEnsemble:
         self.ensemble_number = 0
 
         """
+        Number of beams.
+        """
+        self.num_beams = 1
+
+        """
+        Number of bins.
+        """
+        self.num_bins = 1
+
+        """
         WUS
         East Velocity data for the given selected bins in m/s.
         [bins]
         """
-        self.east_vel = []
+        self.east_vel = bytearray()
 
         """
         WVS
@@ -166,12 +178,12 @@ class WaveEnsemble:
         self.pressure_offset = pressure_offset
 
         # Get the number of beams
-        num_beams = 1
+        self.num_beams = 1
         if ens.IsEnsembleData:
-            num_beams = ens.EnsembleData.NumBeams
+            self.num_beams = ens.EnsembleData.NumBeams
 
         # Get the number of bins
-        num_bins = len(selected_bins)
+        self.num_bins = len(selected_bins)
 
         self.time_stamp_seconds = self.calc_time_stamp_seconds(ens)
 
@@ -186,11 +198,11 @@ class WaveEnsemble:
             self.roll = ens.AncillaryData.Roll
 
         # Add the data based off the number of beams
-        if num_beams == 1:
-            self.is_vertical_sample = True
+        if self.num_beams == 1:
+            self.is_vertical_ens = True
             self.add_vertical_beam(ens, selected_bins, corr_thresh)
         else:
-            self.is_vertical_sample = False
+            self.is_vertical_ens = False
             self.add_4_beam(ens, selected_bins, corr_thresh)
 
     def add_vertical_beam(self, ens, selected_bins, corr_thresh):
@@ -281,9 +293,9 @@ class WaveEnsemble:
 
             # Earth Velocity
             if ens.IsEarthVelocity:
-                self.east_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][0])
-                self.north_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][1])
-                self.vertical_vel.append(ens.EarthVelocity.Velocities[selected_bins[bins]][2])
+                self.east_vel.extend(struct.pack('f', (ens.EarthVelocity.Velocities[selected_bins[bins]][0])))
+                self.north_vel.append(struct.pack('f', (ens.EarthVelocity.Velocities[selected_bins[bins]][1])))
+                self.vertical_vel.append(struct.pack('f', (ens.EarthVelocity.Velocities[selected_bins[bins]][2])))
 
         avg_range_ct = 0
         avg_range = 0.0
