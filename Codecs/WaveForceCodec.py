@@ -102,6 +102,12 @@ class WaveForceCodec:
         wvs_buff = bytearray()
         wzs_buff = bytearray()
 
+        beam_0_vel = bytearray()
+        beam_1_vel = bytearray()
+        beam_2_vel = bytearray()
+        beam_3_vel = bytearray()
+        beam_vert_vel = bytearray()
+
         ens_waves_buff = []
 
 
@@ -121,9 +127,22 @@ class WaveForceCodec:
                 num_4beam_ens += 1
 
                 for sel_bin in range(num_bins):
+                    # Earth Velocity
                     wus_buff.extend(struct.pack('f', ens_wave.east_vel[sel_bin]))
                     wvs_buff.extend(struct.pack('f', ens_wave.north_vel[sel_bin]))
                     wzs_buff.extend(struct.pack('f', ens_wave.vertical_vel[sel_bin]))
+
+                for sel_bin in range(num_bins):
+                    # Beam Velocity
+                    beam_0_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][0]))
+                    if ens_wave.num_beams > 1:
+                        beam_1_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][1]))
+                    if ens_wave.num_beams > 2:
+                        beam_2_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][2]))
+                    if ens_wave.num_beams > 3:
+                        beam_3_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][3]))
+
+
 
         ba = bytearray()
 
@@ -135,6 +154,11 @@ class WaveForceCodec:
         ba.extend(self.process_wus(wus_buff, num_4beam_ens, num_bins))      # East Velocity
         ba.extend(self.process_wvs(wvs_buff, num_4beam_ens, num_bins))      # North Velocity
         ba.extend(self.process_wzs(wzs_buff, num_4beam_ens, num_bins))      # Vertical Velocity
+        ba.extend(self.process_wb0(beam_0_vel, num_4beam_ens, num_bins))    # Beam 0 Beam Velocity
+        ba.extend(self.process_wb1(beam_1_vel, num_4beam_ens, num_bins))    # Beam 1 Beam Velocity
+        ba.extend(self.process_wb2(beam_2_vel, num_4beam_ens, num_bins))    # Beam 2 Beam Velocity
+        ba.extend(self.process_wb3(beam_3_vel, num_4beam_ens, num_bins))    # Beam 3 Beam Velocity
+
 
         # Write the file
         self.write_file(ba)
@@ -396,6 +420,118 @@ class WaveForceCodec:
             ba.extend([code])
 
         ba.extend(wzs)                                  # WZS Values
+
+        return ba
+
+    def process_wb0(self, wb0, num_4beam_ens, num_selected_bins):
+        """
+        Beam 0 Beam velocity data for each selected bin.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: Number of selected bins
+        wus = 7.3, 7,2, 7.5
+        :param wb0: Beam 0 Beam velocity data in byte array for each selected bin.
+        :param num_4beam_ens: Number of 4 Beam ensembles.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - Number of selected bins
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wb0 '):                   # Name
+            ba.extend([code])
+
+        ba.extend(wb0)                                  # WB0 Values
+
+        return ba
+
+    def process_wb1(self, wb1, num_4beam_ens, num_selected_bins):
+        """
+        Beam 1 Beam velocity data for each selected bin.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: Number of selected bins
+        wus = 7.3, 7,2, 7.5
+        :param wb1: Beam 1 Beam velocity data in byte array for each selected bin.
+        :param num_4beam_ens: Number of 4 Beam ensembles.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - Number of selected bins
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wb1 '):                   # Name
+            ba.extend([code])
+
+        ba.extend(wb1)                                  # WB1 Values
+
+        return ba
+
+    def process_wb2(self, wb2, num_4beam_ens, num_selected_bins):
+        """
+        Beam 2 Beam velocity data for each selected bin.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: Number of selected bins
+        wus = 7.3, 7,2, 7.5
+        :param wb2: Beam 2 Beam velocity data in byte array for each selected bin.
+        :param num_4beam_ens: Number of 4 Beam ensembles.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - Number of selected bins
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wb2 '):                   # Name
+            ba.extend([code])
+
+        ba.extend(wb2)                                  # WB2 Values
+
+        return ba
+
+    def process_wb3(self, wb3, num_4beam_ens, num_selected_bins):
+        """
+        Beam 3 Beam velocity data for each selected bin.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: Number of selected bins
+        wus = 7.3, 7,2, 7.5
+        :param wb3: Beam 3 Beam velocity data in byte array for each selected bin.
+        :param num_4beam_ens: Number of 4 Beam ensembles.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - Number of selected bins
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wb3 '):                   # Name
+            ba.extend([code])
+
+        ba.extend(wb3)                                  # WB3 Values
 
         return ba
 
