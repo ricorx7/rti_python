@@ -10,14 +10,14 @@ from Codecs.AdcpCodec import AdcpCodec
 
 class ProcessWavesFile:
 
-    def __init__(self):
+    def __init__(self, ens_in_burst, path):
         self.ens_receiver = None
         self.ens_reader = None
 
         # Codec to decode the data from the file
         self.codec = AdcpCodec(55057)
         self.codec.EnsembleEvent += self.process_ensemble_codec
-        self.codec.enable_waveforce_codec(20, "recorder/", 32.123, 117.234, 1, 2, 3) # Enable WaveForce codec
+        self.codec.enable_waveforce_codec(ens_in_burst, path, 32.123, 117.234, 1, 2, 3)   # Enable WaveForce codec
 
         self.ens_count = 0
         self.ens_codec_count = 0
@@ -99,30 +99,36 @@ class ProcessWavesFile:
             self.ens_codec_count += 1
 
 
-
-
-
 def main(argv):
+    """
+    MAIN to run the application.
+    """
     inputfile = ''
     verbose = False
+    record_path = "recorder/"
+    ens_in_burst = 1028
     try:
-        opts, args = getopt.getopt(argv,"hvi:",["ifile=","verbose"])
+        opts, args = getopt.getopt(argv, "hvi:p:e:", ["ifile=", "path=", "ens=", "verbose"])
     except getopt.GetoptError:
-        print('ProcessWavesFile.py -i <inputfile> -v')
+        print('ProcessWavesFile.py -i <inputfile> -p <path> -e <ens_in_burst> -v')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('ProcessWavesFile.py -i <inputfile> -v')
+            print('ProcessWavesFile.py -i <inputfile> -p <path> -e <ens_in_burst> -v')
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
+        elif opt in ("-p", "--path"):
+            record_path = arg
+        elif opt in ("-e", "--ens"):
+            ens_in_burst = arg
         elif opt in ("-v", "--verbose"):
             verbose = True
             print("Verbose ON")
     print('Input file is: ', inputfile)
 
     # Run report on file
-    ProcessWavesFile().process(inputfile)
+    ProcessWavesFile(ens_in_burst, record_path).process(inputfile)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
