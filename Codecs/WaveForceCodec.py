@@ -108,12 +108,22 @@ class WaveForceCodec:
         beam_3_vel = bytearray()
         beam_vert_vel = bytearray()
 
+        rt_0 = bytearray()
+        rt_1 = bytearray()
+        rt_2 = bytearray()
+        rt_3 = bytearray()
+        rt_vert = bytearray()
+
         pressure =  bytearray()
         vert_pressure = bytearray()
 
         heading = bytearray()
         pitch = bytearray()
         roll = bytearray()
+
+        water_temp = bytearray()
+        height = bytearray()
+        avg_range_track = bytearray()
 
         ens_waves_buff = []
 
@@ -138,12 +148,29 @@ class WaveForceCodec:
                     # Beam Velocity (WZ0)
                     beam_vert_vel.extend(struct.pack('f', ens_wave.vert_beam_vel[sel_bin]))
 
+                # Range Tracking (WZR)
+                rt_vert.extend(struct.pack('f', ens_wave.range_tracking[0]))
+
             else:
                 # 4 Beam Data
                 num_4beam_ens += 1
 
-                # Pressure (WPS)
-                pressure.extend(struct.pack('f', ens_wave.pressure))
+                pressure.extend(struct.pack('f', ens_wave.pressure))                    # Pressure (WPS)
+                heading.extend(struct.pack('f', ens_wave.heading))                      # Heading (WHG)
+                pitch.extend(struct.pack('f', ens_wave.pitch))                          # Pitch (WPH)
+                roll.extend(struct.pack('f', ens_wave.roll))                            # Roll (WRL)
+                water_temp.extend(struct.pack('f', ens_wave.water_temp))                # Water Temp (WTS)
+                height.extend(struct.pack('f', ens_wave.height))                        # Height (WHS)
+                avg_range_track.extend(struct.pack('f', ens_wave.avg_range_tracking))   # Avg Range Tracking (WAH)
+
+                # Range Tracking (WR0, WR1, WR2, WR3)
+                rt_0.extend(struct.pack('f', ens_wave.range_tracking[0]))       # Beam 0 RT
+                if ens_wave.num_beams > 1:
+                    rt_1.extend(struct.pack('f', ens_wave.range_tracking[1]))   # Beam 1 RT
+                if ens_wave.num_beams > 2:
+                    rt_2.extend(struct.pack('f', ens_wave.range_tracking[2]))   # Beam 2 RT
+                if ens_wave.num_beams > 3:
+                    rt_3.extend(struct.pack('f', ens_wave.range_tracking[3]))   # Beam 3 RT
 
                 for sel_bin in range(num_bins):
                     # Earth Velocity (WUS, WVS, WZS)
@@ -152,13 +179,14 @@ class WaveForceCodec:
                     wzs_buff.extend(struct.pack('f', ens_wave.vertical_vel[sel_bin]))
 
                     # Beam Velocity (WB0, WB1, WB2, WB3)
-                    beam_0_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][0]))
+                    beam_0_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][0]))          # Beam 0 Beam Velocity
                     if ens_wave.num_beams > 1:
-                        beam_1_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][1]))
+                        beam_1_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][1]))      # Beam 1 Beam Velocity
                     if ens_wave.num_beams > 2:
-                        beam_2_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][2]))
+                        beam_2_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][2]))      # Beam 2 Beam Velocity
                     if ens_wave.num_beams > 3:
-                        beam_3_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][3]))
+                        beam_3_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][3]))      # Beam 3 Beam Velocity
+
 
         ba = bytearray()
 
@@ -174,10 +202,21 @@ class WaveForceCodec:
         ba.extend(self.process_wb1(beam_1_vel, num_4beam_ens, num_bins))    # [WB1] Beam 1 Beam Velocity
         ba.extend(self.process_wb2(beam_2_vel, num_4beam_ens, num_bins))    # [WB2] Beam 2 Beam Velocity
         ba.extend(self.process_wb3(beam_3_vel, num_4beam_ens, num_bins))    # [WB3] Beam 3 Beam Velocity
+        ba.extend(self.process_wr0(rt_0, num_4beam_ens))                    # [WR0] Beam 0 Range Tracking
+        ba.extend(self.process_wr1(rt_1, num_4beam_ens))                    # [WR1] Beam 1 Range Tracking
+        ba.extend(self.process_wr2(rt_2, num_4beam_ens))                    # [WR2] Beam 2 Range Tracking
+        ba.extend(self.process_wr3(rt_3, num_4beam_ens))                    # [WR3] Beam 3 Range Tracking
         ba.extend(self.process_wps(pressure, num_4beam_ens))                # [WPS] Pressure
+        ba.extend(self.process_whg(heading, num_4beam_ens))                 # [WHG] Heading
+        ba.extend(self.process_wph(pitch, num_4beam_ens))                   # [WPH] Pitch
+        ba.extend(self.process_wrl(roll, num_4beam_ens))                    # [WRL] Roll
+        ba.extend(self.process_wts(water_temp, num_4beam_ens))              # [WTS] Water Temp
+        ba.extend(self.process_whs(height, num_4beam_ens))                  # [WHS] Height
+        ba.extend(self.process_wah(avg_range_track, num_4beam_ens))         # [WAH] Average Range Tracking
 
-        ba.extend(self.process_wz0(beam_3_vel, num_vert_ens, num_bins))     # [WZ0] Beam 0 Vertical Beam Velocity
+        ba.extend(self.process_wz0(beam_3_vel, num_vert_ens, num_bins))     # [WZ0] Vertical Beam Beam Velocity
         ba.extend(self.process_wzp(vert_pressure, num_vert_ens))            # [WZP] Vertical Beam Pressure
+        ba.extend(self.process_wzr(rt_vert, num_vert_ens))                  # [WZR] Vertical Beam Range Tracking
 
         # Write the file
         self.write_file(ba)
@@ -601,6 +640,288 @@ class WaveForceCodec:
 
         return ba
 
+    def process_whg(self, whg, num_4beam_ens):
+        """
+        Heading data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WHG = 7.3, 7.2, 7.5
+        :param whg: Heading data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'whg'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(whg)                                  # WHG Values
+
+        return ba
+
+    def process_wph(self, wph, num_4beam_ens):
+        """
+        Pitch data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WPH = 7.3, 7.2, 7.5
+        :param wph: Heading data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wph'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wph)                                  # WPH Values
+
+        return ba
+
+    def process_wrl(self, wrl, num_4beam_ens):
+        """
+        Roll data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WRL = 7.3, 7.2, 7.5
+        :param wrl: Roll data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wrl'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wrl)                                  # WRL Values
+
+        return ba
+
+    def process_wts(self, wts, num_4beam_ens):
+        """
+        Water Temp data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WTS = 7.3, 7.2, 7.5
+        :param wts: Water Temp data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wts'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wts)                                  # WTS Values
+
+        return ba
+
+    def process_whs(self, whs, num_4beam_ens):
+        """
+        Wave height source data.
+        Average of RT, or a single RT value, or pressure.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WHS = 7.3, 7.2, 7.5
+        :param whs: Wave height source data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'whs'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(whs)                                  # WHS Values
+
+        return ba
+
+    def process_wah(self, wah, num_4beam_ens):
+        """
+        Average height data.
+        Average of all Range Tracking.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WAH = 7.3, 7.2, 7.5
+        :param wah: Average Range Tracking data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wah'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wah)                                  # WAH Values
+
+        return ba
+
+    def process_wr0(self, wr0, num_4beam_ens):
+        """
+        Range Tracking Beam 0 data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WR0 = 7.3, 7.2, 7.5
+        :param wr0: Range Tracking Beam 0 data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wr0'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wr0)                                  # WR0 Values
+
+        return ba
+
+    def process_wr1(self, wr1, num_4beam_ens):
+        """
+        Range Tracking Beam 1 data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WR1 = 7.3, 7.2, 7.5
+        :param wr1: Range Tracking Beam 1 data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wr1'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wr1)                                  # WR1 Values
+
+        return ba
+
+    def process_wr2(self, wr2, num_4beam_ens):
+        """
+        Range Tracking Beam 2 data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WR2 = 7.3, 7.2, 7.5
+        :param wr2: Range Tracking Beam 2 data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wr2'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wr2)                                  # WR2 Values
+
+        return ba
+
+    def process_wr3(self, wr3, num_4beam_ens):
+        """
+        Range Tracking Beam 3 data.
+
+        Data Type: Float
+        Rows: Number of 4 Beam values
+        Columns: 1
+        WR0 = 7.3, 7.2, 7.5
+        :param wr3: Range Tracking Beam 3 data in byte array.
+        :param num_4beam_ens: Number of 4 beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_4beam_ens))      # Rows - Number of 4 Beam ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wr3'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wr3)                                  # WR3 Values
+
+        return ba
+
     def process_wz0(self, wz0, num_vert_ens, num_selected_bins):
         """
         Beam 0 Vertical Beam velocity data for each selected bin.
@@ -655,6 +976,34 @@ class WaveForceCodec:
         ba.extend(bytearray(1))
 
         ba.extend(wzp)                                  # WZP Values
+
+        return ba
+
+    def process_wzr(self, wzr, num_vert_ens):
+        """
+        Range Tracking Vertical Beam data.
+
+        Data Type: Float
+        Rows: Number of Vertical Beam values
+        Columns: 1
+        WZR = 7.3, 7.2, 7.5
+        :param wzr: Range Tracking Vertical Beam data in byte array.
+        :param num_vert_ens: Number of Vertical beam ensembles.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', num_vert_ens))      # Rows - Number of Vertical ensembles
+        ba.extend(struct.pack("i", 1))                  # Columns - 1
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'wzr'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(wzr)                                  # WZR Values
 
         return ba
 
