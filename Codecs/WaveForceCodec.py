@@ -26,11 +26,12 @@ class WaveForceCodec:
         self.Bin1 = 0
         self.Bin2 = 0
         self.Bin3 = 0
+        self.PressureSensorDepth = 0
         self.firstTime = 0
         self.secondTime = 0         # Used to calculate the sample timing
         self.selected_bin = []
 
-    def init(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3):
+    def init(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3, ps_depth):
         """
         Initialize the wave recorder
         :param ens_in_burst: Number of ensembles in a burst.
@@ -40,6 +41,7 @@ class WaveForceCodec:
         :param bin1: First selected bin.
         :param bin2: Second selected bin.
         :param bin3: Third selected bin.
+        :param ps_depth Pressure Sensor depth.  Depth of the ADCP.
         """
         self.EnsInBurst = ens_in_burst
         self.FilePath = path
@@ -50,6 +52,7 @@ class WaveForceCodec:
         self.Bin1 = bin1
         self.Bin2 = bin2
         self.Bin3 = bin3
+        self.PressureSensorDepth = ps_depth
         self.RecordCount = 0
 
         self.selected_bin.append(bin1)
@@ -125,6 +128,10 @@ class WaveForceCodec:
         height = bytearray()
         avg_range_track = bytearray()
 
+        sel_bins_buff = bytearray()
+
+        ps_depth_buff = bytearray()
+
         ens_waves_buff = []
 
         # Convert the buffer to wave ensembles
@@ -187,6 +194,14 @@ class WaveForceCodec:
                     if ens_wave.num_beams > 3:
                         beam_3_vel.extend(struct.pack('f', ens_wave.beam_vel[sel_bin][3]))      # Beam 3 Beam Velocity
 
+        # Selected Bins
+        if ens_buff[0].IsEnsembleData:
+            for sel_bin in range(num_bins):
+                bin_ht = ens_buff[0].AncillaryData.FirstBinRange + (self.selected_bin[sel_bin] * ens_buff[0].AncillaryData.BinSize)
+                sel_bins_buff.extend(struct.pack('f', bin_ht))
+
+        # Pressure Sensor Depth
+        ps_depth_buff.extend(struct.pack('f', self.PressureSensorDepth))
 
         ba = bytearray()
 
@@ -195,6 +210,8 @@ class WaveForceCodec:
         ba.extend(self.process_lon(ens_buff[0]))                            # [LON] Longitude
         ba.extend(self.process_wft(ens_buff[0]))                            # [WFT] Time from the first ensemble
         ba.extend(self.process_wdt(ens_buff))                               # [WDT] Time between ensembles
+        ba.extend(self.process_whv(sel_bins_buff, num_bins))                # [WHV] Wave Cell Depths
+        ba.extend(self.process_whp(ps_depth_buff))                          # [WHP] Pressure Sensor Height
         ba.extend(self.process_wus(wus_buff, num_4beam_ens, num_bins))      # [WUS] East Velocity
         ba.extend(self.process_wvs(wvs_buff, num_4beam_ens, num_bins))      # [WVS] North Velocity
         ba.extend(self.process_wzs(wzs_buff, num_4beam_ens, num_bins))      # [WZS] Vertical Velocity
@@ -211,7 +228,7 @@ class WaveForceCodec:
         ba.extend(self.process_wph(pitch, num_4beam_ens))                   # [WPH] Pitch
         ba.extend(self.process_wrl(roll, num_4beam_ens))                    # [WRL] Roll
         ba.extend(self.process_wts(water_temp, num_4beam_ens))              # [WTS] Water Temp
-        ba.extend(self.process_whs(height, num_4beam_ens))                  # [WHS] Height
+        ba.extend(self.process_whs(height, num_4beam_ens))                  # [WHS] Wave Height Source. (User Select. Range Tracking Beam or Vertical Beam or Pressure)
         ba.extend(self.process_wah(avg_range_track, num_4beam_ens))         # [WAH] Average Range Tracking
 
         ba.extend(self.process_wz0(beam_3_vel, num_vert_ens, num_bins))     # [WZ0] Vertical Beam Beam Velocity
@@ -399,6 +416,61 @@ class WaveForceCodec:
             ba.extend(bytearray(1))
 
             ba.extend(struct.pack("d", wdt))    # WDT Value
+
+        return ba
+
+    def process_whv(self, whv, num_selected_bins):
+        """
+        Wave Cell Height for each selected bin.
+
+        Data Type: Float
+        Rows: Number of Selected Bin values
+        Columns: 1
+        whv = 7.3, 7.2, 7.5
+        :param whv: Wave Cell Height data in byte array for each selected bin.
+        :param num_selected_bins: Number of selected bins.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', 1))                  # Rows - 1 per burst
+        ba.extend(struct.pack("i", num_selected_bins))  # Columns - 1 each selected bin
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'whv'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(whv)                                  # WHV Values
+
+        return ba
+
+    def process_whp(self, whp):
+        """
+        Wave Pressure Sensor Height for each burst.
+
+        Data Type: Float
+        Rows: Number of Selected Bin values
+        Columns: 1
+        whp = 7.3
+        :param whp: Wave Pressure Sensor Height data in byte array for each selected bin.
+        :return:
+        """
+
+        ba = bytearray()
+        ba.extend(struct.pack('i', 10))                 # Indicate double
+        ba.extend(struct.pack('i', 1))                  # Rows - 1 per burst
+        ba.extend(struct.pack("i", 1))                  # Columns - 1 per burst
+        ba.extend(struct.pack("i", 0))                  # Imaginary
+        ba.extend(struct.pack("i", 4))                  # Name Length
+
+        for code in map(ord, 'whp'):                    # Name
+            ba.extend([code])
+        ba.extend(bytearray(1))
+
+        ba.extend(whp)                                  # WHP Values
 
         return ba
 

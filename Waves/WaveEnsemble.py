@@ -306,7 +306,6 @@ class WaveEnsemble:
             # Average the ranges
             if ens.IsRangeTracking:
                 if ens.RangeTracking.Range[beam] > 0:
-                    print(ens.RangeTracking.Range)
                     avg_range += ens.RangeTracking.Range[beam]
                     avg_range_ct += 1
                     self.range_tracking.append(ens.RangeTracking.Range[beam])

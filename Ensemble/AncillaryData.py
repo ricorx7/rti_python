@@ -16,19 +16,19 @@ class AncillaryData:
         self.name_len = 8
         self.Name = "E000009"
 
-        self.FirstBinRange = 0.0
-        self.BinSize = 0.0
-        self.FirstPingTime = 0.0
-        self.LastPingTime = 0.0
-        self.Heading = 0.0
-        self.Pitch = 0.0
-        self.Roll = 0.0
-        self.WaterTemp = 0.0
-        self.SystemTemp = 0.0
-        self.Salinity = 0.0
-        self.Pressure = 0.0
-        self.TransducerDepth = 0.0
-        self.SpeedOfSound = 0.0
+        self.FirstBinRange = 0.0        # Blank.  Depth to the first bin in meters.
+        self.BinSize = 0.0              # Size of a bin in meters.
+        self.FirstPingTime = 0.0        # First Ping Time in seconds.
+        self.LastPingTime = 0.0         # Last Ping Time in seconds.  (If averaging pings, this will be the last ping)
+        self.Heading = 0.0              # Heading in degrees.
+        self.Pitch = 0.0                # Pitch in degrees.
+        self.Roll = 0.0                 # Roll in degrees.
+        self.WaterTemp = 0.0            # Water Temperature in fahrenheit
+        self.SystemTemp = 0.0           # System Temperature in fahrenheit
+        self.Salinity = 0.0             # Water Salinity set by the user in PPT
+        self.Pressure = 0.0             # Pressure from pressure sensor in Pascals
+        self.TransducerDepth = 0.0      # Transducer Depth, used by Pressure sensor in meters
+        self.SpeedOfSound = 0.0         # Speed of Sound in m/s.
 
     def decode(self, data):
         """

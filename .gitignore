@@ -93,3 +93,6 @@ ENV/
 
 # Recorded data
 recorder/
+
+# Build data
+installer/

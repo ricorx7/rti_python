@@ -33,12 +33,22 @@ class AdcpCodec:
         """
         self.binary_codec.add(data)
 
-    def enable_waveforce_codec(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3):
+    def enable_waveforce_codec(self, ens_in_burst, path, lat, lon, bin1, bin2, bin3, ps_depth):
         """
         Enable the WaveForce codec.  This data will be encoded
         into the Matlab format.
+        :param ens_in_burst: Ensembles in a burst.
+        :param path: Path to record the burst matlab files.
+        :param lat: Latitude where data was recorded.
+        :param lon: Longitude where data was recorded.
+        :param bin1: First bin to measure.
+        :param bin2: Second bin to measure.
+        :param bin3: Third bin to measure.
+        :param ps_depth: Pressure sensor depth.
+        :return:
         """
-        self.WaveForceCodec.init(ens_in_burst, path, lat, lon, bin1, bin2, bin3)
+
+        self.WaveForceCodec.init(ens_in_burst, path, lat, lon, bin1, bin2, bin3, ps_depth)
         self.IsWfcEnabled = True
 
     def process_ensemble(self, sender, ens):

@@ -17,7 +17,7 @@ class ProcessWavesFile:
         # Codec to decode the data from the file
         self.codec = AdcpCodec(55057)
         self.codec.EnsembleEvent += self.process_ensemble_codec
-        self.codec.enable_waveforce_codec(ens_in_burst, path, 32.123, 117.234, 1, 2, 3)   # Enable WaveForce codec
+        self.codec.enable_waveforce_codec(ens_in_burst, path, 32.123, 117.234, 1, 2, 3, 12.456)   # Enable WaveForce codec
 
         self.ens_count = 0
         self.ens_codec_count = 0
