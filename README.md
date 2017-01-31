@@ -16,10 +16,16 @@ install pyside2 (Instructions below)
 
 Run Utilties Apps
 ----------------
+OSX and Linux
 ```javascript
 export PYTHONPATH=$PYTHONPATH:/path/to/rti-python
 
 python3 Utilities/EnsembleFileReport.py -i file -v
+```
+
+Windows
+```javascript
+set PYTHONPATH=%PYTHONPATH%;/path/to/rti-python
 ```
 
 AWS DynamoDB

@@ -1,4 +1,5 @@
 import logging
+import os
 import struct
 import threading
 from Waves.WaveEnsemble import WaveEnsemble
@@ -247,6 +248,10 @@ class WaveForceCodec:
         :param ba: Byte Array with record data.
         :return:
         """
+        # Check if the file path exist, if not, then create the file path
+        if not os.path.isdir(self.FilePath):
+            os.mkdir(self.FilePath)
+
         filename = self.FilePath + "D0000" + str(self.RecordCount) + ".mat"
         with open(filename, 'wb') as f:
             f.write(ba)

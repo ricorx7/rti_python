@@ -87,7 +87,7 @@ class BinaryCodec:
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port
-        self.udp_ip = ''                                                # UDP IP (Localhost)
+        self.udp_ip = '127.0.0.1'                                                # UDP IP (Localhost)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
