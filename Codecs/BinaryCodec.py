@@ -87,7 +87,7 @@ class BinaryCodec:
 
         # Create socket
         self.udp_port = udp_port                                        # UDP Port
-        self.udp_ip = '127.0.0.1'                                                # UDP IP (Localhost)
+        self.udp_ip = '127.0.0.1'                                       # UDP IP (Localhost)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP Socket
 
     def add(self, data):
@@ -108,14 +108,11 @@ class BinaryCodec:
 
         # Look for first 16 bytes of header
         delimiter = b'\x80'*16
-        ensStart = self.buffer.find(delimiter)
+        ens_start = self.buffer.find(delimiter)
 
-        #print("EnsStart: ", ensStart)
-        #print("Buffer Size: ", len(self.buffer))
-
-        if ensStart >= 0 and len(self.buffer) > Ensemble().HeaderSize + ensStart:
-            #Decode the Ensemble
-            self.decode_ensemble(ensStart)
+        if ens_start >= 0 and len(self.buffer) > Ensemble().HeaderSize + ens_start:
+            # Decode the Ensemble
+            self.decode_ensemble(ens_start)
 
     def decode_ensemble(self, ensStart):
         """
@@ -153,19 +150,12 @@ class BinaryCodec:
             if checksum[0] == calcChecksum:
                 logger.debug(ensNum[0])
                 # Decode data
-                ensemble = self.decodeDataSets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
+                ensemble = self.decode_data_sets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
                 # ************************
                 try:
                     # Stream data
-                    self.streamData(ensemble)
-
-                    #data = pickle.dumps(ensemble)
-
-                    #logger.debug("ENS Pickled size: " + str(len(data)))
-                    #print(str(ensemble.EnsembleData.EnsembleNumber) + " ENS Pickled size: " + str(len(data)))
-
-                    #self.socket.sendto(struct.pack('>I', len(data)) + data, (self.udp_ip, self.udp_port))
+                    self.stream_data(ensemble)
 
                     logger.debug("Stream ensemble data")
                 except ConnectionRefusedError as err:
@@ -180,7 +170,7 @@ class BinaryCodec:
             ensEnd = ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize
             del self.buffer[0:ensEnd]
 
-    def decodeDataSets(self, ens):
+    def decode_data_sets(self, ens):
         """
         Decode the datasets in the ensemble.
         :param ens: Ensemble data.  Decode the dataset.
@@ -225,8 +215,6 @@ class BinaryCodec:
                 bv = BeamVelocity(num_elements, element_multiplier)
                 bv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddBeamVelocity(bv)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(bv).encode(), (self.udp_ip, self.udp_port))
 
             # Instrument Velocity
             if "E000002" in name:
@@ -234,8 +222,6 @@ class BinaryCodec:
                 iv = InstrumentVelocity(num_elements, element_multiplier)
                 iv.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddInstrumentVelocity(iv)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(iv).encode(), (self.udp_ip, self.udp_port))
 
             # Earth Velocity
             if "E000003" in name:
@@ -243,8 +229,6 @@ class BinaryCodec:
                 ev = EarthVelocity(num_elements, element_multiplier)
                 ev.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEarthVelocity(ev)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(ev).encode(), (self.udp_ip, self.udp_port))
 
             # Amplitude
             if "E000004" in name:
@@ -252,8 +236,6 @@ class BinaryCodec:
                 amp = Amplitude(num_elements, element_multiplier)
                 amp.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddAmplitude(amp)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(amp).encode(), (self.udp_ip, self.udp_port))
 
             # Correlation
             if "E000005" in name:
@@ -261,8 +243,6 @@ class BinaryCodec:
                 corr = Correlation(num_elements, element_multiplier)
                 corr.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddCorrelation(corr)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(corr).encode(), (self.udp_ip, self.udp_port))
 
             # Good Beam
             if "E000006" in name:
@@ -270,8 +250,6 @@ class BinaryCodec:
                 gb = GoodBeam(num_elements, element_multiplier)
                 gb.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodBeam(gb)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(gb).encode(), (self.udp_ip, self.udp_port))
 
             # Good Earth
             if "E000007" in name:
@@ -279,8 +257,6 @@ class BinaryCodec:
                 ge = GoodEarth(num_elements, element_multiplier)
                 ge.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddGoodEarth(ge)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(ge).encode(), (self.udp_ip, self.udp_port))
 
             # Ensemble Data
             if "E000008" in name:
@@ -288,18 +264,13 @@ class BinaryCodec:
                 ed = EnsembleData(num_elements, element_multiplier)
                 ed.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddEnsembleData(ed)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(ed).encode(), (self.udp_ip, self.udp_port))
 
             # Ancillary Data
             if "E000009" in name:
                 logger.debug(name)
-                #logger.debug(type)
                 ad = AncillaryData(num_elements, element_multiplier)
                 ad.decode(ens[packetPointer:packetPointer+data_set_size])
                 ensemble.AddAncillaryData(ad)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(ad).encode(), (self.udp_ip, self.udp_port))
 
             # Bottom Track
             if "E000010" in name:
@@ -307,8 +278,6 @@ class BinaryCodec:
                 bt = BottomTrack(num_elements, element_multiplier)
                 bt.decode(ens[packetPointer:packetPointer + data_set_size])
                 ensemble.AddEnsembleData(bt)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(bt).encode(), (self.udp_ip, self.udp_port))
 
             # Range Tracking
             if "E000015" in name:
@@ -316,17 +285,18 @@ class BinaryCodec:
                 rt = RangeTracking(num_elements, element_multiplier)
                 rt.decode(ens[packetPointer:packetPointer + data_set_size])
                 ensemble.AddRangeTracking(rt)
-                # Send to UDP socket
-                #self.socket.sendto(Ensemble().toJSON(bt).encode(), (self.udp_ip, self.udp_port))
 
             # Move to the next dataset
             packetPointer += data_set_size
 
         return ensemble
 
-    def streamData(self, ens):
+    def stream_data(self, ens):
         """
         Stream the data to the UDP port.
+        When converting the dataset to JSON, a newline will be added
+        to end of the JSON string.  This will allow the user to separate
+        the JSON strings.
         :param ens: Ensemble data to stream.
         """
         serial_number = ""
@@ -423,16 +393,11 @@ class BinaryCodec:
     def send_udp(self, data):
         """
         Send the data to the UDP port.
-        Append the length of the data to the front.
-        This will be 4 bytes long.  First look at the first
-        4 bytes to get the length.  Then wait for the remaining
-        data to get a complete message.
+        Ensemble().toJSON added a newline at the end of the JSON
+        string.  This will allow anyone looking for the JSON data
+        to separate the JSON data by newline.
         :param data: Data to send.
         """
-        # Get the length of the data
-        #data_len = struct.pack('>I', len(data))
-
-        #self.socket.sendto(data_len + data, (self.udp_ip, self.udp_port))
         self.socket.sendto(data, (self.udp_ip, self.udp_port))
 
 

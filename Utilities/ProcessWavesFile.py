@@ -2,15 +2,26 @@ import os.path
 import sys
 import getopt
 import threading
-import json
+import time
 from log import logger
 from Comm.EnsembleReceiver import EnsembleReceiver
 from Codecs.AdcpCodec import AdcpCodec
 
 
 class ProcessWavesFile:
+    """
+    Process wave bursts.  This will take a file contain ensemble data.
+    It will then decode the data.  Based off the number of ensembles per burst,
+    it will generate a Waves MATLAB file for each burst.
+    """
 
     def __init__(self, ens_in_burst, path):
+        """
+        Initialize the processor.  Get the number ensembles per burst and
+        process the data and store the recorded MATLAB file to the path given.
+        :param ens_in_burst: Number of ensembles per waves burst.
+        :param path: File path to record the MATLAB file.
+        """
         self.ens_receiver = None
         self.ens_reader = None
 
@@ -22,13 +33,14 @@ class ProcessWavesFile:
         self.ens_count = 0
         self.ens_codec_count = 0
 
+        self.prev_ens_num = 0
+        self.missing_ens = 0
+
     def process(self, file_path):
         """
         Read the file and start a thread to monitor the incoming ensembles.
         :param file_path: File  path the read files
-        :return:
         """
-
         # Create ensemble receiver
         self.ens_receiver = EnsembleReceiver()
         self.ens_receiver.EnsembleEvent += self.process_ensemble
@@ -45,6 +57,8 @@ class ProcessWavesFile:
 
         logger.info("Completed File reader")
         logger.info("Ensemble UDP Count: " + str(self.ens_count))
+        if self.missing_ens > 0:
+            logger.info("Missing Ensembles from UDP: " + str(self.missing_ens))
         logger.info("Ensemble Codec Count: " + str(self.ens_codec_count))
 
     def process_file(self, file_path):
@@ -86,6 +100,14 @@ class ProcessWavesFile:
         """
         logger.debug("UDP: " + str(ens.EnsembleNumber))
         self.ens_count += 1
+
+        # Check for missing ensembles
+        if self.prev_ens_num > 0 and self.prev_ens_num + 1 != ens.EnsembleNumber:
+            for msens in range((ens.EnsembleNumber - 1) - self.prev_ens_num):
+                logger.info("Missing Ens: " + str(self.prev_ens_num + msens + 1) + " prev: " + str(self.prev_ens_num) + " cur: " + str(ens.EnsembleNumber)) # add 1 to msens because 0 based
+                self.missing_ens += 1
+
+        self.prev_ens_num = ens.EnsembleNumber
 
     def process_ensemble_codec(self, sender, ens):
         """

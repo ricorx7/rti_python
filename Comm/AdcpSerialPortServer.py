@@ -10,10 +10,7 @@ from twisted.internet import reactor, protocol, endpoints
 from twisted.protocols import basic
 from twisted.internet.serialport import SerialPort
 
-logger = logging.getLogger("Ensemble File Report")
-logger.setLevel(logging.DEBUG)
-FORMAT = '[%(asctime)-15s][%(levelname)s][%(funcName)s] %(message)s'
-logging.basicConfig(format=FORMAT)
+from log import logger
 
 
 class SerialDevice(basic.LineReceiver):

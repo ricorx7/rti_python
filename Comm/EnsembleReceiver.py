@@ -26,6 +26,8 @@ class EnsembleReceiver:
         self.adcp_data = EnsembleJsonData()
         self.EnsembleEvent = EventHandler(self)     # Event to handle a complete JSON ensemble
 
+        self.prev_ens_num = 0
+
     def connect(self, udp_port):
         """
         Connect to the UDP port and begin reading data.
@@ -66,7 +68,6 @@ class EnsembleReceiver:
 
                 # JSON data
                 json_response = json.loads(response)
-                #logger.debug(jsonResponse["Name"])
 
                 # Send the JSON data to the abstract class to process
                 # the JSON data.
@@ -112,7 +113,6 @@ class EnsembleReceiver:
         Process the JSON data.
         :param json_data: JSON data.
         """
-
         if json_data["EnsembleNumber"] == self.adcp_data.EnsembleNumber:
             # Add the JSON data to the ensemble data
             self.adcp_data.process(json_data)
@@ -125,7 +125,14 @@ class EnsembleReceiver:
             self.adcp_data.EnsembleNumber = json_data["EnsembleNumber"]
             self.adcp_data.process(json_data)
 
-        #self.EnsembleEvent(json_data)
+            # Check for missing ensembles
+            if self.prev_ens_num > 0 and self.prev_ens_num + 1 != self.adcp_data.EnsembleNumber:
+                for msens in range((self.adcp_data.EnsembleNumber - 1) - self.prev_ens_num):
+                    logger.info("Missing Ens: " + str(self.prev_ens_num + msens + 1) + " prev: " + str(
+                        self.prev_ens_num) + " cur: " + str(self.adcp_data.EnsembleNumber))  # add 1 to msens because 0 based
+
+            self.prev_ens_num = self.adcp_data.EnsembleNumber
+
         return json_data
 
 if __name__ == '__main__':

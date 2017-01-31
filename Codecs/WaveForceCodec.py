@@ -118,7 +118,7 @@ class WaveForceCodec:
         rt_3 = bytearray()
         rt_vert = bytearray()
 
-        pressure =  bytearray()
+        pressure = bytearray()
         vert_pressure = bytearray()
 
         heading = bytearray()
