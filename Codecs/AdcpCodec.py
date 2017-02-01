@@ -1,12 +1,13 @@
 import logging
-from Codecs.BinaryCodec import BinaryCodec
-from Codecs.WaveForceCodec import WaveForceCodec
-from Utilities.events import EventHandler
+from rti_python.Codecs.BinaryCodec import BinaryCodec
+from rti_python.Codecs.WaveForceCodec import WaveForceCodec
+from rti_python.Utilities.events import EventHandler
 
 logger = logging.getLogger("ADCP Codec")
 logger.setLevel(logging.ERROR)
 FORMAT = '[%(asctime)-15s][%(levelname)s][%(name)s:%(funcName)s] %(message)s'
 logging.basicConfig(format=FORMAT)
+
 
 class AdcpCodec:
     """

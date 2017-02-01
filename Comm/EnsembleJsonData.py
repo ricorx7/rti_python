@@ -1,4 +1,3 @@
-from log import logger
 
 
 class EnsembleJsonData:

@@ -2,10 +2,9 @@ import os.path
 import sys
 import getopt
 import threading
-import time
-from log import logger
-from Comm.EnsembleReceiver import EnsembleReceiver
-from Codecs.AdcpCodec import AdcpCodec
+from rti_python.log import logger
+from rti_python.Comm.EnsembleReceiver import EnsembleReceiver
+from rti_python.Codecs.AdcpCodec import AdcpCodec
 
 
 class ProcessWavesFile:

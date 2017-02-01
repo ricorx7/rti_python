@@ -1,6 +1,6 @@
 import struct
-from Ensemble.Ensemble import Ensemble
-from log import logger
+from rti_python.Ensemble.Ensemble import Ensemble
+from rti_python.log import logger
 
 
 class EnsembleData:
