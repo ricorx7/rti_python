@@ -2,7 +2,7 @@ import logging
 import os
 import struct
 import threading
-from rti_python.Waves.WaveEnsemble import WaveEnsemble
+from Waves.WaveEnsemble import WaveEnsemble
 
 logger = logging.getLogger("WaveForce Codec")
 logger.setLevel(logging.ERROR)

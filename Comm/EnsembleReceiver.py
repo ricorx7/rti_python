@@ -2,9 +2,9 @@ import socket
 import sys, getopt
 import json
 import abc
-from rti_python.log import logger
-from rti_python.Utilities.events import EventHandler
-from rti_python.Comm.EnsembleJsonData import EnsembleJsonData
+from log import logger
+from Utilities.events import EventHandler
+from Comm.EnsembleJsonData import EnsembleJsonData
 
 import configparser
 settings = configparser.ConfigParser()

@@ -1,4 +1,5 @@
-from rti_python.Ensemble.Ensemble import Ensemble
+import struct
+from Ensemble.Ensemble import Ensemble
 
 
 class WaveEnsemble:

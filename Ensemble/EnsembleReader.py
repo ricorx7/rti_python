@@ -1,4 +1,4 @@
-from rti_python.log import logger
+from log import logger
 import socket
 
 
