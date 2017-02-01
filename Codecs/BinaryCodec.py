@@ -1,7 +1,7 @@
 import struct
 import socket
 import datetime
-from rti_python.Utilities.events import EventHandler
+from Utilities.events import EventHandler
 
 from Ensemble.Ensemble import Ensemble
 from Ensemble.BeamVelocity import BeamVelocity
