@@ -19,7 +19,7 @@ class EnsembleReceiver:
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
-        self.port = int(settings.get('SerialServerSection', 'JsonEnsUdpPort'))   # Default port
+        #self.port = int(settings.get('SerialServerSection', 'JsonEnsUdpPort'))   # Default port
         self.socket = None
         self.file_socket = None
         self.is_alive = False
