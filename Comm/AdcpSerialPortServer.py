@@ -34,7 +34,8 @@ class SerialDevice(basic.LineReceiver):
         Disconnect the serial port
         """
         #self.factory.clients.remove(self)
-        logger.debug('Serial Connection lost')
+        logger.debug('Serial Connection lost ' +  str(reason))
+        self.tcp_server.reconnect()
 
     def dataReceived(self, data):
         """Send data to all the clients
@@ -67,6 +68,14 @@ class SerialTcpProtocol(basic.LineReceiver):
             # Create a Serial Port device to read in serial data
             self.factory.serial_port = SerialPort(SerialDevice(self, self), comm_port, reactor, baudrate=baud)
             logger.debug('Serial Port started')
+
+    def reconnect(self):
+        """
+        Reconnect the serial connection with the previous serial settings.
+        :return:
+        """
+        self.resetSerialConnection(self.comm_port, self.baud)
+        logger.info("Reconnect serial port: " + self.comm_port + " Baud: " + self.baud)
 
     def resetSerialConnection(self, comm_port, baud):
         """
