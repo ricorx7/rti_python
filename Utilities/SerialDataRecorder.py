@@ -105,8 +105,8 @@ class SerialDataRecorder:
                     self.file_size += len(data)
 
                     # Limit the output prompt
-                    if self.file_size % 5 == 0:
-                        print('.', end="", flush=True)
+                    #if self.file_size % 5 == 0:
+                    #    print('.', end="", flush=True)
 
                     # Check the file size to see if a new file needs to be created
                     if self.file_size > self.MAX_FILE_SIZE:

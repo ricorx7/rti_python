@@ -123,7 +123,7 @@ class SerialTcpProtocol(basic.LineReceiver):
     def rawDataReceived(self, data):
         logger.debug('TCP Raw data received: ', data)
 
-    def reconnect(self, cmd):
+    def CMD_reconnect(self, cmd):
         """
         Decode the RECONNECT command to configure a new serial port.
         RECONNECT, COM12, 115200
@@ -148,7 +148,7 @@ class SerialTcpProtocol(basic.LineReceiver):
         self.resetSerialConnection(comm_port, baud)
         logger.debug("Reconnect Serial to: " + comm_port + " baud: " + str(baud))
 
-    def change_baud(self, cmd):
+    def CMD_change_baud(self, cmd):
         """
         Decode the BAUD command to configure a new serial port.
         This will reuse the last serial port comm port used.
@@ -192,10 +192,10 @@ class SerialTcpProtocol(basic.LineReceiver):
                     logger.debug('Hardware BREAK')
                 elif 'RECONNECT' in cur_cmd:
                     logger.debug("Attempt to reconnect...")
-                    self.reconnect(cmd)
+                    self.CMD_reconnect(cmd)
                 elif 'BAUD' in cur_cmd:
                     logger.debug("Attempt to change baud...")
-                    self.change_baud(cmd)
+                    self.CMD_change_baud(cmd)
                     logger.debug('Baud Changed')
                 else:
                     self.factory.serial_port.write((cmd + "\r").encode())
