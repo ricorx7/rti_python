@@ -29,7 +29,6 @@ class BottomTrack:
         self.SpeedOfSound = 0.0
         self.Status = 0.0
         self.NumBeams = 0.0
-        self.NumBeams = 0.0
         self.ActualPingCount = 0.0
         self.Range = []
         self.SNR = []
