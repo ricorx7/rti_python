@@ -313,16 +313,20 @@ class BinaryCodec:
             # Get the serial number, ensemble number and the date and time to share with all the data
             serial_number = ens.EnsembleData.SerialNumber
             ensemble_number = ens.EnsembleData.EnsembleNumber
-            date_time = datetime.datetime(year=ens.EnsembleData.Year,
-                                          month=ens.EnsembleData.Month,
-                                          day=ens.EnsembleData.Day,
-                                          hour=ens.EnsembleData.Hour,
-                                          minute=ens.EnsembleData.Minute,
-                                          second=ens.EnsembleData.Second,
-                                          microsecond=round(ens.EnsembleData.HSec*10000)).strftime("%Y-%m-%d %H:%M:%S.%f")
+            if ens.EnsembleData.Month > 0:
+                date_time = datetime.datetime(year=ens.EnsembleData.Year,
+                                              month=ens.EnsembleData.Month,
+                                              day=ens.EnsembleData.Day,
+                                              hour=ens.EnsembleData.Hour,
+                                              minute=ens.EnsembleData.Minute,
+                                              second=ens.EnsembleData.Second,
+                                              microsecond=round(ens.EnsembleData.HSec*10000)).strftime("%Y-%m-%d %H:%M:%S.%f")
 
-            # Stream the data
-            ens.EnsembleData.DateTime = date_time
+                # Stream the data
+                ens.EnsembleData.DateTime = date_time
+            else:
+                logger.error("BAD Date and Time: " + str(ensemble_number))
+
             ens.EnsembleData.Meta = self.Meta
             self.send_udp(Ensemble().toJSON(ens.EnsembleData).encode())
 

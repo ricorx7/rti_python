@@ -96,3 +96,6 @@ recorder/
 
 # Build data
 installer/
+
+# Plots generated
+tests/*.html
