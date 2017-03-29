@@ -5,6 +5,7 @@ pycrc
 bokeh
 awscli
 configparser
-scipy
 pyinstaller
-
+scipy
+folium
+pynmea2

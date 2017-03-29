@@ -14,6 +14,7 @@ from Ensemble.GoodEarth import GoodEarth
 from Ensemble.EnsembleData import EnsembleData
 from Ensemble.AncillaryData import AncillaryData
 from Ensemble.BottomTrack import BottomTrack
+from Ensemble.NmeaData import NmeaData
 from Ensemble.RangeTracking import RangeTracking
 
 from PyCRC.CRCCCITT import CRCCCITT
@@ -275,7 +276,14 @@ class BinaryCodec:
                 logger.debug(name)
                 bt = BottomTrack(num_elements, element_multiplier)
                 bt.decode(ens[packetPointer:packetPointer + data_set_size])
-                ensemble.AddEnsembleData(bt)
+                ensemble.AddBottomTrack(bt)
+
+            # NMEA data
+            if "E000011" in name:
+                logger.debug(name)
+                nd = NmeaData(num_elements, element_multiplier)
+                nd.decode(ens[packetPointer:packetPointer + data_set_size])
+                ensemble.AddNmeaData(nd)
 
             # Range Tracking
             if "E000015" in name:

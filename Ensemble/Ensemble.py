@@ -56,6 +56,8 @@ class Ensemble:
         self.WavesInfo = None
         self.IsRangeTracking = False
         self.RangeTracking = None
+        self.IsNmeaData = False
+        self.NmeaData = None
 
     def AddRawData(self, data):
         """
@@ -162,6 +164,15 @@ class Ensemble:
         """
         self.IsRangeTracking = True
         self.RangeTracking = ds
+
+    def AddNmeaData(self, ds):
+        """
+        Add a NMEA data object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: NMEA data Data object.
+        """
+        self.IsNmeaData = True
+        self.NmeaData = ds
 
     @staticmethod
     def toJSON(self, pretty=False):
