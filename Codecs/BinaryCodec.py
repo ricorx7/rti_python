@@ -122,7 +122,7 @@ class BinaryCodec:
 
         # Check Ensemble number
         ensNum = struct.unpack("I", self.buffer[ensStart+16:ensStart+20])
-        #print(ensNum[0])
+        logger.debug(print(ensNum[0]))
         #print(self.ones_complement(ensNumInv[0]))
 
 

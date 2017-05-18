@@ -9,3 +9,5 @@ pyinstaller
 scipy
 folium
 pynmea2
+websocket-client
+autobahn

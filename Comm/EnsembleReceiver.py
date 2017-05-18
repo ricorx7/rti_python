@@ -24,7 +24,7 @@ class EnsembleReceiver:
         self.file_socket = None
         self.is_alive = False
         self.adcp_data = EnsembleJsonData()
-        self.EnsembleEvent = EventHandler(self)     # Event to handle a complete JSON ensemble
+        self.EnsembleEvent = EventHandler(self)     # Event to handle a JSON ensemble
 
         self.prev_ens_num = 0
 
@@ -98,6 +98,7 @@ class EnsembleReceiver:
                 return
             except Exception as ex:
                 logger.error("Error receiving ensemble data. ", ex)
+                print(str(ex))
                 return
 
     def close(self):
@@ -113,11 +114,15 @@ class EnsembleReceiver:
         Process the JSON data.
         :param json_data: JSON data.
         """
+        # Check for a complete ensemble
+        # If the ensemble number matches, it means we are still accumulating
+        # the entire ensemble
         if json_data["EnsembleNumber"] == self.adcp_data.EnsembleNumber:
             # Add the JSON data to the ensemble data
             self.adcp_data.process(json_data)
         else:
             # Send the completed ensemble to the event handler
+            # then create a new ensemble
             self.EnsembleEvent(self.adcp_data)
 
             # Create the new JSON ensemble

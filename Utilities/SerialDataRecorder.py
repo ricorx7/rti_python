@@ -199,7 +199,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hlvc:b:f:p:n:", ["comm=", "baud=", "folder=", "name=", "tcp=", "verbose"])
     except getopt.GetoptError:
-        print('EnsembleFileReport.py -c <comm> -b <baud> -f <folder> -p  -n <file_name> <tcp> -v')
+        print('SerialDataRecorder.py -c <comm> -b <baud> -f <folder> -p <tcp> -n <file_name> -v')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':

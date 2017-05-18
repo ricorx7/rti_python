@@ -240,10 +240,12 @@ class AdcpSerialPortServer:
         self.baud = baud                # Baud Rate
         self.thread = None
 
+        logger.info("Start TCP server at: " + str(port))
+
         # Set the TCP port to output ADCP data
         endpoints.serverFromString(reactor, self.port).listen(AdcpFactory(self.comm_port, self.baud))
-        logger.debug("Serial port connected on " + str(self.comm_port) + " baud: " + str(baud))
-        logger.debug("TCP Port open on " + str(self.port))
+        logger.info("Serial port connected on " + str(self.comm_port) + " baud: " + str(baud))
+        logger.info("TCP Port open on " + str(self.port))
 
         # Run the reactor in a thread
         if not reactor.running:

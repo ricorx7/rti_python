@@ -1,5 +1,5 @@
-from Comm.EnsembleJsonData import ADCP
+from Comm.EnsembleReceiver import EnsembleReceiver
 
 if __name__ == '__main__':
-    adcp = ADCP()
+    adcp = EnsembleReceiver()
     adcp.connect(55057)

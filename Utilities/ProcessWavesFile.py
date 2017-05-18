@@ -143,7 +143,7 @@ def main(argv):
         elif opt in ("-p", "--path"):
             record_path = arg
         elif opt in ("-e", "--ens"):
-            ens_in_burst = arg
+            ens_in_burst = int(arg)
         elif opt in ("-v", "--verbose"):
             verbose = True
             print("Verbose ON")
