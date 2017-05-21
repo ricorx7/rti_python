@@ -2,21 +2,24 @@ from autobahn.twisted.wamp import ApplicationRunner
 from Wamp.SerialPortComponent import SerialPortComponent
 from Wamp.SerialDataComponent import SerialDataComponent
 from Wamp.BackendComponent import AppSession
+from Wamp.SerialDataTwistedComponent import SerialDataTwistedAppSession
+from twisted.internet import reactor
 
 
 class WampSerialPort:
     def __init__(self):
-        serial_data = WampSerialDataComponent()
+        #serial_data = WampSerialDataComponent()
+        #serial_data.start()
         serial_port = WampSerialPortComponent()
-        serial_data.start()
         serial_port.start()
         backend = WampBackend()
         backend.start()
+        twisted = SerialDataTwistedComponent()
+        twisted.start()
 
         # Start the reactor only once
         # So create a start() for each component that
         # creates the runner but does not call run
-        from twisted.internet import reactor
         reactor.run()
 
 
@@ -45,5 +48,16 @@ class WampBackend:
     def start(self):
         # Same as above
         self.runner.run(AppSession, start_reactor=False)
+
+
+class SerialDataTwistedComponent:
+    def __init__(self):
+        self.runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1")
+
+    def start(self):
+        # Same as above
+        self.runner.run(SerialDataTwistedAppSession, start_reactor=False)
+
+
 
 

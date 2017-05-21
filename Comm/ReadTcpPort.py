@@ -37,9 +37,9 @@ class ReadTcpPort:
             logger.debug('Start TCP socket')
 
             # Start to read the raw data
-            self.read_tcp_socket()
-            #self.serial_server_thread = threading.Thread(target=self.read_tcp_socket())
-            #self.serial_server_thread.start()
+            #self.read_tcp_socket()
+            self.serial_server_thread = threading.Thread(target=self.read_tcp_socket())
+            self.serial_server_thread.start()
             logger.debug('Read TCP socket')
         except ConnectionRefusedError as err:
             logger.error("Serial Send Socket: ", err)
@@ -67,7 +67,7 @@ class ReadTcpPort:
                 pass
             except Exception as e:
                 logger.error("Exception in reading data.", e)
-                self.stop_adcp_server()
+                self.disconnect()
 
         print("Read Thread turned off")
 
@@ -91,4 +91,4 @@ class ReadTcpPort:
         :param data: Data from the TCP port.
         :return:
         """
-        logger.debug(str(data))
+        #logger.debug(str(data))
