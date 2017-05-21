@@ -1,0 +1,166 @@
+Skip to content
+Features Business Explore Pricing
+This repository
+Search
+Sign in or Sign up
+ Watch 88  Star 1,432  Fork 443 crossbario/autobahn-python
+ Code  Issues 88  Pull requests 1  Projects 0  Wiki  Pulse  Graphs
+Branch: master Find file Copy pathautobahn-python/examples/twisted/wamp/app/serial2ws/serial2ws.py
+b6a224a  on Nov 7, 2016
+ Tobias Oberstein copyrights transferred from Tavendo to Crossbar.io Technologies
+2 contributors @meejah @w1z2g3
+RawBlameHistory
+154 lines (118 sloc)  5.51 KB
+###############################################################################
+#
+# The MIT License (MIT)
+#
+# Copyright (c) Crossbar.io Technologies GmbH
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+
+import six
+from os import environ
+
+from twisted.internet.defer import inlineCallbacks
+from twisted.internet.serialport import SerialPort
+from twisted.protocols.basic import LineReceiver
+
+from autobahn.twisted.wamp import ApplicationSession
+
+
+class McuProtocol(LineReceiver):
+
+    """
+    MCU serial communication protocol.
+    """
+
+    # need a reference to our WS-MCU gateway factory to dispatch PubSub events
+    def __init__(self, session):
+        self.session = session
+
+    def connectionMade(self):
+        print('Serial port connected.')
+
+    def lineReceived(self, line):
+        print("Serial RX: {0}".format(line))
+
+        try:
+            # parse data received from MCU
+            data = [int(x) for x in line.split()]
+        except ValueError:
+            print('Unable to parse value {0}'.format(line))
+        else:
+            # create payload for WAMP event
+            payload = {u'id': data[0], u'value': data[1]}
+
+            # publish WAMP event to all subscribers on topic
+            self.session.publish(u"com.myapp.mcu.on_analog_value", payload)
+
+    def controlLed(self, turnOn):
+        """
+        This method is exported as RPC and can be called by connected clients
+        """
+        if turnOn:
+            payload = b'1'
+        else:
+            payload = b'0'
+        print("Serial TX: {0}".format(payload))
+        self.transport.write(payload)
+
+
+class McuComponent(ApplicationSession):
+
+    """
+    MCU WAMP application component.
+    """
+
+    @inlineCallbacks
+    def onJoin(self, details):
+        print("MyComponent ready! Configuration: {}".format(self.config.extra))
+
+        port = self.config.extra['port']
+        baudrate = self.config.extra['baudrate']
+
+        serialProtocol = McuProtocol(self)
+
+        print('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
+        try:
+            serialPort = SerialPort(serialProtocol, port, reactor, baudrate=baudrate)
+        except Exception as e:
+            print('Could not open serial port: {0}'.format(e))
+            self.leave()
+        else:
+            yield self.register(serialProtocol.controlLed, u"com.myapp.mcu.control_led")
+
+
+if __name__ == '__main__':
+
+    import sys
+    import argparse
+
+    # parse command line arguments
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--baudrate", type=int, default=115200, choices=[300, 1200, 2400, 4800, 9600, 19200, 57600, 115200, 230400, 460800, 921600],
+                        help='Serial port baudrate.')
+
+    parser.add_argument("--port", type=six.text_type, default=u'/dev/tty.usbserial-FT0ED8ZR',
+                        help='Serial port to use (e.g. 3 for a COM port on Windows, /dev/ttyATH0 for Arduino Yun, /dev/ttyACM0 for Serial-over-USB on RaspberryPi.')
+
+    parser.add_argument("--web", type=int, default=8000,
+                        help='Web port to use for embedded Web server. Use 0 to disable.')
+
+    router_default = environ.get("RTI_ROUTER", u"ws://127.0.0.1:55058/ws")
+    parser.add_argument("--router", type=six.text_type, default=router_default,
+                        help='WAMP router URL (a WAMP-over-WebSocket endpoint, default: "{}")'.format(router_default))
+
+    parser.add_argument("--realm", type=six.text_type, default=u'realm1',
+                        help='WAMP realm to join (default: "realm1")')
+
+    args = parser.parse_args()
+
+    # import Twisted reactor
+    if sys.platform == 'win32':
+        # on Windows, we need to use the following reactor for serial support
+        # http://twistedmatrix.com/trac/ticket/3802
+        from twisted.internet import win32eventreactor
+        win32eventreactor.install()
+
+        # on Windows, we need port to be an integer
+        args.port = int(args.port)
+
+    from twisted.internet import reactor
+    print("Using Twisted reactor {0}".format(reactor.__class__))
+
+    # create embedded web server for static files
+    if args.web:
+        from twisted.web.server import Site
+        from twisted.web.static import File
+        reactor.listenTCP(args.web, Site(File(".")))
+
+    # run WAMP application component
+    from autobahn.twisted.wamp import ApplicationRunner
+    runner = ApplicationRunner(args.router, args.realm,
+                               extra={'port': args.port, 'baudrate': args.baudrate})
+
+    # start the component and the Twisted reactor ..
+    runner.run(McuComponent)

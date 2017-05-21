@@ -12,7 +12,12 @@ https://github.com/crossbario/autobahn-python/blob/master/examples/twisted/wamp/
 """
 
 
-class SerialDataTwistedAppSession(ApplicationSession):
+class TcpToWampTwistedAppSession(ApplicationSession):
+    """
+    Wamp Application Session.
+    Create a TCP connection using the factory.
+    Also pass a reference to this applicaiton session to the factory.
+    """
 
     def __init__(self, config=None):
         ApplicationSession.__init__(self, config)
@@ -24,7 +29,7 @@ class SerialDataTwistedAppSession(ApplicationSession):
 
         # Create an insatance of TCP Protocol and pass itself
         # so it can use it to publish.  Use factory to auto reconnect
-        reactor.connectTCP("localhost", 55056, SerialDataTwistedFactory(self))
+        reactor.connectTCP("localhost", 55056, TcpToWampTwistedFactory(self))
 
     def onConnect(self):
         print("transport connected serial data twisted")
@@ -41,7 +46,15 @@ class SerialDataTwistedAppSession(ApplicationSession):
         print("--------------transport disconnected twisted---------------")
 
 
-class SerialDataTwistedProtocol(Protocol):
+class TcpToWampTwistedProtocol(Protocol):
+    """
+    Tcp conneciton.  When data is received from the TCP port,
+    publish it to the WAMP server.
+    
+    Get a reference of the Applicaiton session to get the WAMP
+    publish method.
+    """
+
     def __init__(self, session):
         # Get the WAMP session
         self.session = session
@@ -59,7 +72,15 @@ class SerialDataTwistedProtocol(Protocol):
         print("connection lost")
 
 
-class SerialDataTwistedFactory(ReconnectingClientFactory):
+class TcpToWampTwistedFactory(ReconnectingClientFactory):
+    """
+    Use the Reconnect client to automatically reconnect at
+    progressively longer intervals so it does not constantly
+    try to reconnect.
+    
+    Get a reference of the Applicaiton session so it can be 
+    passed to the TCP protocol.  Set the TCP protocol to this factory.
+    """
 
     def __init__(self, session):
         # Get the WAMP session
@@ -71,7 +92,7 @@ class SerialDataTwistedFactory(ReconnectingClientFactory):
         self.resetDelay()
 
         # Pass the WAMP session
-        return SerialDataTwistedProtocol(self.session)
+        return TcpToWampTwistedProtocol(self.session)
 
     def clientConnectionFailed(self, connector, reason):
         print("Connection failed - try to reconnect " + str(reason))
