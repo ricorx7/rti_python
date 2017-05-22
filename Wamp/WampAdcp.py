@@ -33,17 +33,21 @@ from twisted.internet.serialport import SerialPort
 from twisted.protocols.basic import LineReceiver
 
 from autobahn.twisted.wamp import ApplicationSession
+from Codecs.AdcpCodec import AdcpCodec
 
 
-class McuProtocol(LineReceiver):
-
+class WampSerialProtocol(LineReceiver):
     """
-    MCU serial communication protocol.
+    Serial communication protocol.
     """
     # need a reference to our WS-MCU gateway factory to dispatch PubSub events
     def __init__(self, session):
+        # Get a reference to Application session
         self.session = session
 
+        # Setup codec
+        self.codec = AdcpCodec()
+        self.codec.EnsembleEvent += self.ensemble_event
 
     def connectionMade(self):
         print('Serial port connected.')
@@ -52,50 +56,37 @@ class McuProtocol(LineReceiver):
         payload = {}
         payload["port"] = self.session.config.extra['port']
         payload["baud"] = self.session.config.extra['baudrate']
-        payload["value"] = str(data)
+        try:
+            payload["value"] = data.decode('utf-8').strip()
+        except:
+            payload["value"] = str(data)
 
-        # publish WAMP event to all subscribers on topic
+        # Publish WAMP event to all subscribers on topic
         self.session.publish(u"com.rti.serialdata", json.dumps(payload))
 
+        # Add data to the codec
+        self.codec.add(data)
+
     def lineReceived(self, line):
+        # Not Used
         print("Serial line RX: {0}".format(line))
 
-        try:
-            # parse data received from MCU
-            data = [int(x) for x in line.split()]
-        except ValueError:
-            print('Unable to parse value {0}'.format(line))
-        else:
-            # create payload for WAMP event
-            payload = {u'id': data[0], u'value': data[1]}
-
-            # publish WAMP event to all subscribers on topic
-            self.session.publish(u"com.myapp.mcu.on_analog_value", payload)
-
-    def controlLed(self, turnOn):
-        """
-        This method is exported as RPC and can be called by connected clients
-        """
-        if turnOn:
-            payload = b'1'
-        else:
-            payload = b'0'
-        print("Serial TX: {0}".format(payload))
-        self.transport.write(payload)
+    def ensemble_event(self, sender, ens):
+        # publish WAMP event to all subscribers on topic
+        self.session.publish(u"com.rti.ensdata", json.dumps(ens, default=lambda o: o.__dict__))
 
     def send_command(self, cmd):
         print("Serial TX: {0}".format(cmd))
-        self.transport.write(cmd.encode('ascii', 'ignore'))
+        self.transport.write((cmd + "\r").encode('ascii', 'ignore'))
 
     def send_break(self, time):
         print("Serial TX BREAK: {0}".format(str(time)))
         self.transport.sendBreak()
 
 
-class McuComponent(ApplicationSession):
-
+class WampAdcpComponent(ApplicationSession):
     """
-    MCU WAMP application component.
+    WAMP application component.
     """
 
     @inlineCallbacks
@@ -105,7 +96,7 @@ class McuComponent(ApplicationSession):
         port = self.config.extra['port']
         baudrate = self.config.extra['baudrate']
 
-        serialProtocol = McuProtocol(self)
+        serialProtocol = WampSerialProtocol(self)
 
         print('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
         try:
@@ -114,7 +105,6 @@ class McuComponent(ApplicationSession):
             print('Could not open serial port: {0}'.format(e))
             self.leave()
         else:
-            yield self.register(serialProtocol.controlLed, u"com.myapp.mcu.control_led")
             yield self.register(serialProtocol.send_command, u"com.rti.oncmd")
             yield self.register(serialProtocol.send_break, u"com.rti.onbreak")
 
@@ -170,4 +160,4 @@ if __name__ == '__main__':
                                extra={'port': args.port, 'baudrate': args.baudrate})
 
     # start the component and the Twisted reactor ..
-    runner.run(McuComponent)
+    runner.run(WampAdcpComponent)
