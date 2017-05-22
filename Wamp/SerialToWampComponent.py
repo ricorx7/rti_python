@@ -1,16 +1,3 @@
-Skip to content
-Features Business Explore Pricing
-This repository
-Search
-Sign in or Sign up
- Watch 88  Star 1,432  Fork 443 crossbario/autobahn-python
- Code  Issues 88  Pull requests 1  Projects 0  Wiki  Pulse  Graphs
-Branch: master Find file Copy pathautobahn-python/examples/twisted/wamp/app/serial2ws/serial2ws.py
-b6a224a  on Nov 7, 2016
- Tobias Oberstein copyrights transferred from Tavendo to Crossbar.io Technologies
-2 contributors @meejah @w1z2g3
-RawBlameHistory
-154 lines (118 sloc)  5.51 KB
 ###############################################################################
 #
 # The MIT License (MIT)
@@ -39,6 +26,7 @@ RawBlameHistory
 
 import six
 from os import environ
+import json
 
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.serialport import SerialPort
@@ -57,11 +45,21 @@ class McuProtocol(LineReceiver):
     def __init__(self, session):
         self.session = session
 
+
     def connectionMade(self):
         print('Serial port connected.')
 
+    def dataReceived(self, data):
+        payload = {}
+        payload["port"] = self.session.config.extra['port']
+        payload["baud"] = self.session.config.extra['baudrate']
+        payload["value"] = str(data)
+
+        # publish WAMP event to all subscribers on topic
+        self.session.publish(u"com.rti.serialdata", json.dumps(payload))
+
     def lineReceived(self, line):
-        print("Serial RX: {0}".format(line))
+        print("Serial line RX: {0}".format(line))
 
         try:
             # parse data received from MCU
@@ -85,6 +83,14 @@ class McuProtocol(LineReceiver):
             payload = b'0'
         print("Serial TX: {0}".format(payload))
         self.transport.write(payload)
+
+    def send_command(self, cmd):
+        print("Serial TX: {0}".format(cmd))
+        self.transport.write(cmd.encode('ascii', 'ignore'))
+
+    def send_break(self, time):
+        print("Serial TX BREAK: {0}".format(str(time)))
+        self.transport.sendBreak()
 
 
 class McuComponent(ApplicationSession):
@@ -110,6 +116,8 @@ class McuComponent(ApplicationSession):
             self.leave()
         else:
             yield self.register(serialProtocol.controlLed, u"com.myapp.mcu.control_led")
+            yield self.register(serialProtocol.send_command, u"com.rti.oncmd")
+            yield self.register(serialProtocol.send_break, u"com.rti.onbreak")
 
 
 if __name__ == '__main__':
