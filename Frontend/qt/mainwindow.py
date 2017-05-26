@@ -11,11 +11,15 @@ from adcp_terminal_vm import AdcpTerminal
 
 
 class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
+    """
+    Main window for the applicaton
+    """
 
     def __init__(self, config=None):
         ApplicationSession.__init__(self, config)
         QtWidgets.QMainWindow.__init__(self)
 
+        # Setup logger
         log = Logger()
 
         # Initialize the pages
@@ -30,21 +34,18 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 
     @inlineCallbacks
     def onJoin(self, details):
-        print("wamp connected")
+        self.log.info("WAMP connected")
         # WAMP onJoin
         yield self.subscribe(None, u"com.rti.data.serial")
 
+        # Initialize the WAMP components with the Widgets
         self.adcp_term.wamp_init()
-
-    def on_serial(self, data):
-        #print(data)
-        print('')
 
     def closeEvent(self, event):
         """Generate 'question' dialog on clicking 'X' button in title bar.
 
         Reimplement the closeEvent() event handler to include a 'Question'
-        dialog with options on how to proceed - Save, Close, Cancel buttons
+        dialog with options on how to proceed - Close, Cancel buttons
         """
         reply = QtWidgets.QMessageBox.question(self, "Message",
             "Are you sure you want to quit?", QtWidgets.QMessageBox.Close | QtWidgets.QMessageBox.Cancel)

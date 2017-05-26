@@ -1,5 +1,6 @@
 import logging
 from Codecs.BinaryCodec import BinaryCodec
+from Codecs.BinaryCodecUdp import BinaryCodecUdp
 from Codecs.WaveForceCodec import WaveForceCodec
 from Utilities.events import EventHandler
 
@@ -16,8 +17,11 @@ class AdcpCodec:
     codecs to decode the data.
     """
 
-    def __init__(self, udp_port=55057):
-        self.binary_codec = BinaryCodec(udp_port)
+    def __init__(self, is_udp=False, udp_port=55057):
+        if not is_udp:
+            self.binary_codec = BinaryCodec()
+        else:
+            self.binary_codec = BinaryCodecUdp(udp_port)
         self.binary_codec.EnsembleEvent += self.process_ensemble
 
         # WaveForce codec

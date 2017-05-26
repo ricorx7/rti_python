@@ -1,19 +1,19 @@
 {
+    "pid": 8255, 
     "options": {
-        "cdc": false, 
-        "command": "start", 
-        "colour": "auto", 
-        "logtofile": false, 
-        "logdir": null, 
         "cbdir": "/Users/rico/python/rti_python/crossbar/.crossbar", 
-        "reactor": null, 
-        "logformat": "standard", 
+        "cdc": false, 
         "config": "config.json", 
+        "logdir": null, 
+        "colour": "auto", 
+        "reactor": null, 
+        "logtofile": false, 
+        "logformat": "standard", 
+        "command": "start", 
         "loglevel": "info"
     }, 
     "argv": [
         "/usr/local/bin/crossbar", 
         "start"
-    ], 
-    "pid": 6667
+    ]
 }

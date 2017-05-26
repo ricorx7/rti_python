@@ -28,7 +28,6 @@ import six
 from os import environ
 import json
 import glob
-import serial
 
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.serialport import SerialPort
@@ -52,7 +51,7 @@ class WampSerialProtocol(LineReceiver):
         self.codec.EnsembleEvent += self.ensemble_event
 
     def connectionMade(self):
-        print('Serial port connected.')
+        self.session.log.info('Serial port connected.')
 
     def dataReceived(self, data):
         payload = {}
@@ -66,25 +65,23 @@ class WampSerialProtocol(LineReceiver):
         # Publish WAMP event to all subscribers on topic
         self.session.publish(u"com.rti.data.serial", json.dumps(payload))
 
-        print("Publish serial data")
-
         # Add data to the codec
         self.codec.add(data)
 
     def lineReceived(self, line):
         # Not Used
-        print("Serial line RX: {0}".format(line))
+        self.session.log.info("Serial line RX: {0}".format(line))
 
     def ensemble_event(self, sender, ens):
         # publish WAMP event to all subscribers on topic
         self.session.publish(u"com.rti.data.ens", json.dumps(ens, default=lambda o: o.__dict__))
 
     def send_command(self, cmd):
-        print("Serial TX: {0}".format(cmd))
+        self.session.log.info("Serial TX: {0}".format(cmd))
         self.transport.write((cmd + "\r").encode('ascii', 'ignore'))
 
     def send_break(self, time):
-        print("Serial TX BREAK: {0}".format(str(time)))
+        self.session.log.info("Serial TX BREAK: {0}".format(str(time)))
         self.transport.sendBreak()
 
 
@@ -95,18 +92,18 @@ class WampAdcpComponent(ApplicationSession):
 
     @inlineCallbacks
     def onJoin(self, details):
-        print("MyComponent ready! Configuration: {}".format(self.config.extra))
+        self.log.info("MyComponent ready! Configuration: {}".format(self.config.extra))
 
         port = self.config.extra['port']
         baudrate = self.config.extra['baudrate']
 
         serialProtocol = WampSerialProtocol(self)
 
-        print('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
+        self.log.info('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
         try:
             serialPort = SerialPort(serialProtocol, port, reactor, baudrate=baudrate)
         except Exception as e:
-            print('Could not open serial port: {0}'.format(e))
+            self.log.error('Could not open serial port: {0}'.format(e))
             self.leave()
         else:
             yield self.register(serialProtocol.send_command, u"com.rti.oncmd")
