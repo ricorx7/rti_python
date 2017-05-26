@@ -55,7 +55,7 @@ class McuProtocol(LineReceiver):
         payload["value"] = str(data)
 
         # publish WAMP event to all subscribers on topic
-        self.session.publish(u"com.rti.serialdata", json.dumps(payload))
+        self.session.publish(u"com.rti.data.serial", json.dumps(payload))
 
     def lineReceived(self, line):
         print("Serial line RX: {0}".format(line))

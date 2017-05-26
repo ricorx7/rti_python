@@ -27,6 +27,8 @@
 import six
 from os import environ
 import json
+import glob
+import serial
 
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.serialport import SerialPort
@@ -62,7 +64,9 @@ class WampSerialProtocol(LineReceiver):
             payload["value"] = str(data)
 
         # Publish WAMP event to all subscribers on topic
-        self.session.publish(u"com.rti.serialdata", json.dumps(payload))
+        self.session.publish(u"com.rti.data.serial", json.dumps(payload))
+
+        print("Publish serial data")
 
         # Add data to the codec
         self.codec.add(data)
@@ -73,7 +77,7 @@ class WampSerialProtocol(LineReceiver):
 
     def ensemble_event(self, sender, ens):
         # publish WAMP event to all subscribers on topic
-        self.session.publish(u"com.rti.ensdata", json.dumps(ens, default=lambda o: o.__dict__))
+        self.session.publish(u"com.rti.data.ens", json.dumps(ens, default=lambda o: o.__dict__))
 
     def send_command(self, cmd):
         print("Serial TX: {0}".format(cmd))
@@ -107,6 +111,46 @@ class WampAdcpComponent(ApplicationSession):
         else:
             yield self.register(serialProtocol.send_command, u"com.rti.oncmd")
             yield self.register(serialProtocol.send_break, u"com.rti.onbreak")
+            yield self.register(self.list_serial_ports, u'com.rti.serial.list.get')
+
+    def list_serial_ports(self, sender):
+        """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+        """
+
+        if sys.platform.startswith('win'):
+            ports = ['COM%s' % (i + 1) for i in range(256)]
+        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+            # this excludes your current terminal "/dev/tty"
+            ports = glob.glob('/dev/tty[A-Za-z]*')
+        elif sys.platform.startswith('darwin'):
+            ports = glob.glob('/dev/tty.*')
+        else:
+            raise EnvironmentError('Unsupported platform')
+
+        result = ports
+        #for port in ports:
+        #    try:
+        #        s = serial.Serial(port)
+        #        s.close()
+        #        result.append(port)
+        #        print(port)
+        #    except OSError as err:
+        #        self.log.error(err)
+        #        print(err)
+        #        pass
+        #    except serial.SerialException as err:
+        #        self.log.error(err)
+        #        print(err)
+        #        pass
+
+        self.publish(u"com.rti.serial.list", json.dumps(result, default=lambda o: o.__dict__))
+
+        return result
 
 
 if __name__ == '__main__':

@@ -11,3 +11,6 @@ folium
 pynmea2
 websocket-client
 autobahn
+pyqt5
+qt5reactor
+qdarkstyle
