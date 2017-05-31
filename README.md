@@ -2,7 +2,10 @@
 RTI Library in Python
 
 
-RoweTech Inc Python library
+Rowe Technologies Inc. Python library
+
+There is currently no main file to run.  This library contains a variety
+of utility applications.  But there is no main application to run.
 
 Dependicencies
 ------------
@@ -11,7 +14,21 @@ Dependicencies
 pip3 install -r requirements.txt -UI
 ```
 
-install pyside2 (Instructions below)
+WAMP Application to run
+-----------------------
+```javascript
+cd crossbar
+crossbar start
+```
+
+This will start the WAMP server, the serial port and GUI
+
+
+Compile QT5 .UI files
+---------------------
+```javascript
+pyuic5 -x file.ui -o file.py
+```
 
 
 Run Utilties Apps
@@ -32,12 +49,15 @@ AWS DynamoDB
 ----------------
 Install AWS CLI
 
+```javascript
 pip3 install awscli
-
+```
 
 Setup a configuration
 
+```javascript
 aws configure
+```
 
 Add a User to IAM in AWS Console
 

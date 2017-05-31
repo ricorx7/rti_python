@@ -76,6 +76,23 @@
                     }
                 }
             }
+        },
+        {
+            "id": "GUI",
+            "type": "guest",
+            "executable": "python3",
+            "arguments": [
+                "mainwindow.py"
+            ],
+            "options": {
+                "workdir": "../../Frontend/qt/",
+                "env": {
+                    "inherit": true,
+                    "vars": {
+                        "WS": "ws://localhost:8080/ws"
+                    }
+                }
+            }
         }
     ]
 }

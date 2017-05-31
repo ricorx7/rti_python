@@ -89,6 +89,11 @@ class WampAdcpComponent(ApplicationSession):
     """
     WAMP application component.
     """
+    def __init__(self, config=None):
+        ApplicationSession.__init__(self, config)
+        print("component created")
+        self.serialProtocol = None
+        self.serialPort = None
 
     @inlineCallbacks
     def onJoin(self, details):
@@ -97,18 +102,24 @@ class WampAdcpComponent(ApplicationSession):
         port = self.config.extra['port']
         baudrate = self.config.extra['baudrate']
 
-        serialProtocol = WampSerialProtocol(self)
+        self.serialProtocol = WampSerialProtocol(self)
 
         self.log.info('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
         try:
-            serialPort = SerialPort(serialProtocol, port, reactor, baudrate=baudrate)
+            serialPort = SerialPort(self.serialProtocol, port, reactor, baudrate=baudrate)
         except Exception as e:
             self.log.error('Could not open serial port: {0}'.format(e))
             self.leave()
         else:
-            yield self.register(serialProtocol.send_command, u"com.rti.oncmd")
-            yield self.register(serialProtocol.send_break, u"com.rti.onbreak")
-            yield self.register(self.list_serial_ports, u'com.rti.serial.list.get')
+            yield self.register(self.serialProtocol.send_command, u"com.rti.oncmd")
+            yield self.register(self.serialProtocol.send_break, u"com.rti.onbreak")
+            yield self.register(self.list_serial_ports, u"com.rti.serial.list.get")
+            yield self.register(self.reconnect_serial, u"com.rti.serial.reconnect")
+
+    def reconnect_serial(self, port, baud):
+        self.log.info("New Serial Connection: " + port + " baud: " + baud)
+        self.serialProtocol = WampSerialProtocol(self)
+        serialPort = SerialPort(self.serialProtocol, port, reactor, baudrate=baud)
 
     def list_serial_ports(self, sender):
         """ Lists serial port names
