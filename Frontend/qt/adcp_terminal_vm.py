@@ -36,6 +36,7 @@ class AdcpTerminal(Ui_AdcpTerminal):
         :return: 
         """
         yield self.parent.subscribe(self.on_serial_data, u"com.rti.data.serial")
+        yield self.parent.subscribe(self.on_ens_json_data, u"com.rti.data.ens")
         self.parent.log.info("ADCP Terminal WAMP init")
 
     def send_break(self):
@@ -72,6 +73,22 @@ class AdcpTerminal(Ui_AdcpTerminal):
         term_txt = str(self.terminalText.toPlainText())
         if len(term_txt) > 1030:
             self.terminalText.setText(term_txt[len(term_txt) - 1030:])
+
+    def on_ens_json_data(self, data):
+        """
+        Called when JSON Ensemble data is received from WAMP.
+        :param data: JSON object containing serial data.
+        :return: 
+        """
+        json_data = json.loads(data)                        # convert to JSON
+        self.check_serial_settings(json_data)               # Check serial settings
+        self.ensJsonText.setText(str(json_data['EnsembleData']))
+        #self.ensJsonText.append(str(json_data["value"]))  # Set terminal output
+
+        # Keep the size of the terminal text buffer small
+        #ens_json_txt = str(self.ensJsonText.toPlainText())
+        #if len(ens_json_txt) > 1030:
+        #    self.ensJsonText.setText(ens_json_txt[len(ens_json_txt) - 1030:])
 
     def check_serial_settings(self, json_data):
         """
