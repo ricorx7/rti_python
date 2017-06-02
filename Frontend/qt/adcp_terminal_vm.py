@@ -57,6 +57,10 @@ class AdcpTerminal(Ui_AdcpTerminal):
         self.cmdLineText.setText("")
 
     def send_connect(self):
+        """
+        Call the Reconnect to change the connection of the serial port.
+        :return: 
+        """
         self.parent.call(u'com.rti.serial.reconnect', str(self.serialPortcomboBox.currentText()), str(self.baudRatecomboBox.currentText()))
 
     def on_serial_data(self, data):

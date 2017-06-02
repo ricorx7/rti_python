@@ -1,34 +1,9 @@
-###############################################################################
-#
-# The MIT License (MIT)
-#
-# Copyright (c) Crossbar.io Technologies GmbH
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-#
-###############################################################################
-
 import six
 from os import environ
 import json
 import glob
 
+from twisted.internet.protocol import ReconnectingClientFactory
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.serialport import SerialPort
 from twisted.protocols.basic import LineReceiver
@@ -43,15 +18,16 @@ class WampSerialProtocol(LineReceiver):
     Serial communication protocol.
     """
     # need a reference to our WS-MCU gateway factory to dispatch PubSub events
-    def __init__(self, session):
+    def __init__(self, session, port, baud):
         # Get a reference to Application session
         self.session = session
+        self.serialPort = None
 
-        port = self.session.config.extra['port']
-        baud = self.session.config.extra['baudrate']
+        #port = self.session.config.extra['port']
+        #baud = self.session.config.extra['baudrate']
 
         try:
-            serialPort = SerialPort(self, port, reactor, baudrate=baud)
+            self.serialPort = SerialPort(self, port, reactor, baudrate=baud)
         except Exception as e:
             self.session.log.error('Could not open serial port: {0}'.format(e))
 
@@ -59,24 +35,49 @@ class WampSerialProtocol(LineReceiver):
         self.codec = AdcpCodec()
         self.codec.EnsembleEvent += self.ensemble_event
 
+    def onConnect(self, response):
+        print("Server connected: {0}".format(response.peer))
+        self.factory.resetDelay()
+
     def connectionMade(self):
+        """
+        Called when the serial made a connection.
+        :return: 
+        """
         self.session.log.info('Serial port connected.')
 
     def connectionLost(self, reason):
+        """
+        Called if the connection is lost.  If the Connection was
+        lost because the connection was disconnected properly,
+        then do nothing.  If it lost connection because the
+        serial port was lost, then try to reconnect.
+        :param reason: 
+        :return: 
+        """
         self.session.log.info("Lost connection (%s)" % reason)
-        #if reason != twisted.internet.error.ConnectionDone:
+
+        # Check if the reason was a good disconnect
         if reason.value.__class__ != twisted.internet.error.ConnectionDone:
             self.session.log.info("Reconnecting in 5 seconds...")
             self.retry = reactor.callLater(5, self.reconnect)
 
-    def reconnect(self):
+    def reconnect(self, port, baud):
+        """
+        Reconnect the serial port.
+        :return: 
+        """
         self.session.log.info("Try to reconnect")
 
-        port = self.session.config.extra['port']
-        baud = self.session.config.extra['baudrate']
+        # Get the serial port and baud rate from the config
+        # This is shared with the ApplicationSession (session)
+        #port = self.session.config.extra['port']
+        #baud = self.session.config.extra['baudrate']
+
+        self.transport.loseConnection()
 
         try:
-            serialPort = SerialPort(self, port, reactor, baudrate=baud)
+            self.serialPort = SerialPort(self, port, reactor, baudrate=baud)
         except Exception as e:
             self.session.log.error('Could not open serial port: {0}'.format(e))
             self.session.log.info("Reconnecting in 5 seconds...")
@@ -84,6 +85,11 @@ class WampSerialProtocol(LineReceiver):
 
 
     def dataReceived(self, data):
+        """
+        Data received from the serial port.
+        :param data: Data received from the serial port.
+        :return: 
+        """
         payload = {}
         payload["port"] = self.session.config.extra['port']
         payload["baud"] = self.session.config.extra['baudrate']
@@ -103,10 +109,21 @@ class WampSerialProtocol(LineReceiver):
         self.session.log.info("Serial line RX: {0}".format(line))
 
     def ensemble_event(self, sender, ens):
+        """
+        This is called when the codec has a processed ensemble.
+        :param sender: Sender of the ensemble.
+        :param ens: Ensemble as JSON.
+        :return: 
+        """
         # publish WAMP event to all subscribers on topic
         self.session.publish(u"com.rti.data.ens", json.dumps(ens, default=lambda o: o.__dict__))
 
     def send_command(self, cmd):
+        """
+        Send a command to the serial port.
+        :param cmd: Command to send to the serial port.
+        :return: 
+        """
         self.session.log.info("Serial TX: {0}".format(cmd))
         try:
             self.transport.write((cmd + "\r").encode('ascii', 'ignore'))
@@ -114,14 +131,20 @@ class WampSerialProtocol(LineReceiver):
             self.session.log.error(str(e))
 
     def send_break(self, time):
+        """
+        Send a BREAK to the serial port.
+        :param time: Duration of the BREAK.
+        :return: 
+        """
         self.session.log.info("Serial TX BREAK: {0}".format(str(time)))
         try:
             self.transport.sendBreak()
+            #self.serialPort.sendBreak()
         except Exception as e:
-            self.session.log.error(str(e))
+            self.session.log.error("send_break Error: " + str(e))
 
 
-class WampAdcpComponent(ApplicationSession):
+class WampAdcpComponent(ApplicationSession, ReconnectingClientFactory):
     """
     WAMP application component.
     """
@@ -129,58 +152,70 @@ class WampAdcpComponent(ApplicationSession):
         ApplicationSession.__init__(self, config)
         print("WAMP ADCP component created")
         self.serialProtocol = None
-        self.serialPort = None
+
+    def clientConnectionFailed(self, connector, reason):
+        print("Client connection failed .. retrying ..")
+        self.retry(connector)
+
+    def clientConnectionLost(self, connector, reason):
+        print("Client connection lost .. retrying ..")
+        self.retry(connector)
 
     @inlineCallbacks
     def onJoin(self, details):
+        """
+        Called to initialize the WAMP ApplicationSession.
+        :param details: 
+        :return: 
+        """
         self.log.info("MyComponent ready! Configuration: {}".format(self.config.extra))
 
-        #yield self.register(self.serialProtocol.send_command, u"com.rti.oncmd")
-        #yield self.register(self.serialProtocol.send_break, u"com.rti.onbreak")
+        # Register functions with WAMP
         yield self.register(self.list_serial_ports, u"com.rti.serial.list.get")
         yield self.register(self.reconnect_serial, u"com.rti.serial.reconnect")
         yield self.register(self.send_cmd, u"com.rti.oncmd")
         yield self.register(self.send_break, u"com.rti.onbreak")
 
-        port = self.config.extra['port']
-        baudrate = self.config.extra['baudrate']
         self.log.info("WAMP Connection made")
 
-        #self.serialProtocol = WampSerialProtocol(self)
-        #self.log.info('About to open serial port {0} [{1} baud] ..'.format(port, baudrate))
-        #try:
-        #    self.serialPort = SerialPort(self.serialProtocol, port, reactor, baudrate=baudrate)
-        #except Exception as e:
-        #    self.log.error('Could not open serial port: {0}'.format(e))
-        #    self.leave()
-        #else:
-        #    yield self.register(self.serialProtocol.send_command, u"com.rti.oncmd")
-        #    yield self.register(self.serialProtocol.send_break, u"com.rti.onbreak")
-        #    yield self.register(self.list_serial_ports, u"com.rti.serial.list.get")
-        #    yield self.register(self.reconnect_serial, u"com.rti.serial.reconnect")
-
     def reconnect_serial(self, port, baud):
+        """
+        Reconnect the serial port connection.  This will create a new
+        Protocol which will create a new connection.  The new conneciton 
+        will get the port and baud rate form the self.config
+        :param port: Serial Port.
+        :param baud: Baud rate.
+        :return: 
+        """
         self.log.info("New Serial Connection: " + port + " baud: " + baud)
 
+        # Set the port and baud rate so the Protocol will know when needing to reconnect
         self.config.extra['port'] = port
         self.config.extra['baudrate'] = baud
 
-        self.serialProtocol = WampSerialProtocol(self)
-
-        #try:
-        #    self.serialPort = SerialPort(self.serialProtocol, port, reactor, baudrate=baud)
-        #except Exception as e:
-        #    self.log.error('Could not open serial port: {0}'.format(e))
-        #else:
-        #    self.register(self.serialProtocol.send_command, u"com.rti.oncmd")
-        #    self.register(self.serialProtocol.send_break, u"com.rti.onbreak")
-        #self.log.info("New serial conneciton made: " + port + " baud: " + baud)
+        # If the protocol has not been created yet
+        # Create a new protocol
+        # else call reconnect to change the connection
+        if not self.serialProtocol:
+            self.serialProtocol = WampSerialProtocol(self, port, baud)
+        else:
+            self.serialProtocol.reconnect(port, baud)
 
     def send_cmd(self, cmd):
+        """
+        Send a command to the Protocol.
+        :param cmd: Command to send.
+        :return: 
+        """
         if self.serialProtocol:
             self.serialProtocol.send_command(cmd)
 
     def send_break(self, duration):
+        """
+        Send a BREAK to the protocol.
+        :param duration: Duration of the BREAK.
+        :return: 
+        """
         if self.serialProtocol:
             self.serialProtocol.send_break(duration)
 
