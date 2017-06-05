@@ -103,7 +103,7 @@
       <x>790</x>
       <y>170</y>
       <width>191</width>
-      <height>281</height>
+      <height>351</height>
      </rect>
     </property>
     <property name="layoutDirection">
@@ -118,7 +118,7 @@
        <x>10</x>
        <y>30</y>
        <width>173</width>
-       <height>241</height>
+       <height>304</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -126,6 +126,20 @@
        <widget class="QPushButton" name="breakButton">
         <property name="text">
          <string>BREAK</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="startPingButton">
+        <property name="text">
+         <string>START PING</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopPingButton">
+        <property name="text">
+         <string>STOP PING</string>
         </property>
        </widget>
       </item>

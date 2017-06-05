@@ -72,5 +72,5 @@ if __name__ == '__main__':
     # Start the WAMP connection
     # Connect the main window to the WAMP connection
     runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1")
-    runner.run(MainWindow)
+    runner.run(MainWindow, auto_reconnect=True)
 

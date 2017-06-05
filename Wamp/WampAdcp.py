@@ -60,7 +60,18 @@ class WampSerialProtocol(LineReceiver):
         # Check if the reason was a good disconnect
         if reason.value.__class__ != twisted.internet.error.ConnectionDone:
             self.session.log.info("Reconnecting in 5 seconds...")
-            self.retry = reactor.callLater(5, self.reconnect)
+            self.retry = reactor.callLater(5, self.reconnect_attempt)
+
+    def reconnect_attempt(self):
+        """
+        Used so that checking for disconnects, it does not need to know
+        the current configuration.
+        :return: 
+        """
+        # Get the port and baud from the configuration
+        port = self.session.config.extra['port']
+        baud = self.session.config.extra['baudrate']
+        self.reconnect(port, baud)
 
     def reconnect(self, port, baud):
         """
@@ -69,19 +80,16 @@ class WampSerialProtocol(LineReceiver):
         """
         self.session.log.info("Try to reconnect")
 
-        # Get the serial port and baud rate from the config
-        # This is shared with the ApplicationSession (session)
-        #port = self.session.config.extra['port']
-        #baud = self.session.config.extra['baudrate']
-
+        # Reset the transport
         self.transport.loseConnection()
 
+        # Create a new serial port
         try:
             self.serialPort = SerialPort(self, port, reactor, baudrate=baud)
         except Exception as e:
             self.session.log.error('Could not open serial port: {0}'.format(e))
             self.session.log.info("Reconnecting in 5 seconds...")
-            self.retry = reactor.callLater(5, self.reconnect)
+            self.retry = reactor.callLater(5, self.reconnect_attempt)
 
 
     def dataReceived(self, data):
@@ -310,4 +318,4 @@ if __name__ == '__main__':
                                extra={'port': args.port, 'baudrate': args.baudrate})
 
     # start the component and the Twisted reactor ..
-    runner.run(WampAdcpComponent)
+    runner.run(WampAdcpComponent, auto_reconnect=True)

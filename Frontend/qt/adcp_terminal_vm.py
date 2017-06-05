@@ -4,6 +4,7 @@ from twisted.internet.defer import inlineCallbacks
 import json
 import sys
 import glob
+import datetime
 from PyQt5 import QtCore
 
 
@@ -21,8 +22,18 @@ class AdcpTerminal(Ui_AdcpTerminal):
 
         # Connect "BREAK" button with a custom function
         self.breakButton.clicked.connect(self.send_break)
-        self.sendButton.clicked.connect(self.send_cmd)
+        self.sendButton.clicked.connect(self.send_cmd_txtBox)
         self.serialConnectButton.clicked.connect(self.send_connect)
+
+        # Command buttons
+        self.startPingButton.clicked.connect(lambda: self.send_cmd("START"))
+        self.stopPingButton.clicked.connect(lambda: self.send_cmd("STOP"))
+        self.cshowButton.clicked.connect(lambda: self.send_cmd("CSHOW"))
+        self.sleepButton.clicked.connect(lambda: self.send_cmd("SLEEP"))
+        self.zeroPressureSensorButton.clicked.connect(lambda: self.send_cmd("CPZ"))
+        self.compassConnectButton.clicked.connect(lambda: self.send_cmd("DIAGCPT"))
+        self.compassDisconnectButton.clicked.connect(lambda: self.send_cmd("XXXXXXXXXXXXXXXX"))
+        self.setTimeButton.clicked.connect(self.send_set_time_cmd)
 
         # Set the list of serial ports and baud rates
         self.set_serialport_list()
@@ -47,7 +58,7 @@ class AdcpTerminal(Ui_AdcpTerminal):
         # Call to WAMP for a BREAK
         self.parent.call(u"com.rti.onbreak", [100])
 
-    def send_cmd(self):
+    def send_cmd_txtBox(self):
         """
         Send a command to WAMP for the serial port.
         :return: 
@@ -55,6 +66,15 @@ class AdcpTerminal(Ui_AdcpTerminal):
         # Call to WAMP for a command
         self.parent.call(u"com.rti.oncmd", self.cmdLineText.text())
         self.cmdLineText.setText("")
+
+    def send_cmd(self, cmd):
+        self.parent.call(u"com.rti.oncmd", cmd)
+
+    def send_set_time_cmd(self):
+        # yyyy/MM/dd,HH:mm:ss
+        dt = datetime.now()
+        dt_str = dt.strftime("%Y/%m/%d,%H:%M:%S")
+        self.send_cmd("STIME " + dt_str)
 
     def send_connect(self):
         """
