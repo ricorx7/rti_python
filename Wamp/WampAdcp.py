@@ -2,6 +2,7 @@ import six
 from os import environ
 import json
 import glob
+import datetime
 
 from twisted.internet.protocol import ReconnectingClientFactory
 from twisted.internet.defer import inlineCallbacks
@@ -102,9 +103,11 @@ class WampSerialProtocol(LineReceiver):
         payload["port"] = self.session.config.extra['port']
         payload["baud"] = self.session.config.extra['baudrate']
         try:
-            payload["value"] = data.decode('utf-8').strip()
+            payload["value"] = data.decode('utf-8')
+            payload["type"] = "command"
         except:
             payload["value"] = str(data)
+            payload["type"] = "binary"
 
         # Publish WAMP event to all subscribers on topic
         self.session.publish(u"com.rti.data.serial", json.dumps(payload))
@@ -183,6 +186,7 @@ class WampAdcpComponent(ApplicationSession, ReconnectingClientFactory):
         yield self.register(self.reconnect_serial, u"com.rti.serial.reconnect")
         yield self.register(self.send_cmd, u"com.rti.oncmd")
         yield self.register(self.send_break, u"com.rti.onbreak")
+        yield self.register(self.set_time, u"com.rti.onsettime")
 
         self.log.info("WAMP Connection made")
 
@@ -191,8 +195,8 @@ class WampAdcpComponent(ApplicationSession, ReconnectingClientFactory):
         Reconnect the serial port connection.  This will create a new
         Protocol which will create a new connection.  The new conneciton 
         will get the port and baud rate form the self.config
-        :param port: Serial Port.
-        :param baud: Baud rate.
+        :param port: Serial Port as a string.
+        :param baud: Baud rate as a string.
         :return: 
         """
         self.log.info("New Serial Connection: " + port + " baud: " + baud)
@@ -227,7 +231,14 @@ class WampAdcpComponent(ApplicationSession, ReconnectingClientFactory):
         if self.serialProtocol:
             self.serialProtocol.send_break(duration)
 
-    def list_serial_ports(self, sender):
+    def set_time(self):
+        if self.serialProtocol:
+            # yyyy/MM/dd,HH:mm:ss
+            dt = datetime.datetime.now()
+            dt_str = dt.strftime("%Y/%m/%d,%H:%M:%S")
+            self.serialProtocol.send_command("STIME " + dt_str)
+
+    def list_serial_ports(self):
         """ Lists serial port names
 
         :raises EnvironmentError:

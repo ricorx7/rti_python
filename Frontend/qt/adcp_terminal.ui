@@ -23,6 +23,15 @@
       <height>501</height>
      </rect>
     </property>
+    <property name="lineWrapMode">
+     <enum>QTextEdit::FixedColumnWidth</enum>
+    </property>
+    <property name="lineWrapColumnOrWidth">
+     <number>50</number>
+    </property>
+    <property name="readOnly">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
@@ -54,6 +63,15 @@
       <width>251</width>
       <height>501</height>
      </rect>
+    </property>
+    <property name="lineWrapMode">
+     <enum>QTextEdit::FixedColumnWidth</enum>
+    </property>
+    <property name="lineWrapColumnOrWidth">
+     <number>75</number>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox">
@@ -103,7 +121,7 @@
       <x>790</x>
       <y>170</y>
       <width>191</width>
-      <height>351</height>
+      <height>381</height>
      </rect>
     </property>
     <property name="layoutDirection">
@@ -118,7 +136,7 @@
        <x>10</x>
        <y>30</y>
        <width>173</width>
-       <height>304</height>
+       <height>338</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -161,6 +179,13 @@
        <widget class="QPushButton" name="setTimeButton">
         <property name="text">
          <string>SET TIME</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cemacButton">
+        <property name="text">
+         <string>CEMAC</string>
         </property>
        </widget>
       </item>
