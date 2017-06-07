@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1008</width>
+    <width>1045</width>
     <height>818</height>
    </rect>
   </property>
@@ -27,7 +27,7 @@
      <enum>QTextEdit::FixedColumnWidth</enum>
     </property>
     <property name="lineWrapColumnOrWidth">
-     <number>50</number>
+     <number>80</number>
     </property>
     <property name="readOnly">
      <bool>false</bool>
@@ -60,7 +60,7 @@
      <rect>
       <x>520</x>
       <y>30</y>
-      <width>251</width>
+      <width>311</width>
       <height>501</height>
      </rect>
     </property>
@@ -68,7 +68,7 @@
      <enum>QTextEdit::FixedColumnWidth</enum>
     </property>
     <property name="lineWrapColumnOrWidth">
-     <number>75</number>
+     <number>65</number>
     </property>
     <property name="readOnly">
      <bool>true</bool>
@@ -77,7 +77,7 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>840</x>
       <y>30</y>
       <width>191</width>
       <height>141</height>
@@ -118,7 +118,7 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>840</x>
       <y>170</y>
       <width>191</width>
       <height>381</height>
@@ -219,7 +219,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1008</width>
+     <width>1045</width>
      <height>22</height>
     </rect>
    </property>

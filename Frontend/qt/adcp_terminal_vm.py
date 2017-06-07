@@ -19,6 +19,13 @@ class AdcpTerminal(Ui_AdcpTerminal):
         self.parent = parent
 
         self.serial_settings_checked = False
+        self.serial_display_buffer = ""
+        self.serial_display_need_refresh = False
+
+        # Timer to limit the refresh rate
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.timer_tick)
+        self.timer.start(1000)
 
         # Connect "BREAK" button with a custom function
         self.breakButton.clicked.connect(self.send_break)
@@ -72,10 +79,6 @@ class AdcpTerminal(Ui_AdcpTerminal):
         self.parent.call(u"com.rti.oncmd", cmd)
 
     def send_set_time_cmd(self):
-        # yyyy/MM/dd,HH:mm:ss
-        #dt = datetime.now()
-        #dt_str = dt.strftime("%Y/%m/%d,%H:%M:%S")
-        #self.send_cmd("STIME " + dt_str)
         self.parent.call(u"com.rti.onsettime")
 
     def send_connect(self):
@@ -93,12 +96,18 @@ class AdcpTerminal(Ui_AdcpTerminal):
         """
         json_data = json.loads(data)                        # convert to JSON
         self.check_serial_settings(json_data)               # Check serial settings
-        self.terminalText.setText(self.terminalText.toPlainText() + str(json_data["value"]))  # Set terminal output
+        #self.terminalText.setText(self.terminalText.toPlainText() + str(json_data["value"]))  # Set terminal output
 
         # Keep the size of the terminal text buffer small
-        term_txt = str(self.terminalText.toPlainText())
-        if len(term_txt) > 1050:
-            self.terminalText.setText(term_txt[len(term_txt) - 1050:])
+        #term_txt = str(self.terminalText.toPlainText())
+        #if len(term_txt) > 1050:
+        #    self.terminalText.setText(term_txt[len(term_txt) - 1050:])
+        self.serial_display_buffer += str(json_data["value"])
+        if len(self.serial_display_buffer) > 1050:
+            self.serial_display_buffer = self.serial_display_buffer[len(self.serial_display_buffer) - 1050:]
+
+        # Set flag to refresh display
+        self.serial_display_need_refresh = True
 
     def on_ens_json_data(self, data):
         """
@@ -108,13 +117,18 @@ class AdcpTerminal(Ui_AdcpTerminal):
         """
         json_data = json.loads(data)                        # convert to JSON
         self.check_serial_settings(json_data)               # Check serial settings
-        self.ensJsonText.setText(str(json_data['EnsembleData']))
-        #self.ensJsonText.append(str(json_data["value"]))  # Set terminal output
+        self.ensJsonText.setText(json.dumps(json_data['EnsembleData'], indent=4, sort_keys=True))  # Set terminal output
 
-        # Keep the size of the terminal text buffer small
-        #ens_json_txt = str(self.ensJsonText.toPlainText())
-        #if len(ens_json_txt) > 1030:
-        #    self.ensJsonText.setText(ens_json_txt[len(ens_json_txt) - 1030:])
+
+    def timer_tick(self):
+        """
+        Limit the update to the display.  This will ensure that high ping rates
+        do not overload the screen refresh.
+        :return: 
+        """
+        if self.serial_display_need_refresh:
+            self.terminalText.setText(self.serial_display_buffer)   # Refresh display
+            self.serial_display_need_refresh = False                # Reset flag
 
     def check_serial_settings(self, json_data):
         """
