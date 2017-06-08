@@ -232,6 +232,10 @@ class WampAdcpComponent(ApplicationSession, ReconnectingClientFactory):
             self.serialProtocol.send_break(duration)
 
     def set_time(self):
+        """
+        Set the time for the ADCP.
+        :return:
+        """
         if self.serialProtocol:
             # yyyy/MM/dd,HH:mm:ss
             dt = datetime.datetime.now()
