@@ -10,8 +10,15 @@ of utility applications.  But there is no main application to run.
 Dependicencies
 ------------
 
+OSX and Linux
 ```python
-pip3 install -r requirements.txt -UI
+pip3 install -r requirements.txt -UI --user
+```
+ 
+ 
+Windows
+```python
+python -m pip install -r requirements.txt -UI --user
 ```
 
 WAMP Application to run

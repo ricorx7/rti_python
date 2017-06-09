@@ -2,11 +2,11 @@ requests
 pyserial
 twisted
 pycrc
+tornado==4.4.2
 bokeh
 awscli
 configparser
 pyinstaller
-scipy
 folium
 pynmea2
 websocket-client
@@ -14,3 +14,5 @@ autobahn
 pyqt5
 qt5reactor
 qdarkstyle
+crossbar
+scipy
