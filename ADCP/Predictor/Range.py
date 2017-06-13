@@ -3,6 +3,7 @@ import json
 import os
 import ADCP.AdcpCommands
 
+
 def calculate_predicted_range(**kwargs):
     """
     :param SystemFrequency=: System frequency for this configuration.
