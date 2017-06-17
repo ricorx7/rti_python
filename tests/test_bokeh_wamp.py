@@ -27,7 +27,7 @@ class test_bokeh_wamp(ApplicationSession):
         self.log.info("WAMP connected")
 
         yield self.subscribe(self.on_ens_json_data, u"com.rti.data.ens")
-        self.log.info("test Numpy WAMP init")
+        self.log.info("test Bokehs WAMP init")
 
     def on_ens_json_data(self, data):
         """

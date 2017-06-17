@@ -16,4 +16,5 @@ qt5reactor
 qdarkstyle
 crossbar
 pytest
+pandas
 scipy

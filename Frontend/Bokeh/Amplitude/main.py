@@ -11,11 +11,13 @@ from bokeh.models.widgets import Panel, Tabs
 from bokeh.models import Range1d
 
 import numpy as np
+import pandas as pd
 
 class test_bokeh_wamp(ApplicationSession):
 
     def __init__(self, config=None):
         ApplicationSession.__init__(self, config)
+        self.df = None
 
     @inlineCallbacks
     def onJoin(self, details):
@@ -27,7 +29,7 @@ class test_bokeh_wamp(ApplicationSession):
         self.log.info("WAMP connected")
 
         yield self.subscribe(self.on_ens_json_data, u"com.rti.data.ens")
-        self.log.info("test Numpy WAMP init")
+        self.log.info("test Amplitude Bokeh WAMP init")
 
     def on_ens_json_data(self, data):
         """
@@ -36,32 +38,24 @@ class test_bokeh_wamp(ApplicationSession):
         :return:
         """
         json_data = json.loads(data)                        # convert to JSON
+        self.amp = json_data['Amplitude']                                                           # Get the amplitude data
+        amp_np = np.array(json_data['Amplitude']['Amplitude'])                                      # Create a numpy array from the amplitude data
+        self.df = pd.DataFrame(columns=['AmpB0', 'AmpB1', 'AmpB2', 'AmpB3'], data=amp_np)                # Create a description(name) for the columns
+        print("-")
+
+    def callback(self):
+        self.config.extra['ampB0'].data_source.data["y"] = self.df.index
+        self.config.extra['ampB0'].data_source.data["x"] = self.df.loc[:, 'AmpB0']
+
+        self.config.extra['ampB1'].data_source.data["y"] = self.df.index
+        self.config.extra['ampB1'].data_source.data["x"] = self.df.loc[:, 'AmpB1']
+
+        self.config.extra['ampB2'].data_source.data["y"] = self.df.index
+        self.config.extra['ampB2'].data_source.data["x"] = self.df.loc[:, 'AmpB2']
+
+        self.config.extra['ampB3'].data_source.data["y"] = self.df.index
+        self.config.extra['ampB3'].data_source.data["x"] = self.df.loc[:, 'AmpB3']
         print(".")
-        bins = []
-        ampB0 = []
-        ampB1 = []
-        ampB2 = []
-        ampB3 = []
-
-        for bin in range(json_data['EnsembleData']["NumBins"]):
-            bins.append(bin)
-            ampB0.append(json_data['Amplitude']["Amplitude"][bin][0])
-            ampB1.append(json_data['Amplitude']["Amplitude"][bin][1])
-            ampB2.append(json_data['Amplitude']["Amplitude"][bin][2])
-            ampB3.append(json_data['Amplitude']["Amplitude"][bin][3])
-
-        self.config.extra['ampB0'].data_source.data["y"] = bins
-        self.config.extra['ampB0'].data_source.data["x"] = ampB0
-
-        self.config.extra['ampB1'].data_source.data["y"] = bins
-        self.config.extra['ampB1'].data_source.data["x"] = ampB1
-
-        self.config.extra['ampB2'].data_source.data["y"] = bins
-        self.config.extra['ampB2'].data_source.data["x"] = ampB2
-
-        self.config.extra['ampB3'].data_source.data["y"] = bins
-        self.config.extra['ampB3'].data_source.data["x"] = ampB3
-
 
 x = np.array([1])
 y = np.array([1])
@@ -77,17 +71,21 @@ ampB2 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='blue', legend="B2
 ampB3 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='orange', legend="B3")
 
 # open a session to keep our local document in sync with server
-#session = push_session(curdoc())
+session = push_session(curdoc())
 
-#session.show(ampPlot)  # open the document in a browser
+session.show(ampPlot)  # open the document in a browser
 
-curdoc().add_root(ampPlot)
+#curdoc().add_root(ampPlot)
+
+#curdoc().add_periodic_callback(tbw.callback, 1000)
 
 # Start the WAMP connection
 # Connect the main window to the WAMP connection
 runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1",
                            extra={'ampB0': ampB0, 'ampB1': ampB1, 'ampB2': ampB2, 'ampB3': ampB3})
-runner.run(test_bokeh_wamp)
+runner.run(test_bokeh_wamp, start_reactor=True)
 
-
+#from twisted.internet import reactor
+#reactor.run()
 #session.loop_until_closed()  # run forever
+
