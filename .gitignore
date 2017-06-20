@@ -95,7 +95,7 @@ ENV/
 recorder/
 
 # Build data
-installer/
+Installer/build/
 
 # Plots generated
 tests/*.html
