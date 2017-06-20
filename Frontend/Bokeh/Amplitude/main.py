@@ -19,6 +19,20 @@ class test_bokeh_wamp(ApplicationSession):
         ApplicationSession.__init__(self, config)
         self.df = None
 
+        x = np.array([1])
+        y = np.array([1])
+        TOOLS = 'pan,box_zoom,wheel_zoom,box_select,crosshair,resize,reset,save,hover'
+        ampPlot = figure(plot_width=600, plot_height=800, tools=TOOLS, x_range=Range1d(0, 140))
+        ampPlot.legend.location = "top_left"
+        ampPlot.legend.click_policy = "hide"
+        ampPlot.xaxis[0].axis_label = "dB"
+        ampPlot.yaxis[0].axis_label = "Bin"
+        self.ampB0 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='red', legend="B0")
+        self.ampB1 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='green', legend="B1")
+        self.ampB2 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='blue', legend="B2")
+        self.ampB3 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='orange', legend="B3")
+        curdoc().add_root(ampPlot)
+
     @inlineCallbacks
     def onJoin(self, details):
         """
@@ -44,45 +58,49 @@ class test_bokeh_wamp(ApplicationSession):
         print("-")
 
     def callback(self):
-        self.config.extra['ampB0'].data_source.data["y"] = self.df.index
-        self.config.extra['ampB0'].data_source.data["x"] = self.df.loc[:, 'AmpB0']
+        self.ampB0.data_source.data["y"] = self.df.index
+        self.ampB0.data_source.data["x"] = self.df.loc[:, 'AmpB0']
 
-        self.config.extra['ampB1'].data_source.data["y"] = self.df.index
-        self.config.extra['ampB1'].data_source.data["x"] = self.df.loc[:, 'AmpB1']
+        self.ampB1.data_source.data["y"] = self.df.index
+        self.ampB1.data_source.data["x"] = self.df.loc[:, 'AmpB1']
 
-        self.config.extra['ampB2'].data_source.data["y"] = self.df.index
-        self.config.extra['ampB2'].data_source.data["x"] = self.df.loc[:, 'AmpB2']
+        self.ampB2.data_source.data["y"] = self.df.index
+        self.ampB2.data_source.data["x"] = self.df.loc[:, 'AmpB2']
 
-        self.config.extra['ampB3'].data_source.data["y"] = self.df.index
-        self.config.extra['ampB3'].data_source.data["x"] = self.df.loc[:, 'AmpB3']
+        self.ampB3.data_source.data["y"] = self.df.index
+        self.ampB3.data_source.data["x"] = self.df.loc[:, 'AmpB3']
         print(".")
 
-x = np.array([1])
-y = np.array([1])
-TOOLS = 'pan,box_zoom,wheel_zoom,box_select,crosshair,resize,reset,save,hover'
-ampPlot = figure(plot_width=600, plot_height=800, tools=TOOLS, x_range=Range1d(0, 140))
-ampPlot.legend.location = "top_left"
-ampPlot.legend.click_policy = "hide"
-ampPlot.xaxis[0].axis_label="dB"
-ampPlot.yaxis[0].axis_label = "Bin"
-ampB0 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='red', legend="B0")
-ampB1 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='green', legend="B1")
-ampB2 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='blue', legend="B2")
-ampB3 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='orange', legend="B3")
+#x = np.array([1])
+#y = np.array([1])
+#TOOLS = 'pan,box_zoom,wheel_zoom,box_select,crosshair,resize,reset,save,hover'
+#ampPlot = figure(plot_width=600, plot_height=800, tools=TOOLS, x_range=Range1d(0, 140))
+#ampPlot.legend.location = "top_left"
+#ampPlot.legend.click_policy = "hide"
+#ampPlot.xaxis[0].axis_label="dB"
+#ampPlot.yaxis[0].axis_label = "Bin"
+#ampB0 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='red', legend="B0")
+#ampB1 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='green', legend="B1")
+#ampB2 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='blue', legend="B2")
+#ampB3 = ampPlot.line(x=x, y=y, line_width=2, alpha=.85, color='orange', legend="B3")
 
 # open a session to keep our local document in sync with server
-session = push_session(curdoc())
+#session = push_session(curdoc())
 
-session.show(ampPlot)  # open the document in a browser
+#session.show(ampPlot)  # open the document in a browser
+
+#tbw = test_bokeh_wamp()
 
 #curdoc().add_root(ampPlot)
-
 #curdoc().add_periodic_callback(tbw.callback, 1000)
 
 # Start the WAMP connection
 # Connect the main window to the WAMP connection
-runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1",
-                           extra={'ampB0': ampB0, 'ampB1': ampB1, 'ampB2': ampB2, 'ampB3': ampB3})
+#runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1",
+#                           extra={'ampB0': ampB0, 'ampB1': ampB1, 'ampB2': ampB2, 'ampB3': ampB3})
+
+
+runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1")
 runner.run(test_bokeh_wamp, start_reactor=True)
 
 #from twisted.internet import reactor

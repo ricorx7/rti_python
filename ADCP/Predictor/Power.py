@@ -469,39 +469,44 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
     time_between_pings = 0.0
     # Check for divide by 0
     if sample_rate == 0:
-        time_between_pings = 0
-    elif _cwpp_ == 1:
-        # If there is only 1 ping, then there is no time between pings.
-        time_between_pings = 0
+        time_between_pings = _cwptbp_
     elif _cwpbn_ * bin_samples / sample_rate > _cwptbp_:
         time_between_pings = _cwpbn_ * bin_samples / sample_rate
     else:
         time_between_pings = _cwptbp_
 
 
-    # Receive Time
+    # Profile Time / Receive Time
     receive_time = 0.0
-    # Check for divide by 0
-    if sample_rate == 0:
-        receive_time = time_between_pings
-    elif _cwpp_ == 1: # If only 1 ping
+    if sample_rate == 0:                                        # Default if issue with divide by zero
+        receive_time = 0
+    elif _cwpp_ == 1:                                           # 1 Ping only, so no time between ping needed
+        receive_time = 0
+    elif time_between_pings > 1.0:                              # Time Between Pings is greater 1, sleeping between pings
         receive_time = _cwpbn_ * bin_samples / sample_rate
-    elif time_between_pings > 1.0: # Or CWPP > 1 and Time Between Pings is greater 1, sleeping between pings
-        # Sleep between pings
-        receive_time = _cwpbn_ * bin_samples / sample_rate
-    else:
-        # No sleeping between pings
+    else:                                                       # Use the greatest sleep time found
         receive_time = time_between_pings
+
+    if _is_burst_:                                              # If in burst mode, use different default timing
+        if _cwpp_ == 1:                                         # If single ping, use CEI for time
+            receive_time = _cei_
+        elif sample_rate == 0:                                  # Default if issue with divide by zero
+            receive_time = _cei_
+        elif time_between_pings > 1.0:                          # Time Between Pings is greater 1, sleeping between pings
+            receive_time = _cwpbn_ * bin_samples / sample_rate
+        else:                                                   # Use the greatest sleep time found
+            receive_time = time_between_pings
+
 
 
     # Receive Power
     system_rcv_power = 3.80
     if _beams_ == 4:
-        system_rcv_power = 3.8 # 1200khz 4Beam system test result
+        system_rcv_power = 3.8      # 1200khz 4Beam system test result
     elif _beams_ == 5:
-        system_rcv_power = 4.30 # 600 / 600khz 5Beam system test result
+        system_rcv_power = 4.30     # 600 / 600khz 5Beam system test result
     elif _beams_ >= 7:
-        system_rcv_power = 5.00 # 300 / 1200khz 8Beam system test result, 7Beam taken from waves model
+        system_rcv_power = 5.00     # 300 / 1200khz 8Beam system test result, 7Beam taken from waves model
 
     receive_power = 0.0
     freq_mult_rcv_pwr = 1
@@ -517,12 +522,13 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Sleep Power
     sleep_power = _system_sleep_power_ * _deployment_duration_ * 24.0
+    if _is_burst_:
+        sleep_power = _system_sleep_power_
 
 
     # Transmit Voltage
     # Sum up the Xmt Voltage
     sum_xmt_v = 0.0
-
     if _system_frequency_ > config["DEFAULT"]["1200000"]["FREQ"]:                                                                           # 1200khz
         sum_xmt_v = config["DEFAULT"]["1200000"]["XMIT_V"]
     elif (_system_frequency_ > config["DEFAULT"]["600000"]["FREQ"]) and (_system_frequency_ < config["DEFAULT"]["1200000"]["FREQ"]):        # 600khz
@@ -540,7 +546,6 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
     # Leakage
     # Sum up the Leakage
     sum_leakage_ua = 0.0;
-
     if _system_frequency_ > config["DEFAULT"]["1200000"]["FREQ"]:                                                                           # 1200khz
         sum_leakage_ua = 3.0 * math.sqrt(2.0 * 0.000001 * config["DEFAULT"]["1200000"]["UF"] * config["DEFAULT"]["1200000"]["XMIT_V"])
     if (_system_frequency_ > config["DEFAULT"]["600000"]["FREQ"]) and (_system_frequency_ < config["DEFAULT"]["1200000"]["FREQ"]):          # 600khz
@@ -557,6 +562,8 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Cap Charge Power
     cap_charge_power = 0.03 * (bt_transmit_power + transmit_power) + 1.3 * _deployment_duration_ * 24.0 * sum_xmt_v * 0.000001 * sum_leakage_ua
+    if _is_burst_:
+        cap_charge_power = 0.03 * (bt_transmit_power + transmit_power) + 1.3 * sum_xmt_v * 0.000001 * sum_leakage_ua
 
 
     return bt_transmit_power + bt_receive_power + wakeup_power + init_power + transmit_power + receive_power + save_power + sleep_power + cap_charge_power

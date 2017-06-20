@@ -153,11 +153,11 @@ def test_calculate_power_burst():
                                 SystemSleepPower=_SystemSleepPower_,
                                 BeamDiameter=_BeamDiameter_, CyclesPerElement=_CyclesPerElement_, CBI=True, CBI_BurstInterval=3600, CBI_NumEns=2036)
 
-    assert result == pytest.approx(17794.71, 0.01)
+    assert result == pytest.approx(17395.02, 0.01)
 
     batts = ADCP.Predictor.Power.calculate_number_batteries(PowerUsage=result, DeploymentDuration=_DeploymentDuration_)
 
-    assert batts == pytest.approx(47.580, 0.01)
+    assert batts == pytest.approx(46.511, 0.01)
 
 
 def test_calculate_power_kwargs1():
