@@ -15,7 +15,7 @@ class Ui_RoweTechPredictor(object):
         self.centralWidget = QtWidgets.QWidget(RoweTechPredictor)
         self.centralWidget.setObjectName("centralWidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralWidget)
-        self.groupBox.setGeometry(QtCore.QRect(20, 40, 291, 141))
+        self.groupBox.setGeometry(QtCore.QRect(20, 30, 291, 141))
         self.groupBox.setObjectName("groupBox")
         self.formLayoutWidget = QtWidgets.QWidget(self.groupBox)
         self.formLayoutWidget.setGeometry(QtCore.QRect(10, 30, 271, 94))
@@ -60,10 +60,13 @@ class Ui_RoweTechPredictor(object):
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")
         self.tabSubsystem.addTab(self.tab_4, "")
+        self.calculateButton = QtWidgets.QPushButton(self.centralWidget)
+        self.calculateButton.setGeometry(QtCore.QRect(20, 340, 113, 32))
+        self.calculateButton.setObjectName("calculateButton")
         RoweTechPredictor.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(RoweTechPredictor)
-        self.tabSubsystem.setCurrentIndex(1)
+        self.tabSubsystem.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(RoweTechPredictor)
 
     def retranslateUi(self, RoweTechPredictor):
@@ -77,4 +80,15 @@ class Ui_RoweTechPredictor(object):
         self.addSubsystemButton.setText(_translate("RoweTechPredictor", "ADD"))
         self.tabSubsystem.setTabText(self.tabSubsystem.indexOf(self.tab_3), _translate("RoweTechPredictor", "Tab 1"))
         self.tabSubsystem.setTabText(self.tabSubsystem.indexOf(self.tab_4), _translate("RoweTechPredictor", "Tab 2"))
+        self.calculateButton.setText(_translate("RoweTechPredictor", "Calculate"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    RoweTechPredictor = QtWidgets.QMainWindow()
+    ui = Ui_RoweTechPredictor()
+    ui.setupUi(RoweTechPredictor)
+    RoweTechPredictor.show()
+    sys.exit(app.exec_())
 

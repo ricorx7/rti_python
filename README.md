@@ -5,7 +5,7 @@ RTI Library in Python
 Rowe Technologies Inc. Python library
 
 There is currently no main file to run.  This library contains a variety
-of utility applications.  But there is no main application to run.
+of utility applications.
 
 Dependicencies
 ------------

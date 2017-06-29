@@ -12,7 +12,7 @@ from predictor_vm import PredictorVM
 
 class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
     """
-    Main window for the applicaton
+    Main window for the application
     """
 
     def __init__(self, config=None):
@@ -42,7 +42,8 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
         #self.adcp_term.wamp_init()
 
     def closeEvent(self, event):
-        """Generate 'question' dialog on clicking 'X' button in title bar.
+        """
+        Generate 'question' dialog on clicking 'X' button in title bar.
 
         Reimplement the closeEvent() event handler to include a 'Question'
         dialog with options on how to proceed - Close, Cancel buttons
@@ -63,6 +64,7 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
+
     #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     import qt5reactor
 

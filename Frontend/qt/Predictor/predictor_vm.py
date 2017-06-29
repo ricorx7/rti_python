@@ -17,7 +17,12 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)
 
-        # Create th elist of subsystems
+        self.tabSubsystem.setTabsClosable(True)
+        self.tabSubsystem.clear()
+        self.tabSubsystem.tabCloseRequested.connect(self.tab_close_requested)
+        self.calculateButton.clicked.connect(self.calculate)
+
+        # Create the list of subsystems
         self.init_list()
 
     def init_list(self):
@@ -35,11 +40,28 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.subsystemComboBox.addItem("E - 75kHz Vertical", "E")
 
     def add_subsystem(self):
-
+        """
+        Add a tab for the given subsystem.
+        :return:
+        """
         ss = self.subsystemComboBox.itemData(self.subsystemComboBox.currentIndex())
 
-        print(ss)
+        # Create the subsystem view
+        # Add it to the Tab
         ssUI = Ui_Subsystem()
-        ssVM = SubsystemVM(self.tabSubsystem)
+        ssVM = SubsystemVM(self.tabSubsystem, self)
         self.tabSubsystem.addTab(ssVM, ss)
 
+    def tab_close_requested(self, index):
+        """
+        Remove the tab.
+        :param index: Index of the tab.
+        :return:
+        """
+        self.tabSubsystem.removeTab(index)
+
+    def calculate(self):
+        print(self.tabSubsystem.count())
+        for tab in range(self.tabSubsystem.count()):
+            self.tabSubsystem.widget(tab).calculate()
+            print(self.tabSubsystem.widget(tab).cwpblDoubleSpinBox.value())
