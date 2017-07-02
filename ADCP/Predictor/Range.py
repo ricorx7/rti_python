@@ -20,7 +20,7 @@ def calculate_predicted_range(**kwargs):
     :param BeamAngle=: Beam angle in degrees. Default 20 degrees.
     :param BeamDiameter=: The beam diameter in meters.
     :param CyclesPerElement=: Cycles per element.
-    :return: The amount of power required based of the deployment parameters.
+    :return: BT Range, WP Range, Range First Bin, Configured Ranges
     """
 
     # Get the configuration from the json file

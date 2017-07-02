@@ -1,17 +1,31 @@
 from subsystem_view import Ui_Subsystem
 from PyQt5.QtWidgets import QWidget
 
+import ADCP.Predictor.Power  as Power
+import ADCP.Predictor.Range as Range
+import ADCP.Predictor.MaxVelocity as Velocity
+import ADCP.Predictor.STD as STD
+import ADCP.Predictor.DataStorage as DS
+import ADCP.Subsystem as SS
+
+
 class SubsystemVM(Ui_Subsystem, QWidget):
     """
     Subsystem settings.
     """
 
-    def __init__(self, parent, predictor):
+    def __init__(self, parent, predictor, ss_code):
         Ui_Subsystem.__init__(self)
         QWidget.__init__(self, parent)
         self.setupUi(self)
         self.parent = parent
         self.predictor = predictor
+        self.ss_code = ss_code
+        self.freq = SS.ss_frequency(ss_code)
+
+        self.freqLabel.setText("[" + str(ss_code) + "] - " + SS.ss_label(ss_code))
+
+        self.initList()
 
         # Get the checkbox state
         self.cwponCheckBox.stateChanged.connect(self.cwpon_enable_disable)
@@ -23,6 +37,21 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cbtonCheckBox.setCheckState(2)
         self.cbiEnabledCheckBox.setCheckState(0)
         self.cbi_enable_disable(0)
+        self.cedBeamVelCheckBox.setCheckState(2)
+        self.cedInstrVelCheckBox.setCheckState(2)
+        self.cedEarthVelCheckBox.setCheckState(2)
+        self.cedAmpCheckBox.setCheckState(2)
+        self.cedCorrCheckBox.setCheckState(2)
+        self.cedBeamGoodPingCheckBox.setCheckState(2)
+        self.cedEarthGoodPingCheckBox.setCheckState(2)
+        self.cedEnsCheckBox.setCheckState(2)
+        self.cedAncCheckBox.setCheckState(2)
+        self.cedBtCheckBox.setCheckState(2)
+        self.cedNmeaCheckBox.setCheckState(2)
+        self.cedWpEngCheckBox.setCheckState(2)
+        self.cedBtEngCheckBox.setCheckState(2)
+        self.cedSysSettingCheckBox.setCheckState(2)
+        self.cedRangeTrackingCheckBox.setCheckState(2)
 
         # Calculated results
         self.calc_power = 0.0
@@ -33,6 +62,64 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.calc_first_bin = 0.0
         self.calc_wp_range = 0.0
         self.calc_bt_range = 0.0
+        self.calc_cfg_wp_range = 0.0
+
+        # Watch for changes to recalculate
+        self.cedBeamVelCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedInstrVelCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedEarthVelCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedAmpCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedCorrCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedBeamGoodPingCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedEarthGoodPingCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedEnsCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedAncCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedBtCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedNmeaCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedWpEngCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedBtEngCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedSysSettingCheckBox.stateChanged.connect(self.stateChanged)
+        self.cedRangeTrackingCheckBox.stateChanged.connect(self.stateChanged)
+        self.cwpblDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwpbsDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwpbnSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwpbbDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwpbbComboBox.currentIndexChanged.connect(self.valueChanged)
+        self.cwppSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwptbpDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cbtbbComboBox.currentIndexChanged.connect(self.valueChanged)
+        self.cbttbpDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cbiBurstIntervalDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cbiNumEnsSpinBox.valueChanged.connect(self.valueChanged)
+        self.numBeamsSpinBox.valueChanged.connect(self.valueChanged)
+
+        # Show initial results
+        self.calculate()
+
+    def initList(self):
+        self.cwpbbComboBox.addItem("Broadband", 1)
+        self.cwpbbComboBox.addItem("Narrowband", 0)
+
+        self.cbtbbComboBox.addItem("Broadband", "1")
+        self.cbtbbComboBox.addItem("Narrowband", "0")
+
+    def stateChanged(self, state):
+        """
+        Monitor for any state changes then recalculate.
+        :param state:
+        :return:
+        """
+        # Recalculate
+        self.predictor.calculate()
+
+    def valueChanged(self, value):
+        """
+        Monitor for any value changes then recalculate.
+        :param state:
+        :return:
+        """
+        # Recalculate
+        self.predictor.calculate()
 
 
     def cwpon_enable_disable(self, state):
@@ -56,6 +143,9 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cwppSpinBox.setEnabled(enable_state)
         self.cwptbpDoubleSpinBox.setEnabled(enable_state)
 
+        # Recalculate
+        self.predictor.calculate()
+
     def cbton_enable_disable(self, state):
         """
         Change the enable state of the values based off
@@ -72,6 +162,9 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cbtbbComboBox.setEnabled(enable_state)
         self.cbttbpDoubleSpinBox.setEnabled(enable_state)
 
+        # Recalculate
+        self.predictor.calculate()
+
     def cbi_enable_disable(self, state):
         """
         Change the enable state of the values based off
@@ -85,10 +178,155 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         else:
             enable_state = False
 
-        self.cbiBurstIntervaloubleSpinBox.setEnabled(enable_state)
+        self.cbiBurstIntervalDoubleSpinBox.setEnabled(enable_state)
         self.cbiNumEnsSpinBox.setEnabled(enable_state)
 
+        # Recalculate
+        self.predictor.calculate()
+
     def calculate(self):
-        deployment = self.predictor.deploymentDurationspinBox.value()
+        # Get the global settings
+        deployment = self.predictor.deploymentDurationSpinBox.value()
         cei = self.predictor.ceiDoubleSpinBox.value()
-        cws = self.predictor.cwsSpinBox.value()
+
+        # Calculate
+        self.calc_power = Power.calculate_power(DeploymentDuration=deployment,
+                                                Beams=self.numBeamsSpinBox.value(),
+                                                CEI=cei,
+                                                SystemFrequency=self.freq,
+                                                CWPON=self.cwponCheckBox.isChecked(),
+                                                CWPBL=self.cwpblDoubleSpinBox.value(),
+                                                CWPBS=self.cwpbsDoubleSpinBox.value(),
+                                                CWPBN=self.cwpbnSpinBox.value(),
+                                                CWPBB=self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex()),
+                                                CWPBB_LagLength=self.cwpbbDoubleSpinBox.value(),
+                                                CWPP=self.cwppSpinBox.value(),
+                                                CWPTBP=self.cwptbpDoubleSpinBox.value(),
+                                                CBTON=self.cbtonCheckBox.isChecked(),
+                                                CBTBB=self.cbtbbComboBox.itemData(self.cbtbbComboBox.currentIndex()),)
+
+        if self.cbiEnabledCheckBox.isChecked():
+            self.calc_power = Power.calculate_burst_power(DeploymentDuration=deployment,
+                                                          Beams=self.numBeamsSpinBox.value(),
+                                                          CEI=cei,
+                                                          SystemFrequency=self.freq,
+                                                          CWPON=self.cwponCheckBox.isChecked(),
+                                                          CWPBL=self.cwpblDoubleSpinBox.value(),
+                                                          CWPBS=self.cwpbsDoubleSpinBox.value(),
+                                                          CWPBN=self.cwpbnSpinBox.value(),
+                                                          CWPBB=self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex()),
+                                                          CWPBB_LagLength=self.cwpbbDoubleSpinBox.value(),
+                                                          CWPP=self.cwppSpinBox.value(),
+                                                          CWPTBP=self.cwptbpDoubleSpinBox.value(),
+                                                          CBTON=self.cbtonCheckBox.isChecked(),
+                                                          CBTBB=self.cbtbbComboBox.itemData(self.cbtbbComboBox.currentIndex()),
+                                                          CBI=self.cbiEnabledCheckBox.isChecked(),
+                                                          CBI_BurstInterval=self.cbiBurstIntervalDoubleSpinBox.value(),
+                                                          CBI_NumEns=self.cbiNumEnsSpinBox.value(),)
+
+
+        self.calc_num_batt = Power.calculate_number_batteries(DeploymentDuration=deployment, PowerUsage=self.calc_power)
+
+        range = Range.calculate_predicted_range(SystemFrequency=self.freq,
+                                                Beams=self.numBeamsSpinBox.value(),
+                                                CWPON=self.cwponCheckBox.isChecked(),
+                                                CWPBL=self.cwpblDoubleSpinBox.value(),
+                                                CWPBS=self.cwpbsDoubleSpinBox.value(),
+                                                CWPBN=self.cwpbnSpinBox.value(),
+                                                CWPBB=self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex()),
+                                                CWPBB_LagLength=self.cwpbbDoubleSpinBox.value(),
+                                                CWPP=self.cwppSpinBox.value(),
+                                                CWPTBP=self.cwptbpDoubleSpinBox.value(),
+                                                CBTON=self.cbtonCheckBox.isChecked())
+
+        self.calc_wp_range = range[1]
+        self.calc_bt_range = range[0]
+        self.calc_first_bin = range[2]
+        self.calc_cfg_wp_range = range[3]
+
+        self.calc_max_vel = Velocity.calculate_max_velocity(SystemFrequency=self.freq,
+                                                            Beams=self.numBeamsSpinBox.value(),
+                                                            CWPON=self.cwponCheckBox.isChecked(),
+                                                            CWPBL=self.cwpblDoubleSpinBox.value(),
+                                                            CWPBS=self.cwpbsDoubleSpinBox.value(),
+                                                            CWPBN=self.cwpbnSpinBox.value(),
+                                                            CWPBB=self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex()),
+                                                            CWPBB_LagLength=self.cwpbbDoubleSpinBox.value(),
+                                                            CWPP=self.cwppSpinBox.value(),
+                                                            CWPTBP=self.cwptbpDoubleSpinBox.value(),
+                                                            CBTON=self.cbtonCheckBox.isChecked())
+
+        if self.cbiEnabledCheckBox.isChecked():
+            self.calc_data = DS.calculate_burst_storage_amount(CBI_BurstInterval=self.cbiBurstIntervalDoubleSpinBox.value(),
+                                                               CBI_NumEns=self.cbiNumEnsSpinBox.value(),
+                                                               DeploymentDuration=deployment,
+                                                               Beams=self.numBeamsSpinBox.value(),
+                                                               CEI=cei,
+                                                               CWPBN=self.cwpbnSpinBox.value(),
+                                                               IsE0000001=self.cedBeamVelCheckBox.isChecked(),
+                                                               IsE0000002=self.cedInstrVelCheckBox.isChecked(),
+                                                               IsE0000003=self.cedEarthVelCheckBox.isChecked(),
+                                                               IsE0000004=self.cedAmpCheckBox.isChecked(),
+                                                               IsE0000005=self.cedCorrCheckBox.isChecked(),
+                                                               IsE0000006=self.cedBeamGoodPingCheckBox.isChecked(),
+                                                               IsE0000007=self.cedEarthGoodPingCheckBox.isChecked(),
+                                                               IsE0000008=self.cedEnsCheckBox.isChecked(),
+                                                               IsE0000009=self.cedAncCheckBox.isChecked(),
+                                                               IsE0000010=self.cedBtCheckBox.isChecked(),
+                                                               IsE0000011=self.cedNmeaCheckBox.isChecked(),
+                                                               IsE0000012=self.cedWpEngCheckBox.isChecked(),
+                                                               IsE0000013=self.cedBtEngCheckBox.isChecked(),
+                                                               IsE0000014=self.cedSysSettingCheckBox.isChecked(),
+                                                               IsE0000015=self.cedRangeTrackingCheckBox.isChecked(),)
+        else:
+            self.calc_data = DS.calculate_storage_amount(DeploymentDuration=deployment,
+                                                         CEI=cei,
+                                                         Beams=self.numBeamsSpinBox.value(),
+                                                         CWPBN=self.cwpbnSpinBox.value(),
+                                                         IsE0000001=self.cedBeamVelCheckBox.isChecked(),
+                                                         IsE0000002=self.cedInstrVelCheckBox.isChecked(),
+                                                         IsE0000003=self.cedEarthVelCheckBox.isChecked(),
+                                                         IsE0000004=self.cedAmpCheckBox.isChecked(),
+                                                         IsE0000005=self.cedCorrCheckBox.isChecked(),
+                                                         IsE0000006=self.cedBeamGoodPingCheckBox.isChecked(),
+                                                         IsE0000007=self.cedEarthGoodPingCheckBox.isChecked(),
+                                                         IsE0000008=self.cedEnsCheckBox.isChecked(),
+                                                         IsE0000009=self.cedAncCheckBox.isChecked(),
+                                                         IsE0000010=self.cedBtCheckBox.isChecked(),
+                                                         IsE0000011=self.cedNmeaCheckBox.isChecked(),
+                                                         IsE0000012=self.cedWpEngCheckBox.isChecked(),
+                                                         IsE0000013=self.cedBtEngCheckBox.isChecked(),
+                                                         IsE0000014=self.cedSysSettingCheckBox.isChecked(),
+                                                         IsE0000015=self.cedRangeTrackingCheckBox.isChecked(),)
+
+
+        self.calc_std = STD.calculate_std(SystemFrequency=self.freq,
+                                          Beams=self.numBeamsSpinBox.value(),
+                                          CWPON=self.cwponCheckBox.isChecked(),
+                                          CWPBL=self.cwpblDoubleSpinBox.value(),
+                                          CWPBS=self.cwpbsDoubleSpinBox.value(),
+                                          CWPBN=self.cwpbnSpinBox.value(),
+                                          CWPBB=self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex()),
+                                          CWPBB_LagLength=self.cwpbbDoubleSpinBox.value(),
+                                          CWPP=self.cwppSpinBox.value(),
+                                          CWPTBP=self.cwptbpDoubleSpinBox.value(),
+                                          CBTON=self.cbtonCheckBox.isChecked())
+
+        # Update the display
+        self.powerLabel.setText(str(round(self.calc_power, 4)) + " watts")
+        self.powerLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 4)) + " batteries")
+        self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.wpRangeLabel.setText(str(round(self.calc_wp_range, 4)) + " m")
+        self.wpRangeLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.btRangeLabel.setText(str(round(self.calc_bt_range, 4)) + " m")
+        self.btRangeLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.firstBinPosLabel.setText(str(round(self.calc_first_bin, 4)) + " m")
+        self.firstBinPosLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.maxVelLabel.setText(str(round(self.calc_max_vel, 4)) + " m/s")
+        self.maxVelLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.dataUsageLabel.setText(str(DS.bytes_2_human_readable(self.calc_data)))
+        self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.stdLabel.setText(str(round(self.calc_std, 4)) + " m/s")
+        self.stdLabel.setStyleSheet("font-weight: bold; color: blue")
+

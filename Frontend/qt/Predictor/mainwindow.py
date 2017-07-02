@@ -55,7 +55,8 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 
             # Stop Reactor
             from twisted.internet import reactor
-            reactor.stop()
+            if reactor.running:
+                reactor.stop()
 
             event.accept()
         else:
@@ -65,14 +66,21 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
-    #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    import qt5reactor
+    is_wamp= False
 
-    # Add PyQT5 to twisted reactor
-    qt5reactor.install()
+    if is_wamp:
+        #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+        import qt5reactor
 
-    # Start the WAMP connection
-    # Connect the main window to the WAMP connection
-    runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1")
-    runner.run(MainWindow, auto_reconnect=True)
+        # Add PyQT5 to twisted reactor
+        qt5reactor.install()
 
+        # Start the WAMP connection
+        # Connect the main window to the WAMP connection
+        runner = ApplicationRunner(url=u"ws://localhost:55058/ws", realm=u"realm1")
+        runner.run(MainWindow, auto_reconnect=True)
+
+    else:
+        #app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+        MainWindow()
+        sys.exit(app.exec_())

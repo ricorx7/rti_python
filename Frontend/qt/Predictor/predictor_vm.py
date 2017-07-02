@@ -3,6 +3,8 @@ from subsystem_view import Ui_Subsystem
 from subsystem_vm import SubsystemVM
 from PyQt5.QtWidgets import QWidget
 
+import ADCP.Predictor.DataStorage as DS
+
 
 class PredictorVM(Ui_RoweTechPredictor):
     """
@@ -14,6 +16,11 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.setupUi(parent)
         self.parent = parent
 
+        # Calculated results
+        self.calc_power = 0.0
+        self.calc_data = 0.0
+        self.calc_num_batt = 0.0
+
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)
 
@@ -22,8 +29,15 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.tabSubsystem.tabCloseRequested.connect(self.tab_close_requested)
         self.calculateButton.clicked.connect(self.calculate)
 
+        # Recalculate when value changes
+        self.deploymentDurationSpinBox.valueChanged.connect(self.valueChanged)
+        self.ceiDoubleSpinBox.valueChanged.connect(self.valueChanged)
+
         # Create the list of subsystems
         self.init_list()
+
+        # Run initial Calculate
+        self.calculate()
 
     def init_list(self):
         # Add item to combobox.  Set the userData to subsystem code
@@ -49,8 +63,11 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Create the subsystem view
         # Add it to the Tab
         ssUI = Ui_Subsystem()
-        ssVM = SubsystemVM(self.tabSubsystem, self)
+        ssVM = SubsystemVM(self.tabSubsystem, self, ss)
         self.tabSubsystem.addTab(ssVM, ss)
+
+        # Recalculate
+        self.calculate()
 
     def tab_close_requested(self, index):
         """
@@ -60,8 +77,41 @@ class PredictorVM(Ui_RoweTechPredictor):
         """
         self.tabSubsystem.removeTab(index)
 
+        # Recalculate
+        self.calculate()
+
+    def valueChanged(self, value):
+        """
+        Use this to handle a value changed.
+        :param value: New value.
+        :return:
+        """
+        self.calculate()
+
     def calculate(self):
-        print(self.tabSubsystem.count())
+        """
+        Calculate the new prediction results.
+        :return:
+        """
+        # Clear the results
+        self.calc_power = 0.0
+        self.calc_data = 0.0
+        self.calc_num_batt = 0.0
+
         for tab in range(self.tabSubsystem.count()):
             self.tabSubsystem.widget(tab).calculate()
-            print(self.tabSubsystem.widget(tab).cwpblDoubleSpinBox.value())
+            # print(self.tabSubsystem.widget(tab).cwpblDoubleSpinBox.value())
+
+            # Accuulate the values
+            self.calc_data += self.tabSubsystem.widget(tab).calc_data
+            self.calc_num_batt += self.tabSubsystem.widget(tab).calc_num_batt
+            self.calc_power += self.tabSubsystem.widget(tab).calc_power
+
+
+        # Update the display
+        self.powerLabel.setText(str(round(self.calc_power, 2)) + " watts")
+        self.powerLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 2)) + " batteries")
+        self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue")
+        self.dataUsageLabel.setText(str(DS.bytes_2_human_readable(self.calc_data)))
+        self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue")

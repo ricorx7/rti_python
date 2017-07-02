@@ -220,7 +220,10 @@ def _calculate_storage_amount(_CWPBN_, _Beams_,
                                            IsE0000015)
 
     # Number of Ensembles
-    ensembles = round(_DeploymentDuration_ * 24 * 3600 / _CEI_)
+    if _CEI_ != 0:
+        ensembles = round(_DeploymentDuration_ * 24 * 3600 / _CEI_)
+    else:
+        ensembles = 0
 
     return ensembles * ensembleSize
 
@@ -275,8 +278,6 @@ def _calculate_burst_storage_amount(_CBI_NumEns_,
 
     # Divide total duration by burst duration to get number of burst in the deployment
     num_bursts = round(deployment_dur / _CBI_BurstInterval_)
-
-    print(num_bursts)
 
     return burst_mem * num_bursts
 
@@ -392,3 +393,33 @@ def _calculate_ensemble_size(_CWPBN_, _Beams_,
 
     return bytes_per_ensemble + checksum + wrapper
 
+
+def bytes_2_human_readable(number_of_bytes):
+    if number_of_bytes < 0:
+        raise ValueError("!!! numberOfBytes can't be smaller than 0 !!!")
+
+    step_to_greater_unit = 1024.
+
+    number_of_bytes = float(number_of_bytes)
+    unit = 'bytes'
+
+    if (number_of_bytes / step_to_greater_unit) >= 1:
+        number_of_bytes /= step_to_greater_unit
+        unit = 'KB'
+
+    if (number_of_bytes / step_to_greater_unit) >= 1:
+        number_of_bytes /= step_to_greater_unit
+        unit = 'MB'
+
+    if (number_of_bytes / step_to_greater_unit) >= 1:
+        number_of_bytes /= step_to_greater_unit
+        unit = 'GB'
+
+    if (number_of_bytes / step_to_greater_unit) >= 1:
+        number_of_bytes /= step_to_greater_unit
+        unit = 'TB'
+
+    precision = 1
+    number_of_bytes = round(number_of_bytes, precision)
+
+    return str(number_of_bytes) + ' ' + unit

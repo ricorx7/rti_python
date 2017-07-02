@@ -47,7 +47,7 @@ def calculate_power(**kwargs):
         print("Error opening predictor.JSON file", e)
         return 0.0
 
-    return _calculate_power( kwargs.pop('CEI', config['DEFAULT']['CEI']),
+    return _calculate_power(kwargs.pop('CEI', config['DEFAULT']['CEI']),
                             kwargs.pop('DeploymentDuration', config['DEFAULT']['DeploymentDuration']),
                             kwargs.pop('Beams', config['DEFAULT']['Beams']),
                             kwargs.pop('SystemFrequency', config['DEFAULT']['SystemFrequency']),
@@ -647,7 +647,11 @@ def _calculate_burst_power(_cei_, _deployment_duration_, _beams_, _system_freque
 
     # Get the number of burst per deployment duration
     deployment_dur = _deployment_duration_ * 3600 * 24
-    num_burst = round(deployment_dur / _burst_interval_)
+
+    if _burst_interval_ != 0:
+        num_burst = round(deployment_dur / _burst_interval_)
+    else:
+        num_burst = 0
 
     return burst_pwr * num_burst
 
