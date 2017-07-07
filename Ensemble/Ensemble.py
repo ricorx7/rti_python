@@ -28,7 +28,7 @@ class Ensemble:
     NUM_DATASET_HEADER_ELEMENTS = 6
 
     # Bad Velocity
-    BadVelocity = float(88.888)
+    BadVelocity = float(88.888000)
 
     def __init__(self):
         self.RawData = None

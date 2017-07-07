@@ -24,6 +24,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.freq = SS.ss_frequency(ss_code)
 
         self.freqLabel.setText("[" + str(ss_code) + "] - " + SS.ss_label(ss_code))
+        self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
 
         self.initList()
 
