@@ -1,6 +1,43 @@
 from enum import Enum
 
 
+class AdcpCmd:
+    """
+    ADCP Command.
+    """
+
+    def __init__(self, cmd, value):
+        self.cmd = cmd
+        self.value = value
+
+    def to_str(self, index):
+        """
+        Convert the command to a command string.
+        :param index: CEPO index.
+        :return: String with the index.
+        """
+        return self.cmd + '[' + str(index) + "] " + self.value
+
+
+def sec_to_hmss(sec):
+    """
+    Convert the seconds to a string of hh:mm:ss.ss
+    :param sec: Seconds.
+    :return: hh:mm:ss.ss
+    """
+    m, s = divmod(sec, 60)
+    h, m = divmod(m, 60)
+    hs_f = sec - int(sec)
+    hs = round(hs_f * 100, 2)
+
+    hour = str(int(h)).zfill(2)
+    minute = str(int(m)).zfill(2)
+    sec = str(int(s)).zfill(2)
+    hsec = str(int(hs)).zfill(2)
+
+    return hour + ":" + minute + ":" + sec + "." + hsec
+
+
 class eCWPBB_TransmitPulseType(Enum):
     """
     Enum used to select the different transmit pulse types.

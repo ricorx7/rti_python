@@ -1,10 +1,11 @@
+import datetime
 from predictor_view import Ui_RoweTechPredictor
 from subsystem_view import Ui_Subsystem
 from subsystem_vm import SubsystemVM
 from PyQt5.QtWidgets import QWidget
 
 import ADCP.Predictor.DataStorage as DS
-
+import ADCP.AdcpCommands as Commands
 
 class PredictorVM(Ui_RoweTechPredictor):
     """
@@ -27,7 +28,8 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.tabSubsystem.setTabsClosable(True)
         self.tabSubsystem.clear()
         self.tabSubsystem.tabCloseRequested.connect(self.tab_close_requested)
-        self.calculateButton.clicked.connect(self.calculate)
+        #self.calculateButton.clicked.connect(self.calculate)
+        self.saveCommandsButton.clicked.connect(self.save_to_file)
 
         # Recalculate when value changes
         self.deploymentDurationSpinBox.valueChanged.connect(self.valueChanged)
@@ -35,6 +37,10 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         # Create the list of subsystems
         self.init_list()
+
+        # Command file
+        self.cepo_list = []
+        self.command_file = []
 
         # Run initial Calculate
         self.calculate()
@@ -66,8 +72,12 @@ class PredictorVM(Ui_RoweTechPredictor):
         ssVM = SubsystemVM(self.tabSubsystem, self, ss)
         self.tabSubsystem.addTab(ssVM, ss)
 
+        # Add subsystem to CEPO
+        self.cepo_list.append(ss)
+
         # Recalculate
         self.calculate()
+
 
     def tab_close_requested(self, index):
         """
@@ -76,6 +86,9 @@ class PredictorVM(Ui_RoweTechPredictor):
         :return:
         """
         self.tabSubsystem.removeTab(index)
+
+        # Remove from the CEPO list
+        del self.cepo_list[index]
 
         # Recalculate
         self.calculate()
@@ -115,3 +128,37 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue")
         self.dataUsageLabel.setText(str(DS.bytes_2_human_readable(self.calc_data)))
         self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue")
+
+        # Update the command file
+        self.update_command_file()
+
+
+    def update_command_file(self):
+        self.commandFileTextBrowser.clear()
+
+        self.commandFileTextBrowser.append("CDEFAULT")
+
+        # CEPO List
+        cepo = "CEPO "
+        for ss in self.cepo_list:
+            cepo += ss
+        self.commandFileTextBrowser.append(cepo)
+
+        self.commandFileTextBrowser.append("CEI " + Commands.sec_to_hmss(self.ceiDoubleSpinBox.value()))
+
+        for tab in range(self.tabSubsystem.count()):
+            ss_cmd_list = self.tabSubsystem.widget(tab).get_cmd_list()
+            for ss_cmd in ss_cmd_list:
+                self.commandFileTextBrowser.append(ss_cmd.to_str(tab))
+
+        self.commandFileTextBrowser.append("CSAVE")
+        self.commandFileTextBrowser.append("START")
+
+    def save_to_file(self):
+
+        # Create a new file name based off date and time
+        file_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S_RTI_CFG.txt")
+
+        file = open(file_name, 'w')
+        file.write(self.commandFileTextBrowser.toPlainText())
+        file.close()

@@ -8,6 +8,10 @@ import ADCP.Predictor.STD as STD
 import ADCP.Predictor.DataStorage as DS
 import ADCP.Subsystem as SS
 
+import ADCP.AdcpCommands as Commands
+import datetime
+import time
+
 
 class SubsystemVM(Ui_Subsystem, QWidget):
     """
@@ -101,8 +105,8 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cwpbbComboBox.addItem("Broadband", 1)
         self.cwpbbComboBox.addItem("Narrowband", 0)
 
-        self.cbtbbComboBox.addItem("Broadband", "1")
-        self.cbtbbComboBox.addItem("Narrowband", "0")
+        self.cbtbbComboBox.addItem("Broadband", 1)
+        self.cbtbbComboBox.addItem("Narrowband", 0)
 
     def stateChanged(self, state):
         """
@@ -330,4 +334,133 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue")
         self.stdLabel.setText(str(round(self.calc_std, 4)) + " m/s")
         self.stdLabel.setStyleSheet("font-weight: bold; color: blue")
+
+
+    def get_cmd_list(self):
+        """
+        Create a list of commands.
+        :return: List of all the commands with the values.
+        """
+        command_list = []
+
+        if self.cwponCheckBox.isChecked():
+            # CWPON
+            if self.cwponCheckBox.isChecked():
+                command_list.append(Commands.AdcpCmd("CWPON", "1"))
+            else:
+                command_list.append(Commands.AdcpCmd("CWPON", "0"))
+
+            # CWPBB
+            cwpbb_val = self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex())
+            cwpbb_lag = str(self.cwpbbDoubleSpinBox.value())
+            command_list.append((Commands.AdcpCmd("CBTBB", str(cwpbb_val) + ", " + cwpbb_lag)))
+
+            command_list.append(Commands.AdcpCmd("CWPBL", str(self.cwpblDoubleSpinBox.value())))        # CWPBL
+            command_list.append(Commands.AdcpCmd("CWPBS", str(self.cwpbsDoubleSpinBox.value())))        # CWPBS
+            command_list.append(Commands.AdcpCmd("CWPBN", str(self.cwpbnSpinBox.value())))              # CWPBS
+            command_list.append(Commands.AdcpCmd("CWPP", str(self.cwppSpinBox.value())))                # CWPP
+            command_list.append(Commands.AdcpCmd("CWPTBP", str(self.cwptbpDoubleSpinBox.value())))      # CWPTBP
+
+        if self.cbtonCheckBox.isChecked():
+            # CBTON
+            if self.cbtonCheckBox.isChecked():
+                command_list.append(Commands.AdcpCmd("CBTON", "1"))
+            else:
+                command_list.append(Commands.AdcpCmd("CBTON", "0"))
+
+            #CBTBB
+            cbtbb_val = self.cbtbbComboBox.itemData(self.cbtbbComboBox.currentIndex())
+            if cbtbb_val == 0:
+                command_list.append((Commands.AdcpCmd("CBTBB", "0")))
+            else:
+                command_list.append((Commands.AdcpCmd("CBTBB", "7")))
+
+            command_list.append(Commands.AdcpCmd("CBTTBP", str(self.cbttbpDoubleSpinBox.value())))      # CBTTBP
+
+        if self.cbiEnabledCheckBox.isChecked():
+            cbi_num_ens = str(self.cbiNumEnsSpinBox.value())
+            cbi_interval = Commands.sec_to_hmss(self.cbiBurstIntervalDoubleSpinBox.value())
+            command_list.append(Commands.AdcpCmd("CBI", cbi_interval + ", " + cbi_num_ens + " ,0"))      # CBI
+
+        # CED
+        ced = ""
+        if self.cedBeamVelCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedInstrVelCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedEarthVelCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedAmpCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedCorrCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedBeamGoodPingCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedEarthGoodPingCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedEnsCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedAncCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedBtCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedNmeaCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedWpEngCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedBtEngCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedSysSettingCheckBox.isChecked():
+            ced += "1,"
+        else:
+            ced += "0,"
+
+        if self.cedRangeTrackingCheckBox.isChecked():
+            ced += "1"
+        else:
+            ced += "0"
+        command_list.append(Commands.AdcpCmd("CED", ced))               # CED
+
+
+        return command_list
+
 

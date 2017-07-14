@@ -393,7 +393,7 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Cased BinSamples and LagSamples to double because Truncate only takes doubles
     # Make the result of Truncate an int
-    if (math.trunc(bin_samples / lag_samples)) + 1.0 < 2.0:
+    elif (math.trunc(bin_samples / lag_samples)) + 1.0 < 2.0:
         code_repeats = 2
     else:
         code_repeats = (math.trunc(bin_samples / lag_samples)) + 1
@@ -432,11 +432,11 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
         if lag_samples == 0:
             xmt_scale = 0.0
 
-    # Check which Broadband power is used
-    if _broadband_power_:
-        xmt_scale = (lag_samples - 1.0) / lag_samples
-    else:
-        xmt_scale = 1.0 / lag_samples
+        # Check which Broadband power is used
+        elif _broadband_power_:
+            xmt_scale = (lag_samples - 1.0) / lag_samples
+        else:
+            xmt_scale = 1.0 / lag_samples
 
 
     # Transmit Watt

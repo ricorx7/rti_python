@@ -391,9 +391,8 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
         # Check for bad value
         if lagSamples == 0:
             xmtScale = 1.0
-
         # Check which Broadband power is used
-        if _BroadbandPower_:
+        elif _BroadbandPower_:
             xmtScale = (lagSamples - 1.0) / lagSamples
         else:
             xmtScale = 1.0 / lagSamples
@@ -462,7 +461,6 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
     elif (_SystemFrequency_ > config["DEFAULT"]["600000"]["FREQ"]) and (_SystemFrequency_ < config["DEFAULT"]["1200000"]["FREQ"]):      # 600 khz
         bt = btRange_600000
         wp = wpRange_600000 + rangeReduction
-        print("!!!600")
     elif (_SystemFrequency_ > config["DEFAULT"]["300000"]["FREQ"]) and (_SystemFrequency_ < config["DEFAULT"]["600000"]["FREQ"]):       # 300 khz
         bt = btRange_300000
         wp = wpRange_300000 + rangeReduction

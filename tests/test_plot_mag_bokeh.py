@@ -78,12 +78,14 @@ class PlotMagnitude:
                 ("desc", "@desc"),
             ])
 
+            TOOLS = "hover,save,pan,box_zoom,reset,wheel_zoom"
+
             hm = HeatMap(self.df_mag_ens, x='ens', y='bin', values='mag',
                          stat=None,
                          sort_dim={'x': False},
                          width=1000,
                          spacing_ratio=0.9,
-                         tools=[hover],
+                         tools=TOOLS,
                          toolbar_location="above",          # Move toolbar to top
                          toolbar_sticky=False)              # Make toolbar not to close to plot
 
