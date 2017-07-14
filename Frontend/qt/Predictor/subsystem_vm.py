@@ -335,6 +335,18 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.stdLabel.setText(str(round(self.calc_std, 4)) + " m/s")
         self.stdLabel.setStyleSheet("font-weight: bold; color: blue")
 
+        self.pingingTextBrowser.clear()
+        if self.cbiEnabledCheckBox.isChecked():
+            self.pingingTextBrowser.setText(Commands.pretty_print_burst(self.predictor.ceiDoubleSpinBox.value(),
+                                                                  self.cbiBurstIntervalDoubleSpinBox.value(),
+                                                                  self.cbiNumEnsSpinBox.value(),
+                                                                  self.cwppSpinBox.value(),
+                                                                  self.cwptbpDoubleSpinBox.value()))
+        else:
+            self.pingingTextBrowser.setText(Commands.pretty_print_standard(self.predictor.ceiDoubleSpinBox.value(),
+                                                                     self.cwppSpinBox.value(),
+                                                                     self.cwptbpDoubleSpinBox.value()))
+        self.pingingTextBrowser.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt; background-color: transparent")
 
     def get_cmd_list(self):
         """
@@ -385,79 +397,81 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         # CED
         ced = ""
         if self.cedBeamVelCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedInstrVelCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedEarthVelCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedAmpCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedCorrCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedBeamGoodPingCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedEarthGoodPingCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedEnsCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedAncCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedBtCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedNmeaCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedWpEngCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedBtEngCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedSysSettingCheckBox.isChecked():
-            ced += "1,"
+            ced += "1"
         else:
-            ced += "0,"
+            ced += "0"
 
         if self.cedRangeTrackingCheckBox.isChecked():
             ced += "1"
         else:
             ced += "0"
+
+        ced += "00000000000000000"
         command_list.append(Commands.AdcpCmd("CED", ced))               # CED
 
 

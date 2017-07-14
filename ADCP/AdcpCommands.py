@@ -38,6 +38,116 @@ def sec_to_hmss(sec):
     return hour + ":" + minute + ":" + sec + "." + hsec
 
 
+def pretty_print_sec(sec):
+    """
+    Pretty print the seconds to days, hours, minutes, seconds and milliseconds.
+    :param sec: Seconds in time.
+    :return: Days, hours, minutes, seconds and milliseconds.
+    """
+
+    seconds = abs(int(sec))
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    hs_f = sec - int(sec)
+    hs = round(hs_f * 100, 2)
+    ms = int(hs * 10)
+
+    result = ""
+
+    if days > 0:
+        result += str(days) + " day"
+        if days > 1:
+            result += "s "
+        else:
+            result += " "
+    if hours > 0:
+        result += str(hours) + " hour"
+        if hours > 1:
+            result += "s "
+        else:
+            result += " "
+    if minutes > 0:
+        result += str(minutes) + " minute"
+        if minutes > 1:
+            result += "s "
+        else:
+            result += " "
+    if seconds > 0:
+        result += str(seconds) + " second"
+        if seconds > 1:
+            result += "s "
+        else:
+            result += " "
+    if ms > 0:
+        result += str(ms) + " millisecond"
+        if ms > 1:
+            result + "s"
+
+    return result
+
+
+def pretty_print_burst(cei, burst_interval, num_ens, cwpp, cwptbp):
+    """
+    Measure XXX ensembles in XXX days XXX hours XXX minutes XXX seconds XXX milliseconds.
+    XXX minutes between each ensemble.
+    Average XXX pings over XXX minutes.
+    Burst length is XXX hours.
+    BURST MEASUREMENT WILL TAKE LONGER THAN BURST LENGTH
+    :param cei:
+    :param burst_interval:
+    :param num_ens:
+    :return:
+    """
+    burst_interval_str = pretty_print_sec(burst_interval)
+    cei_str = pretty_print_sec(cei)
+    burst_measure = num_ens * cei
+    avg_time = cwpp * cwptbp
+    avg_time_str = pretty_print_sec(avg_time)
+    if cwpp > 1:
+        burst_measure = (num_ens * (cwpp * cwptbp)) * cei
+    burst_measure_str = pretty_print_sec(burst_measure)
+
+    result = ""
+    result += "-Measuring " + str(num_ens) + " ensembles in " + burst_measure_str + "\n"
+    result += "-Output an ensemble every " + cei_str + "\n"
+    if cwpp > 1:
+        result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
+    result += "-Take a burst measurement every " + burst_interval_str + "\n"
+
+    if burst_measure > burst_interval:
+        result += "*BURST MEASURMENT WILL TAKE LONGER THAN BURST LENGTH!"
+
+    return result
+
+
+def pretty_print_standard(cei, cwpp, cwptbp):
+    """
+    Using the values, print out the pinging strategy.
+    XXX seconds between each ensemble
+    Average XXX pings over XXX minutes
+    AVERAGING WILL TAKE LONGER THAN CEI
+    :param cei: Time between ensembles.
+    :param cwpp: Number of pings to average.
+    :param cwptbp: Time between pings.
+    :return: String describing the pinging.
+    """
+
+    cei_str = pretty_print_sec(cei)
+    avg_time = cwpp * cwptbp
+    avg_time_str = pretty_print_sec(avg_time)
+
+    result = ""
+    result += "-Output an ensemble every " + cei_str + "\n"
+
+    if cwpp > 1:
+        result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
+
+    if avg_time > cei:
+        result += "*AVERAGING WILL TAKE LONGER THAN CEI"
+
+    return result
+
 class eCWPBB_TransmitPulseType(Enum):
     """
     Enum used to select the different transmit pulse types.

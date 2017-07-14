@@ -124,7 +124,7 @@
         <double>86400.000000000000000</double>
        </property>
        <property name="value">
-        <double>900.000000000000000</double>
+        <double>3600.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -528,6 +528,9 @@
      <height>251</height>
     </rect>
    </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
    <property name="title">
     <string>Predictions</string>
    </property>
@@ -536,20 +539,20 @@
      <rect>
       <x>250</x>
       <y>30</y>
-      <width>231</width>
+      <width>351</width>
       <height>101</height>
      </rect>
     </property>
     <property name="title">
      <string>Range</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
        <width>211</width>
-       <height>61</height>
+       <height>66</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
@@ -613,19 +616,19 @@
       <x>10</x>
       <y>130</y>
       <width>231</width>
-      <height>81</height>
+      <height>91</height>
      </rect>
     </property>
     <property name="title">
      <string>Velocity</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
        <width>211</width>
-       <height>41</height>
+       <height>42</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
@@ -678,13 +681,13 @@
     <property name="title">
      <string>Power and Data</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
        <width>211</width>
-       <height>61</height>
+       <height>68</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -748,21 +751,29 @@
      </layout>
     </widget>
    </widget>
-   <zorder>label_16</zorder>
-   <zorder>label_18</zorder>
-   <zorder>label_20</zorder>
-   <zorder>label_25</zorder>
-   <zorder>label_19</zorder>
-   <zorder>maxVelLabel</zorder>
-   <zorder>label_21</zorder>
-   <zorder>stdLabel</zorder>
-   <zorder>label_25</zorder>
-   <zorder>wpRangeLabel</zorder>
-   <zorder>label_27</zorder>
-   <zorder>btRangeLabel</zorder>
-   <zorder>groupBox_7</zorder>
-   <zorder>groupBox_8</zorder>
-   <zorder>groupBox_9</zorder>
+   <widget class="QGroupBox" name="groupBox_10">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>130</y>
+      <width>351</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Pinging</string>
+    </property>
+    <widget class="QTextBrowser" name="pingingTextBrowser">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>331</width>
+       <height>71</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QLabel" name="freqLabel">
    <property name="geometry">

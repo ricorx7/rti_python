@@ -29,6 +29,9 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
         self.main_window_init()
 
     def main_window_init(self):
+        # Set the title of the window
+        self.setWindowTitle("RoweTech Predictr")
+
         # Show the main window
         self.show()
 
