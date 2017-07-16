@@ -17,4 +17,5 @@ qdarkstyle
 crossbar
 pytest
 pandas==0.19.2
+pyinstaller
 scipy

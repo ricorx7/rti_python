@@ -31,6 +31,11 @@ crossbar start
 This will start the WAMP server, the serial port and GUI
 
 
+Create Predictr application
+---------------------
+pyinstaller Predictr_installer.spec --windowed --onefile
+
+
 Compile QT5 .UI files
 ---------------------
 ```javascript

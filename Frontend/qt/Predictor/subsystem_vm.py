@@ -232,7 +232,9 @@ class SubsystemVM(Ui_Subsystem, QWidget):
 
         self.calc_num_batt = Power.calculate_number_batteries(DeploymentDuration=deployment, PowerUsage=self.calc_power)
 
-        range = Range.calculate_predicted_range(SystemFrequency=self.freq,
+
+
+        (bt_range, wp_range, first_bin, cfg_range) = Range.calculate_predicted_range(SystemFrequency=self.freq,
                                                 Beams=self.numBeamsSpinBox.value(),
                                                 CWPON=self.cwponCheckBox.isChecked(),
                                                 CWPBL=self.cwpblDoubleSpinBox.value(),
@@ -244,10 +246,10 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                                                 CWPTBP=self.cwptbpDoubleSpinBox.value(),
                                                 CBTON=self.cbtonCheckBox.isChecked())
 
-        self.calc_wp_range = range[1]
-        self.calc_bt_range = range[0]
-        self.calc_first_bin = range[2]
-        self.calc_cfg_wp_range = range[3]
+        self.calc_bt_range = bt_range
+        self.calc_wp_range = wp_range
+        self.calc_first_bin = first_bin
+        self.calc_cfg_wp_range = cfg_range
 
         self.calc_max_vel = Velocity.calculate_max_velocity(SystemFrequency=self.freq,
                                                             Beams=self.numBeamsSpinBox.value(),

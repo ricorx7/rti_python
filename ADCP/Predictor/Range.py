@@ -30,7 +30,7 @@ def calculate_predicted_range(**kwargs):
         config = json.loads(open(json_file_path).read())
     except Exception as e:
         print("Error opening JSON file", e)
-        return 0.0
+        return (0.0, 0.0, 0.0, 0.0)
 
     return _calculate_predicted_range(kwargs.pop('CWPON', config['DEFAULT']['CWPON']),
                                         kwargs.pop('CWPBB', config['DEFAULT']['CWPBB']),
@@ -474,4 +474,4 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
         bt = btRange_38000;
         wp = wpRange_38000 + rangeReduction;
 
-    return bt, wp, firstBinPosition, profileRangeSettings;
+    return (bt, wp, firstBinPosition, profileRangeSettings)
