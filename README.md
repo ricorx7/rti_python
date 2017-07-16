@@ -33,8 +33,19 @@ This will start the WAMP server, the serial port and GUI
 
 Create Predictr application
 ---------------------
-pyinstaller Predictr_installer.spec --windowed --onefile
+```javascript
+pyinstaller Predictr_installer.spec
+```
 
+This will create a dist and build folder.  The exe in is the dist folder.
+
+
+To create a new spec file
+```javascript
+pyinstaller /path/to/mainwindow.py --windowed --onefile
+```
+You will need to add the predictor.json to the data=[] in the spec file.
+Use the previous spec files as an example.
 
 Compile QT5 .UI files
 ---------------------
