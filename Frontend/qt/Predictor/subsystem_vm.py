@@ -121,7 +121,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
             cmds = json.loads(open(json_file_path).read())
         except Exception as e:
             print("Error opening predictor.JSON file", e)
-            return 
+            return
 
         self.cwpbbDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
         self.cwpbbComboBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
