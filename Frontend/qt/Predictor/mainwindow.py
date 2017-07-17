@@ -68,6 +68,7 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle("Mac")
 
     is_wamp= False
 
