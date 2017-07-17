@@ -1,4 +1,17 @@
 {
+    "CWPBL": {
+        "type": "float",
+        "min": 0.01,
+        "max": 100.0,
+        "desc": [
+                "CWPBL n.nn<CR>",
+                "Water Profile Blank (meters).",
+                "",
+                "n.nn = 0 to 100.",
+                "",
+                "Sets the vertical range from the face of the transducer to the first sample of the first bin."
+        ]
+    }
 	"CWPBS": {
 		"type": "float",
         "min": 0.01,

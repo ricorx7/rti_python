@@ -112,10 +112,11 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cbtbbComboBox.addItem("Narrowband", 0)
 
     def set_tooltips(self):
-        # Get the configuration from the json file
+        # Get the descriptions from the json file
+        #script_dir = ""
         script_dir = os.path.dirname(__file__)
         # The path to this JSON file will not work if run from python script
-        # But if built as an applicaiton with pyinstaller, this path will work
+        # But if built as an application with pyinstaller, this path will work
         json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
         try:
             cmds = json.loads(open(json_file_path).read())
