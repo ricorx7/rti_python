@@ -10,6 +10,8 @@ of utility applications.
 Dependicencies
 ------------
 
+Must use Python version 3.5
+
 OSX and Linux
 ```python
 pip3 install -r requirements.txt -UI --user
@@ -33,19 +35,36 @@ This will start the WAMP server, the serial port and GUI
 
 Create Predictr application
 ---------------------
+OSX
 ```javascript
-pyinstaller Predictr_installer.spec
+pyinstaller Predictr_installer_OSX.spec
+```
+
+Windows
+```javascript
+C:\Users\XXX\AppData\Local\Programs\Python\Python35\Scripts\pyinstaller.exe Predictr_installer_WIN.spec
 ```
 
 This will create a dist and build folder.  The exe in is the dist folder.
 
 
 To create a new spec file
+
+OSX
 ```javascript
 pyinstaller /path/to/mainwindow.py --windowed --onefile
 ```
+
+Windows
+```javascript
+C:\Users\XXX\AppData\Local\Programs\Python\Python35\Scripts\pyinstaller.exe  --windowed --onefile --paths C:\Users\XXX\AppData\Roaming\Python\Python35\site-packages\PyQt5\Qt\bin /path/to/mainwindow.py
+```
+
 You will need to add the predictor.json to the data=[] in the spec file.
-Use the previous spec files as an example.
+Use the spec files as an example for the data=[] settings.
+
+Windows must include the path to PyQT5 DLL files.
+
 
 Compile QT5 .UI files
 ---------------------
