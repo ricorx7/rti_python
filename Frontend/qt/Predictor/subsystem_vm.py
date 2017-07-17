@@ -1,3 +1,5 @@
+import json
+import os
 from subsystem_view import Ui_Subsystem
 from PyQt5.QtWidgets import QWidget
 
@@ -31,6 +33,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
 
         self.initList()
+        self.set_tooltips()
 
         # Get the checkbox state
         self.cwponCheckBox.stateChanged.connect(self.cwpon_enable_disable)
@@ -107,6 +110,26 @@ class SubsystemVM(Ui_Subsystem, QWidget):
 
         self.cbtbbComboBox.addItem("Broadband", 1)
         self.cbtbbComboBox.addItem("Narrowband", 0)
+
+    def set_tooltips(self):
+        # Get the configuration from the json file
+        script_dir = os.path.dirname(__file__)
+        # The path to this JSON file will not work if run from python script
+        # But if built as an applicaiton with pyinstaller, this path will work
+        json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
+        try:
+            cmds = json.loads(open(json_file_path).read())
+        except Exception as e:
+            print("Error opening predictor.JSON file", e)
+            return 
+
+        self.cwpbbDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
+        self.cwpbbComboBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
+        self.cwpbsDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBS"]["desc"]))
+
+
+    #def get_tooltip(self, desc_array):
+    #    return '\n'.join([str(x) for x in desc_array])
 
     def stateChanged(self, state):
         """

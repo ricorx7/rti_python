@@ -1,0 +1,50 @@
+{
+	"CWPBS": {
+		"type": "float",
+        "min": 0.01,
+        "max": 100.0,
+		"desc": [
+			"CWPBS n.nn<CR>",
+			"Water Profile Bin Size (meters)",
+			"",
+			"n.nn sets the vertical bin size."
+		]
+	},
+    "CWPBB": {
+        "type": "float",
+        "min": 0,
+        "max": 0,
+        "desc": [
+                "CWPBB 1, 2, 3, 4<CR>",
+                "Water Profile Broad Band. Sets water profile coded pulse transmission and lag.",
+                "",
+                "1. Transmit Pulse Type and Processing",
+                "   0 = Narrowband.",
+                "          i. Provides long range profiles at the expense of variance.",
+                "          ii. Not recommended for use with bin size less than the default bin size.",
+                "   1 = Broadband.",
+                "          i. Typically 15% less range than narrow band but has greatly reduced variance (depending on lag length).",
+                "          ii. Used in conjunction with CWPBP for small bins.",
+                "   2 = Un-coded Broadband (no ambiguity resolver).",
+                "          i. Non-coded has slightly higher variance than the coded transmit without the annoying autocorrelation side peaks. Better for small bins.",
+                "   3 = Broadband pulse-to-pulse (no ambiguity resolver).",
+                "          i. Provides ultra low variance for small bin sizes.",
+                "   4 = Non Coded Broadband pulse-to-pulse (no ambiguity resolver).",
+                "          i. Provides ultra low variance for small bin sizes.",
+                "   5 = Broadband with ambiguity resolver ping.",
+                "          i. Used in conjunction with CWPBP averaging.",
+                "   6 = Broadband pulse to pulse with pulse to pulse ambiguity resolver ping.",
+                "          i. Used in conjunction with CWPAP.",
+                "",
+                "2. Lag length in vertical meters (m).",
+                "   a. Not used with Narrowband.",
+                "   b. A longer lag will have lower variance and a lower ambiguity velocity.",
+                "",
+                "3. Transmit Bandwidth",
+                "   a. Not fully implemented",
+                "",
+                "4. Receive Bandwidth",
+                "   a. Not fully implemented"
+        ]
+    }
+}

@@ -19,6 +19,9 @@ class AdcpCmd:
         return self.cmd + '[' + str(index) + "] " + self.value
 
 
+def get_tooltip(desc_array):
+    return '\n'.join([str(x) for x in desc_array])
+
 def sec_to_hmss(sec):
     """
     Convert the seconds to a string of hh:mm:ss.ss

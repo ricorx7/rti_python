@@ -39,6 +39,9 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Create the list of subsystems
         self.init_list()
 
+        # Set the tooltips from the JSON file
+        #self.set_tooltips()
+
         # Command file
         self.cepo_list = []
         self.command_file = []
