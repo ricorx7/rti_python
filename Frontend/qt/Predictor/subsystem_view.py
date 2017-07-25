@@ -303,6 +303,7 @@ class Ui_Subsystem(object):
         self.pingingTextBrowser.setObjectName("pingingTextBrowser")
         self.freqLabel = QtWidgets.QLabel(Subsystem)
         self.freqLabel.setGeometry(QtCore.QRect(260, 10, 211, 16))
+        self.freqLabel.setText("")
         self.freqLabel.setObjectName("freqLabel")
         self.groupBox_6 = QtWidgets.QGroupBox(Subsystem)
         self.groupBox_6.setGeometry(QtCore.QRect(10, 340, 311, 61))
@@ -369,7 +370,6 @@ class Ui_Subsystem(object):
         self.label_16.setText(_translate("Subsystem", "Power Usage: "))
         self.label_29.setText(_translate("Subsystem", "Data Usage: "))
         self.groupBox_10.setTitle(_translate("Subsystem", "Pinging"))
-        self.freqLabel.setText(_translate("Subsystem", "TextLabel"))
         self.groupBox_6.setTitle(_translate("Subsystem", "Beams"))
         self.label_15.setText(_translate("Subsystem", "Number of Beams"))
 

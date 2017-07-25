@@ -3,6 +3,7 @@ import os
 from predictor_view import Ui_RoweTechPredictor
 from subsystem_view import Ui_Subsystem
 from subsystem_vm import SubsystemVM
+import ADCP.Subsystem as SS
 from PyQt5.QtWidgets import QWidget
 
 import ADCP.Predictor.DataStorage as DS
@@ -25,6 +26,7 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)
+        self.addSubsystemButton.setStyleSheet("background: lightgreen")
 
         self.tabSubsystem.setTabsClosable(True)
         self.tabSubsystem.clear()
@@ -74,7 +76,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Add it to the Tab
         ssUI = Ui_Subsystem()
         ssVM = SubsystemVM(self.tabSubsystem, self, ss)
-        self.tabSubsystem.addTab(ssVM, ss)
+        self.tabSubsystem.addTab(ssVM, "[" + str(ss) + "] - " + SS.ss_label(ss))
 
         # Add subsystem to CEPO
         self.cepo_list.append(ss)

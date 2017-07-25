@@ -32,6 +32,9 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.freqLabel.setText("[" + str(ss_code) + "] - " + SS.ss_label(ss_code))
         self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
 
+        #self.closeTabButton.setStyleSheet("background: red")
+        #self.closeTabButton.clicked.connect(self.closeTab)              # Close this tab button
+
         self.initList()
         self.set_tooltips()
 
@@ -42,9 +45,10 @@ class SubsystemVM(Ui_Subsystem, QWidget):
 
         # Init defaults
         self.cwponCheckBox.setCheckState(2)
-        self.cbtonCheckBox.setCheckState(2)
+        self.cbtonCheckBox.setCheckState(0)
+        self.cbton_enable_disable(0)                    # Disable CBTON by default
         self.cbiEnabledCheckBox.setCheckState(0)
-        self.cbi_enable_disable(0)
+        self.cbi_enable_disable(0)                      # Disable CBI by default
         self.cedBeamVelCheckBox.setCheckState(2)
         self.cedInstrVelCheckBox.setCheckState(2)
         self.cedEarthVelCheckBox.setCheckState(2)
@@ -60,6 +64,10 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cedBtEngCheckBox.setCheckState(2)
         self.cedSysSettingCheckBox.setCheckState(2)
         self.cedRangeTrackingCheckBox.setCheckState(2)
+
+        # Check SS code to know how many beams
+        if self.ss_code == 'A' or self.ss_code == 'B' or self.ss_code == 'C' or self.ss_code == 'D' or self.ss_code == 'E':
+            self.numBeamsSpinBox.setValue(1)
 
         # Calculated results
         self.calc_power = 0.0
@@ -110,6 +118,13 @@ class SubsystemVM(Ui_Subsystem, QWidget):
 
         self.cbtbbComboBox.addItem("Broadband", 1)
         self.cbtbbComboBox.addItem("Narrowband", 0)
+
+    def closeTab(self):
+        """
+        Close this tab.
+        :return:
+        """
+        self.predictor.tab_close_requested(self.index)
 
     def set_tooltips(self):
         # Get the descriptions from the json file
