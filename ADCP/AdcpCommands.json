@@ -11,7 +11,7 @@
                 "",
                 "Sets the vertical range from the face of the transducer to the first sample of the first bin."
         ]
-    }
+    },
 	"CWPBS": {
 		"type": "float",
         "min": 0.01,
@@ -52,6 +52,7 @@
                 "2. Lag length in vertical meters (m).",
                 "   a. Not used with Narrowband.",
                 "   b. A longer lag will have lower variance and a lower ambiguity velocity.",
+                "   c. Increasing the lag length will improve the accuracy but decrease the maximum velocity that can be measured.",
                 "",
                 "3. Transmit Bandwidth",
                 "   a. Not fully implemented",
@@ -59,5 +60,87 @@
                 "4. Receive Bandwidth",
                 "   a. Not fully implemented"
         ]
+    },
+    "Setups": {
+      "Default": {
+        "1200": {
+          "CWPON": true,
+          "CWPBL": 0.4,
+          "CWPBS": 1.0,
+          "CWPBN": 30,
+          "CWPBB_Lag": 0.02,
+          "CWPP": 1,
+          "CWPTBP": 0.13,
+          "CBTON": false,
+          "CBTBB": 7,
+          "CBTTBP": 0.05,
+          "CBI_Enabled": false,
+          "CBI_BusrtInterval": 3600.0,
+          "CBI_NumEns": 1024,
+          "CBI_Interleaved": false,
+          "CWPRT_Mode": 0,
+          "CWPRT_MinBin": 0,
+          "CWPRT_MaxBin": 30,
+          "CWPRT_Pressure": 0.5
+        },
+        "600": {
+          "CWPON": true,
+          "CWPBL": 0.8,
+          "CWPBS": 2.0,
+          "CWPBN": 30,
+          "CWPBB_Lag": 0.4,
+          "CWPP": 1,
+          "CWPTBP": 0.25,
+          "CBTON": false,
+          "CBTBB": 7,
+          "CBTTBP": 0.13,
+          "CBI_Enabled": false,
+          "CBI_BusrtInterval": 3600.0,
+          "CBI_NumEns": 1024,
+          "CBI_Interleaved": false,
+          "CWPRT_Mode": 0,
+          "CWPRT_MinBin": 0,
+          "CWPRT_MaxBin": 30,
+          "CWPRT_Pressure": 0.5
+        },
+        "300": {
+          "CWPON": true,
+          "CWPBL": 1.6,
+          "CWPBS": 4.0,
+          "CWPBN": 30,
+          "CWPBB_Lag": 0.8,
+          "CWPP": 1,
+          "CWPTBP": 0.25,
+          "CBTON": false,
+          "CBTBB": 7,
+          "CBTTBP": 0.13,
+          "CBI_Enabled": false,
+          "CBI_BusrtInterval": 3600.0,
+          "CBI_NumEns": 1024,
+          "CBI_Interleaved": false,
+          "CWPRT_Mode": 0,
+          "CWPRT_MinBin": 0,
+          "CWPRT_MaxBin": 30,
+          "CWPRT_Pressure": 0.5
+        }
+      },
+      "MovingBoat": {
+
+      },
+      "Shallow": {
+
+      },
+      "ShallowSlowMoving": {
+
+      },
+      "Waves": {
+
+      },
+      "DVL": {
+
+      },
+      "UpwardFacing": {
+
+      }
     }
 }

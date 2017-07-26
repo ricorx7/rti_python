@@ -90,6 +90,22 @@ def pretty_print_sec(sec):
     return result
 
 
+def pretty_print_m(length):
+    """
+    Print the distance scaled.
+    :param length: Length in meters.
+    :return: String of the distanced scaled.
+    """
+    if length < 1.0:
+        return str(round((length*100), 2)) + " cm"
+
+    if length >= 1000:
+        return str(round(length/1000), 2) + " km"
+
+    return str(round(length, 2)) + " m"
+
+
+
 def pretty_print_burst(cei, burst_interval, num_ens, cwpp, cwptbp):
     """
     Measure XXX ensembles in XXX days XXX hours XXX minutes XXX seconds XXX milliseconds.
@@ -116,10 +132,14 @@ def pretty_print_burst(cei, burst_interval, num_ens, cwpp, cwptbp):
     result += "-Output an ensemble every " + cei_str + "\n"
     if cwpp > 1:
         result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
+
+        if avg_time > cei:
+            result += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
+
     result += "-Take a burst measurement every " + burst_interval_str + "\n"
 
     if burst_measure > burst_interval:
-        result += "*BURST MEASURMENT WILL TAKE LONGER THAN BURST LENGTH!"
+        result += "*BURST MEASUREMENT WILL TAKE LONGER THAN BURST LENGTH!\n"
 
     return result
 
@@ -147,9 +167,63 @@ def pretty_print_standard(cei, cwpp, cwptbp):
         result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
 
     if avg_time > cei:
-        result += "*AVERAGING WILL TAKE LONGER THAN CEI"
+        result += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
 
     return result
+
+
+def pretty_print_accuracy(max_vel, std):
+    """
+    Print out the max velocity and accuracy of the measurement.
+    -The boat and water speed cannot exceed XXXm/s or XXXknots
+    -The accuracy of the measurement is +/- XXXcm/s
+    :param max_vel: Maximum Velocity in m/s.
+    :param std: Standard Deviation in m/s.
+    :return: String describing the max vel and accuracy.
+    """
+    max_vel_knots = max_vel * 1.94384
+    max_vel_mph = max_vel * 2.23694
+    std_cm_s = std * 100
+    max_vel_str = str(round(max_vel, 2))
+    max_vel_knots_str = str(round(max_vel_knots, 2))
+    max_vel_mph_str = str(round(max_vel_mph, 2))
+    std_cm_str = str(round(std_cm_s, 2))
+
+    result = ""
+    result += "-The boat and water speed combined cannot exceed " + max_vel_str + " m/s or " + max_vel_knots_str + " knots or " + max_vel_mph_str + " mph\n"
+    result += "-The accuracy of the measurement is +/- " + std_cm_str + " cm/s"
+
+    if max_vel < 2.8:
+        result += "\n*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"
+
+    return result
+
+
+def pretty_print_cfg_depth(blank, bin_size, num_bin, calc_first_bin):
+    """
+    Print the configured Water Profile depth of the ADCP and the first bin position.
+    The first measurement will begin XXX m below the ADCP.
+    It is configured to Water Profile to a depth of XXX m.
+    :param blank: Blank setting in meters (CWPBL).
+    :param bin_size: Bin size in meters (CWPBS).
+    :param num_bin: Number of bins (CWPBN).
+    :param calc_first_bin: Calculated first bin position in meters.
+    :return: Configured water profile range and first bin position.
+    """
+
+    result = ""
+
+    cfg_range = blank + (bin_size * num_bin)
+    range_str = pretty_print_m(cfg_range)
+    first_bin_str = pretty_print_m(calc_first_bin)
+
+    result += "-The first measurement will begin " + first_bin_str + " below the ADCP.\n"
+    result += "-Measure the Water Profile to a depth of " + range_str + ".\n"
+
+
+
+    return result
+
 
 class eCWPBB_TransmitPulseType(Enum):
     """

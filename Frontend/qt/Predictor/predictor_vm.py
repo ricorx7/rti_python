@@ -37,12 +37,15 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Recalculate when value changes
         self.deploymentDurationSpinBox.valueChanged.connect(self.valueChanged)
         self.ceiDoubleSpinBox.valueChanged.connect(self.valueChanged)
+        self.cwsSpinBox.valueChanged.connect(self.valueChanged)
 
         # Create the list of subsystems
         self.init_list()
 
         # Set the tooltips from the JSON file
         #self.set_tooltips()
+
+        self.parent.statusBar().showMessage('Add a subsystem to begin configuring...')
 
         # Command file
         self.cepo_list = []
@@ -76,13 +79,16 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Add it to the Tab
         ssUI = Ui_Subsystem()
         ssVM = SubsystemVM(self.tabSubsystem, self, ss)
-        self.tabSubsystem.addTab(ssVM, "[" + str(ss) + "] - " + SS.ss_label(ss))
+        ss_label = "[" + str(ss) + "] - " + SS.ss_label(ss)
+        self.tabSubsystem.addTab(ssVM, ss_label)
 
         # Add subsystem to CEPO
         self.cepo_list.append(ss)
 
         # Recalculate
         self.calculate()
+
+        self.parent.statusBar().showMessage(ss_label + ' added to configuration.')
 
 
     def tab_close_requested(self, index):
@@ -151,6 +157,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.commandFileTextBrowser.append(cepo)
 
         self.commandFileTextBrowser.append("CEI " + Commands.sec_to_hmss(self.ceiDoubleSpinBox.value()))
+        self.commandFileTextBrowser.append("CWS " + str(self.cwsSpinBox.value()))
 
         for tab in range(self.tabSubsystem.count()):
             ss_cmd_list = self.tabSubsystem.widget(tab).get_cmd_list()

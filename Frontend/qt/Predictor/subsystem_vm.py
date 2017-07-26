@@ -35,7 +35,18 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         #self.closeTabButton.setStyleSheet("background: red")
         #self.closeTabButton.clicked.connect(self.closeTab)              # Close this tab button
 
-        self.initList()
+        # Calculated results
+        self.calc_power = 0.0
+        self.calc_data = 0.0
+        self.calc_num_batt = 0.0
+        self.calc_max_vel = 0.0
+        self.calc_std = 0.0
+        self.calc_first_bin = 0.0
+        self.calc_wp_range = 0.0
+        self.calc_bt_range = 0.0
+        self.calc_cfg_wp_range = 0.0
+
+        self.init_list()
         self.set_tooltips()
 
         # Get the checkbox state
@@ -69,17 +80,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         if self.ss_code == 'A' or self.ss_code == 'B' or self.ss_code == 'C' or self.ss_code == 'D' or self.ss_code == 'E':
             self.numBeamsSpinBox.setValue(1)
 
-        # Calculated results
-        self.calc_power = 0.0
-        self.calc_data = 0.0
-        self.calc_num_batt = 0.0
-        self.calc_max_vel = 0.0
-        self.calc_std = 0.0
-        self.calc_first_bin = 0.0
-        self.calc_wp_range = 0.0
-        self.calc_bt_range = 0.0
-        self.calc_cfg_wp_range = 0.0
-
         # Watch for changes to recalculate
         self.cedBeamVelCheckBox.stateChanged.connect(self.stateChanged)
         self.cedInstrVelCheckBox.stateChanged.connect(self.stateChanged)
@@ -107,17 +107,33 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cbttbpDoubleSpinBox.valueChanged.connect(self.valueChanged)
         self.cbiBurstIntervalDoubleSpinBox.valueChanged.connect(self.valueChanged)
         self.cbiNumEnsSpinBox.valueChanged.connect(self.valueChanged)
+        self.cbiInterleaveCheckBox.stateChanged.connect(self.valueChanged)
         self.numBeamsSpinBox.valueChanged.connect(self.valueChanged)
 
         # Show initial results
         self.calculate()
 
-    def initList(self):
+    def init_list(self):
         self.cwpbbComboBox.addItem("Broadband", 1)
         self.cwpbbComboBox.addItem("Narrowband", 0)
 
         self.cbtbbComboBox.addItem("Broadband", 1)
         self.cbtbbComboBox.addItem("Narrowband", 0)
+
+        self.recommendCfgComboBox.addItem("Default", 0)
+        self.recommendCfgComboBox.addItem("Seafloor Mount", 1)
+        self.recommendCfgComboBox.addItem("WM1", 1)
+        self.recommendCfgComboBox.addItem("WM5", 1)
+        self.recommendCfgComboBox.addItem("WM8", 1)
+        self.recommendCfgComboBox.addItem("Moving Boat", 2)
+        self.recommendCfgComboBox.addItem("Shallow", 3)
+        self.recommendCfgComboBox.addItem("Shallow Slow-moving", 4)
+        self.recommendCfgComboBox.addItem("Waves", 5)
+        self.recommendCfgComboBox.addItem("DVL", 6)
+
+        self.rangeTrackingComboBox.addItem("Disable", 0)
+        self.rangeTrackingComboBox.addItem("Pressure", 1)
+        self.rangeTrackingComboBox.addItem("Bin", 2)
 
     def closeTab(self):
         """
@@ -126,17 +142,43 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         """
         self.predictor.tab_close_requested(self.index)
 
-    def set_tooltips(self):
+    def get_tooltip_json(self):
         # Get the descriptions from the json file
         #script_dir = ""
         script_dir = os.path.dirname(__file__)
+
         # The path to this JSON file will not work if run from python script
         # But if built as an application with pyinstaller, this path will work
         json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
         try:
             cmds = json.loads(open(json_file_path).read())
+            return cmds
         except Exception as e:
-            print("Error opening predictor.JSON file", e)
+            print("Error opening predictor.JSON file at: " + json_file_path, e)
+            try:
+                script_dir = ""
+                json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
+                cmds = json.loads(open(json_file_path).read())
+                return cmds
+            except Exception as e1:
+                print("Error opening predictor.JSON file at: " + json_file_path, e1)
+
+        return None
+
+    def set_tooltips(self):
+        # Get the descriptions from the json file
+        #script_dir = ""
+        #script_dir = os.path.dirname(__file__)
+        # The path to this JSON file will not work if run from python script
+        # But if built as an application with pyinstaller, this path will work
+        #json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
+        #try:
+        #    cmds = json.loads(open(json_file_path).read())
+        #except Exception as e:
+        #    print("Error opening predictor.JSON file", e)
+        #    return
+        cmds = self.get_tooltip_json()
+        if cmds is None:
             return
 
         self.cwpbbDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
@@ -359,35 +401,53 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                                           CBTON=self.cbtonCheckBox.isChecked())
 
         # Update the display
-        self.powerLabel.setText(str(round(self.calc_power, 4)) + " watts")
+        self.powerLabel.setText(str(round(self.calc_power, 3)) + " watts")
         self.powerLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 4)) + " batteries")
+        self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 3)) + " batteries")
         self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.wpRangeLabel.setText(str(round(self.calc_wp_range, 4)) + " m")
+        self.wpRangeLabel.setText(str(round(self.calc_wp_range, 3)) + " m")
         self.wpRangeLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.btRangeLabel.setText(str(round(self.calc_bt_range, 4)) + " m")
+        self.btRangeLabel.setText(str(round(self.calc_bt_range, 3)) + " m")
         self.btRangeLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.firstBinPosLabel.setText(str(round(self.calc_first_bin, 4)) + " m")
+        self.firstBinPosLabel.setText(str(round(self.calc_first_bin, 3)) + " m")
         self.firstBinPosLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.maxVelLabel.setText(str(round(self.calc_max_vel, 4)) + " m/s")
+        self.maxVelLabel.setText(str(round(self.calc_max_vel, 3)) + " m/s")
         self.maxVelLabel.setStyleSheet("font-weight: bold; color: blue")
         self.dataUsageLabel.setText(str(DS.bytes_2_human_readable(self.calc_data)))
         self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue")
-        self.stdLabel.setText(str(round(self.calc_std, 4)) + " m/s")
+        self.stdLabel.setText(str(round(self.calc_std, 3)) + " m/s")
         self.stdLabel.setStyleSheet("font-weight: bold; color: blue")
 
+        # Set the ping description
         self.pingingTextBrowser.clear()
+        cfg_status_str = ""
         if self.cbiEnabledCheckBox.isChecked():
-            self.pingingTextBrowser.setText(Commands.pretty_print_burst(self.predictor.ceiDoubleSpinBox.value(),
-                                                                  self.cbiBurstIntervalDoubleSpinBox.value(),
-                                                                  self.cbiNumEnsSpinBox.value(),
-                                                                  self.cwppSpinBox.value(),
-                                                                  self.cwptbpDoubleSpinBox.value()))
+            cfg_status_str += Commands.pretty_print_burst(self.predictor.ceiDoubleSpinBox.value(),
+                                                          self.cbiBurstIntervalDoubleSpinBox.value(),
+                                                          self.cbiNumEnsSpinBox.value(),
+                                                          self.cwppSpinBox.value(),
+                                                          self.cwptbpDoubleSpinBox.value())
         else:
-            self.pingingTextBrowser.setText(Commands.pretty_print_standard(self.predictor.ceiDoubleSpinBox.value(),
-                                                                     self.cwppSpinBox.value(),
-                                                                     self.cwptbpDoubleSpinBox.value()))
+            cfg_status_str += Commands.pretty_print_standard(self.predictor.ceiDoubleSpinBox.value(),
+                                           self.cwppSpinBox.value(),
+                                           self.cwptbpDoubleSpinBox.value())
+
+
+
+        # Configured Water Profile depth
+        cfg_status_str += Commands.pretty_print_cfg_depth(self.cwpblDoubleSpinBox.value(),
+                                                                     self.cwpbsDoubleSpinBox.value(),
+                                                                     self.cwpbnSpinBox.value(),
+                                                                     self.calc_first_bin)
+        # Set the text to the browser
+        self.pingingTextBrowser.setText(cfg_status_str)
         self.pingingTextBrowser.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt; background-color: transparent")
+
+        # Max Velocity and Accuracy tooltip
+        max_vel_acc_tt = Commands.pretty_print_accuracy(self.calc_max_vel, self.calc_std)
+        self.velAccGroupBox.setToolTip(max_vel_acc_tt)
+        self.maxVelLabel.setToolTip(max_vel_acc_tt)
+        self.stdLabel.setToolTip(max_vel_acc_tt)
 
     def get_cmd_list(self):
         """
@@ -433,7 +493,10 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         if self.cbiEnabledCheckBox.isChecked():
             cbi_num_ens = str(self.cbiNumEnsSpinBox.value())
             cbi_interval = Commands.sec_to_hmss(self.cbiBurstIntervalDoubleSpinBox.value())
-            command_list.append(Commands.AdcpCmd("CBI", cbi_interval + ", " + cbi_num_ens + " ,0"))      # CBI
+            if self.cbiInterleaveCheckBox.isChecked():
+                command_list.append(Commands.AdcpCmd("CBI", cbi_interval + ", " + cbi_num_ens + " ,1"))     # CBI
+            else:
+                command_list.append(Commands.AdcpCmd("CBI", cbi_interval + ", " + cbi_num_ens + " ,0"))     # CBI
 
         # CED
         ced = ""
