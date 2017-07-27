@@ -38,6 +38,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.deploymentDurationSpinBox.valueChanged.connect(self.valueChanged)
         self.ceiDoubleSpinBox.valueChanged.connect(self.valueChanged)
         self.cwsSpinBox.valueChanged.connect(self.valueChanged)
+        self.cerecordCheckBox.stateChanged.connect(self.valueChanged)
 
         # Create the list of subsystems
         self.init_list()
@@ -158,6 +159,11 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         self.commandFileTextBrowser.append("CEI " + Commands.sec_to_hmss(self.ceiDoubleSpinBox.value()))
         self.commandFileTextBrowser.append("CWS " + str(self.cwsSpinBox.value()))
+
+        if self.cerecordCheckBox.isChecked():
+            self.commandFileTextBrowser.append("CERECORD " + "1")
+        else:
+            self.commandFileTextBrowser.append("CERECORD " + "0")
 
         for tab in range(self.tabSubsystem.count()):
             ss_cmd_list = self.tabSubsystem.widget(tab).get_cmd_list()

@@ -20,7 +20,7 @@
       <x>20</x>
       <y>20</y>
       <width>291</width>
-      <height>131</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>10</x>
        <y>30</y>
        <width>273</width>
-       <height>91</height>
+       <height>120</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -84,6 +84,20 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Record To Internal SD Card</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="cerecordCheckBox">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -91,9 +105,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>160</y>
+      <y>190</y>
       <width>291</width>
-      <height>121</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="title">
@@ -103,7 +117,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>20</y>
        <width>271</width>
        <height>41</height>
       </rect>
@@ -113,7 +127,7 @@
      <property name="geometry">
       <rect>
        <x>170</x>
-       <y>80</y>
+       <y>60</y>
        <width>113</width>
        <height>32</height>
       </rect>
@@ -153,9 +167,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>290</y>
+      <y>310</y>
       <width>291</width>
-      <height>151</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="title">
@@ -167,7 +181,7 @@
        <x>0</x>
        <y>30</y>
        <width>291</width>
-       <height>91</height>
+       <height>68</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -235,9 +249,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>450</y>
+      <y>430</y>
       <width>291</width>
-      <height>391</height>
+      <height>411</height>
      </rect>
     </property>
     <property name="title">
@@ -247,9 +261,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>30</y>
+       <y>40</y>
        <width>261</width>
-       <height>311</height>
+       <height>331</height>
       </rect>
      </property>
     </widget>
@@ -257,7 +271,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>350</y>
+       <y>380</y>
        <width>113</width>
        <height>32</height>
       </rect>

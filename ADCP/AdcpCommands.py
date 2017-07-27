@@ -128,20 +128,21 @@ def pretty_print_burst(cei, burst_interval, num_ens, cwpp, cwptbp):
     burst_measure_str = pretty_print_sec(burst_measure)
 
     result = ""
+    error_msg = ""
     result += "-Measuring " + str(num_ens) + " ensembles in " + burst_measure_str + "\n"
     result += "-Output an ensemble every " + cei_str + "\n"
     if cwpp > 1:
         result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
 
         if avg_time > cei:
-            result += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
+            error_msg += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
 
     result += "-Take a burst measurement every " + burst_interval_str + "\n"
 
     if burst_measure > burst_interval:
-        result += "*BURST MEASUREMENT WILL TAKE LONGER THAN BURST LENGTH!\n"
+        error_msg += "*BURST MEASUREMENT WILL TAKE LONGER THAN BURST LENGTH!\n"
 
-    return result
+    return result, error_msg
 
 
 def pretty_print_standard(cei, cwpp, cwptbp):
@@ -161,15 +162,16 @@ def pretty_print_standard(cei, cwpp, cwptbp):
     avg_time_str = pretty_print_sec(avg_time)
 
     result = ""
+    error_msg = ""
     result += "-Output an ensemble every " + cei_str + "\n"
 
     if cwpp > 1:
         result += "-An ensemble averages " + str(cwpp) + " pings over " + avg_time_str + "\n"
 
     if avg_time > cei:
-        result += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
+        error_msg += "*AVERAGING WILL TAKE LONGER THAN CEI\n"
 
-    return result
+    return result, error_msg
 
 
 def pretty_print_accuracy(max_vel, std):
@@ -190,13 +192,14 @@ def pretty_print_accuracy(max_vel, std):
     std_cm_str = str(round(std_cm_s, 2))
 
     result = ""
+    error_msg = ""
     result += "-The boat and water speed combined cannot exceed " + max_vel_str + " m/s or " + max_vel_knots_str + " knots or " + max_vel_mph_str + " mph\n"
     result += "-The accuracy of the measurement is +/- " + std_cm_str + " cm/s"
 
     if max_vel < 2.8:
-        result += "\n*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"
+        error_msg += "\n*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"
 
-    return result
+    return result, error_msg
 
 
 def pretty_print_cfg_depth(blank, bin_size, num_bin, calc_first_bin):
@@ -219,8 +222,6 @@ def pretty_print_cfg_depth(blank, bin_size, num_bin, calc_first_bin):
 
     result += "-The first measurement will begin " + first_bin_str + " below the ADCP.\n"
     result += "-Measure the Water Profile to a depth of " + range_str + ".\n"
-
-
 
     return result
 
