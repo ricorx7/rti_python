@@ -1,0 +1,3 @@
+([('mainwindow',
+   '/Users/rico/python/rti_python/Updater/pyu-data/new/mainwindow',
+   'EXECUTABLE')],)

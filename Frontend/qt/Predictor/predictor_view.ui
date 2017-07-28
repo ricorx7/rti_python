@@ -111,7 +111,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Subsystems</string>
+     <string>Subsystem Configurations</string>
     </property>
     <widget class="QComboBox" name="subsystemComboBox">
      <property name="geometry">
@@ -163,7 +163,7 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_3">
+   <widget class="QGroupBox" name="predictionGroupBox">
     <property name="geometry">
      <rect>
       <x>20</x>

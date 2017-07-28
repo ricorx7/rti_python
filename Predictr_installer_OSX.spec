@@ -28,5 +28,5 @@ exe = EXE(pyz,
           console=False )
 app = BUNDLE(exe,
              name='predictr.app',
-             icon=None,
+             icon='rti.ico',
              bundle_identifier=None)

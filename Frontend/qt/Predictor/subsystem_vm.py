@@ -30,14 +30,14 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.freq = SS.ss_frequency(ss_code)
 
         # Set the label
-        self.freqLabel.setText("[" + str(ss_code) + "] - " + SS.ss_label(ss_code))
+        #self.freqLabel.setText("[" + str(ss_code) + "] - " + SS.ss_label(ss_code))
 
         # Set the style
-        self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
+        #self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
         self.pingingTextBrowser.setStyleSheet(
-            "font-weight: bold; color: blue; font-size: 10pt; background-color: transparent")
+            "font-weight: bold; font-size: 10pt; background-color: transparent")
         self.errorTextBrowser.setStyleSheet(
-            "font-weight: bold; color: red; font-size: 10pt; background-color: transparent")
+            "font-weight: bold; font-size: 10pt; background-color: transparent")
         self.powerLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.wpRangeLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
@@ -46,6 +46,9 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.maxVelLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.dataUsageLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.stdLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
+        self.predictionGroupBox.setStyleSheet("QGroupBox#predictionGroupBox { background: #e3f2fd }\n QGroupBox::title { background-color: transparent; }")
+        self.statusGroupBox.setStyleSheet("QGroupBox { background: #e0f2f1 }\n QGroupBox::title { background-color: transparent; }")
+        self.errorGroupBox.setStyleSheet("QGroupBox { background: #ffebee }\n QGroupBox::title { background-color: transparent; }")
 
         # Set the values based off the preset
         self.presetButton.clicked.connect(self.set_preset)
@@ -204,9 +207,16 @@ class SubsystemVM(Ui_Subsystem, QWidget):
             return
 
         # Set the tooltip
+        self.cwponCheckBox.setToolTip(Commands.get_tooltip(cmds["CWPON"]["desc"]))
+        self.cwpblDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBL"]["desc"]))
+        self.cwpbsDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBS"]["desc"]))
+        self.cwpbnSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBN"]["desc"]))
         self.cwpbbDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
         self.cwpbbComboBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
-        self.cwpbsDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPBS"]["desc"]))
+        self.cwppSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPP"]["desc"]))
+        self.cwptbpDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPTBP"]["desc"]))
+
+
 
     def stateChanged(self, state):
         """
@@ -465,6 +475,8 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.pingingTextBrowser.clear()
         cfg_status_str = ""
         err_status_str = ""
+
+        # CBI
         if self.cbiEnabledCheckBox.isChecked():
             msg, error_msg = Commands.pretty_print_burst(self.predictor.ceiDoubleSpinBox.value(),
                                                           self.cbiBurstIntervalDoubleSpinBox.value(),
@@ -480,14 +492,14 @@ class SubsystemVM(Ui_Subsystem, QWidget):
             cfg_status_str += msg
             err_status_str += error_msg
 
-
-        # Configured Water Profile depth
-        msg = Commands.pretty_print_cfg_depth(self.cwpblDoubleSpinBox.value(),
-                                                                     self.cwpbsDoubleSpinBox.value(),
-                                                                     self.cwpbnSpinBox.value(),
-                                                                     self.calc_first_bin)
-        cfg_status_str += msg
-        err_status_str += error_msg
+        if self.cwponCheckBox.isChecked():
+            # Configured Water Profile depth
+            msg = Commands.pretty_print_cfg_depth(self.cwpblDoubleSpinBox.value(),
+                                                                         self.cwpbsDoubleSpinBox.value(),
+                                                                         self.cwpbnSpinBox.value(),
+                                                                         self.calc_first_bin)
+            cfg_status_str += msg
+            err_status_str += error_msg
 
         # Max Velocity and Accuracy tooltip
         max_vel_acc_tt, error_msg = Commands.pretty_print_accuracy(self.calc_max_vel, self.calc_std)
@@ -495,6 +507,8 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.velAccGroupBox.setToolTip(max_vel_acc_tt)
         self.maxVelLabel.setToolTip(max_vel_acc_tt)
         self.stdLabel.setToolTip(max_vel_acc_tt)
+        if self.cwponCheckBox.isChecked():
+            cfg_status_str += max_vel_acc_tt
 
         # Recording turned on
         if self.predictor.cerecordCheckBox.isChecked():
@@ -903,4 +917,201 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                 self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["Seafloor"]["300"]["CWPRT_Pressure"])
                 self.predictor.cerecordCheckBox.setChecked(True)
 
+        elif self.recommendCfgComboBox.currentText() == "Waves":  # Waves
+            print("Waves")
+            if self.ss_code == "2":  # 1200 khz
+                print("1200kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["Waves"]["1200"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["Waves"]["1200"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["Waves"]["1200"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["Waves"]["1200"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["Waves"]["1200"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(True)
+            elif self.ss_code == "3":  # 600 khz
+                print("600kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["Waves"]["600"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["Waves"]["600"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["Waves"]["600"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["Waves"]["600"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["Waves"]["600"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(True)
+            elif self.ss_code == "4":  # 300 khz
+                print("300kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["Waves"]["300"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["Waves"]["300"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["Waves"]["300"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["Waves"]["300"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["Waves"]["300"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(True)
+
+        elif self.recommendCfgComboBox.currentText() == "Moving Boat":  # Moving Boat
+            print("Moving Boat")
+            if self.ss_code == "2":  # 1200 khz
+                print("1200kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["1200"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["1200"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["1200"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
+            elif self.ss_code == "3":  # 600 khz
+                print("600kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["600"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["600"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["600"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["MovingBoat"]["600"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["600"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
+            elif self.ss_code == "4":  # 300 khz
+                print("300kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["300"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["300"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["MovingBoat"]["300"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["MovingBoat"]["300"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["MovingBoat"]["300"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
+
+        elif self.recommendCfgComboBox.currentText() == "DVL":  # DVL
+            print("DVL")
+            if self.ss_code == "2":  # 1200 khz
+                print("1200kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["DVL"]["1200"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["DVL"]["1200"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["DVL"]["1200"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["DVL"]["1200"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["DVL"]["1200"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
+            elif self.ss_code == "3":  # 600 khz
+                print("600kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["DVL"]["600"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["DVL"]["600"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["DVL"]["600"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["DVL"]["600"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["DVL"]["600"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
+            elif self.ss_code == "4":  # 300 khz
+                print("300kHz")
+                self.cwponCheckBox.setChecked(json_cmds["Setups"]["DVL"]["300"]["CWPON"])
+                self.cwpblDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPBL"])
+                self.cwpbsDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPBS"])
+                self.cwpbnSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPBN"])
+                self.cwpbbComboBox.setCurrentIndex(0)
+                self.cwpbbDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPBB_Lag"])
+                self.cwppSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPP"])
+                self.cwptbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPTBP"])
+                self.cbtonCheckBox.setChecked(json_cmds["Setups"]["DVL"]["300"]["CBTON"])
+                self.cbtbbComboBox.setCurrentIndex(0)
+                self.cbttbpDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CBTTBP"])
+                self.cbiEnabledCheckBox.setChecked(json_cmds["Setups"]["DVL"]["300"]["CBI_Enabled"])
+                self.cbiBurstIntervalDoubleSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CBI_BusrtInterval"])
+                self.cbiNumEnsSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CBI_NumEns"])
+                self.rangeTrackingComboBox.setCurrentIndex(json_cmds["Setups"]["DVL"]["300"]["CWPRT_Mode"])
+                self.cwprtMinBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPRT_MinBin"])
+                self.cwprtMaxBinSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPRT_MaxBin"])
+                self.cwprtRangeFractionSpinBox.setValue(json_cmds["Setups"]["DVL"]["300"]["CWPRT_Pressure"])
+                self.predictor.cerecordCheckBox.setChecked(False)
 

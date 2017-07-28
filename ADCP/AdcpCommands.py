@@ -185,16 +185,16 @@ def pretty_print_accuracy(max_vel, std):
     """
     max_vel_knots = max_vel * 1.94384
     max_vel_mph = max_vel * 2.23694
-    std_cm_s = std * 100
+    #std_cm_s = std * 100
     max_vel_str = str(round(max_vel, 2))
     max_vel_knots_str = str(round(max_vel_knots, 2))
     max_vel_mph_str = str(round(max_vel_mph, 2))
-    std_cm_str = str(round(std_cm_s, 2))
+    std_cm_str = pretty_print_m(std)
 
     result = ""
     error_msg = ""
     result += "-The boat and water speed combined cannot exceed " + max_vel_str + " m/s or " + max_vel_knots_str + " knots or " + max_vel_mph_str + " mph\n"
-    result += "-The accuracy of the measurement is +/- " + std_cm_str + " cm/s"
+    result += "-The accuracy of the measurement is +/- " + std_cm_str + "\n"
 
     if max_vel < 2.8:
         error_msg += "\n*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"

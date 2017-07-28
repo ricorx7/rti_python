@@ -26,7 +26,8 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)
-        self.addSubsystemButton.setStyleSheet("background: lightgreen")
+        self.addSubsystemButton.setStyleSheet("background: #c8e6c9")
+        self.predictionGroupBox.setStyleSheet("QGroupBox { background: #e3f2fd }\n QGroupBox::title { background-color: transparent; }")
 
         self.tabSubsystem.setTabsClosable(True)
         self.tabSubsystem.clear()
@@ -46,6 +47,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         # Set the tooltips from the JSON file
         #self.set_tooltips()
 
+        # Set status bar
         self.parent.statusBar().showMessage('Add a subsystem to begin configuring...')
 
         # Command file
@@ -102,6 +104,10 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         # Remove from the CEPO list
         del self.cepo_list[index]
+
+        if self.tabSubsystem.count() == 0:
+            # Set status bar
+            self.parent.statusBar().showMessage('Add a subsystem to begin configuring...')
 
         # Recalculate
         self.calculate()
