@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict><key>LSBackgroundOnly</key>
-<string>0</string>
-<key>CFBundleIconFile</key>
-<string>rti.ico</string>
-<key>CFBundleShortVersionString</key>
+<dict><key>CFBundleShortVersionString</key>
 <string>0.0.0</string>
-<key>CFBundlePackageType</key>
-<string>APPL</string>
+<key>LSBackgroundOnly</key>
+<string>0</string>
 <key>CFBundleIdentifier</key>
-<string>predictr</string>
-<key>CFBundleName</key>
 <string>predictr</string>
 <key>CFBundleInfoDictionaryVersion</key>
 <string>6.0</string>
-<key>CFBundleExecutable</key>
-<string>MacOS/mainwindow</string>
 <key>CFBundleDisplayName</key>
 <string>predictr</string>
+<key>CFBundleIconFile</key>
+<string>rti.ico</string>
+<key>CFBundleExecutable</key>
+<string>MacOS/mainwindow</string>
+<key>CFBundleName</key>
+<string>predictr</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
 </dict>
 </plist>
