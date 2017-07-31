@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QWidget
 
 import ADCP.Predictor.DataStorage as DS
 import ADCP.AdcpCommands as Commands
+import AdcpJson as JSON
 
 class PredictorVM(Ui_RoweTechPredictor):
     """
@@ -45,7 +46,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.init_list()
 
         # Set the tooltips from the JSON file
-        #self.set_tooltips()
+        self.set_tooltips()
 
         # Set status bar
         self.parent.statusBar().showMessage('Add a subsystem to begin configuring...')
@@ -70,6 +71,26 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.subsystemComboBox.addItem("C - 300kHz Vertical", "C")
         self.subsystemComboBox.addItem("D - 150kHz Vertical", "D")
         self.subsystemComboBox.addItem("E - 75kHz Vertical", "E")
+
+    def set_tooltips(self):
+        """
+        Set the tooltip for all the values.  The tooltip will be found
+        in a JSON file.  This file can be changed for other languages.
+        :return:
+        """
+        # Get the JSON file
+        cmds = JSON.get_json()
+        if cmds is None:
+            return
+
+        self.ceiDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CEI"]["desc"]))
+        self.cwsSpinBox.setToolTip(Commands.get_tooltip(cmds["CWS"]["desc"]))
+        self.cerecordCheckBox.setToolTip(Commands.get_tooltip(cmds["CERECORD"]["desc"]))
+        self.deploymentDurationSpinBox.setToolTip("Number of days the ADCP will be deployed.")
+        self.predictionGroupBox.setToolTip("Prediction results from all the subsystem configurations combined.")
+        self.commandFileGroupBox.setToolTip("Command file generated from all the subsystem configurations.")
+        self.subsystemConfigGroupBox.setToolTip("Select a subsystem to create a configuration.")
+        self.saveCommandsButton.setToolTip("Save the commands to a text file.\nThe file will be saved to location of the application.\nThe file name will be the date and time.")
 
     def add_subsystem(self):
         """

@@ -116,8 +116,12 @@
           "CBTON n<CR>",
           "Bottom Track ON. Enables or disables bottom track pings.",
           "",
-          "1. n = 0 disable bottom tracking. Allows for more water profile pings per second and saves battery energy during self-contained deployments.",
-          "2. n = 1 enable bottom tracking. When enabled a bottom track ping occurs once per ensemble. Or, when profiling is enabled, a bottom track ping occurs at the beginning of the ensemble and then after every 10 profile pings in the ensemble. If there are less than 10 profile pings per ensemble the bottom track ping will only occur once at the beginning of the ensemble."
+          "1. n = 0 disable bottom tracking. Allows for more water profile pings per second and saves battery energy ",
+          " during self-contained deployments.",
+          "2. n = 1 enable bottom tracking. When enabled a bottom track ping occurs once per ensemble. Or, when ",
+          "profiling is enabled, a bottom track ping occurs at the beginning of the ensemble and then after every ",
+          "10 profile pings in the ensemble. If there are less than 10 profile pings per ensemble the bottom track ",
+          "ping will only occur once at the beginning of the ensemble."
         ]
     },
     "CBTBB": {
@@ -176,6 +180,16 @@
           "to increase the data output rate use the C485B 921600<CR> or C422B 921600<CR> command. Be aware that the RS232 connection may not",
           "reliably support the higher data rates."
         ]
+    },
+    "CEI": {
+      "desc": [
+        "CEI HH:MM:SS.hh<CR> ",
+        "Ensemble Interval.",
+        "",
+        "Sets the time interval that system will output the averaged profile/bottom track data.",
+        "Note:",
+        "All digits including the space following CEI and the separators must be part of the command or the system will reject it."
+      ]
     },
     "CERECORD": {
         "desc": [

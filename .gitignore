@@ -113,3 +113,5 @@ mainwindow.spec
 # PyUpdater
 Updater/.pyupdater/
 Updater/pyu-data
+Updater/.pyupdater/spec/
+Updater/pyu-data/new/predictr.app/Contents/Frameworks/

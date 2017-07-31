@@ -328,7 +328,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_4">
+  <widget class="QGroupBox" name="cedGroupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -740,7 +740,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_6">
+  <widget class="QGroupBox" name="numBeamsGroupBox">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -785,7 +785,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_8">
+  <widget class="QGroupBox" name="recommendSettingGroupBox">
    <property name="geometry">
     <rect>
      <x>330</x>

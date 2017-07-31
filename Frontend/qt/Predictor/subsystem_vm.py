@@ -11,6 +11,7 @@ import ADCP.Predictor.DataStorage as DS
 import ADCP.Subsystem as SS
 
 import ADCP.AdcpCommands as Commands
+import AdcpJson as JSON
 import datetime
 import time
 
@@ -166,35 +167,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         """
         self.predictor.tab_close_requested(self.index)
 
-    def get_json(self):
-        """
-        Get the JSON file.  There are 2 locations based off local testing or a deployed
-        application.  This will check the first location which is the directory the application
-        is running.  The second location is the root directory.
-        :return:
-        """
-        # Get the descriptions from the json file
-        #script_dir = ""
-        script_dir = os.path.dirname(__file__)
-
-        # The path to this JSON file will not work if run from python script
-        # But if built as an application with pyinstaller, this path will work
-        json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
-        try:
-            cmds = json.loads(open(json_file_path).read())
-            return cmds
-        except Exception as e:
-            print("Error opening predictor.JSON file at: " + json_file_path, e)
-            try:
-                script_dir = ""
-                json_file_path = os.path.join(script_dir, 'ADCP/AdcpCommands.json')
-                cmds = json.loads(open(json_file_path).read())
-                return cmds
-            except Exception as e1:
-                print("Error opening predictor.JSON file at: " + json_file_path, e1)
-
-        return None
-
     def set_tooltips(self):
         """
         Set the tooltip for all the values.  The tooltip will be found
@@ -202,7 +174,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         :return:
         """
         # Get the JSON file
-        cmds = self.get_json()
+        cmds = JSON.get_json()
         if cmds is None:
             return
 
@@ -215,7 +187,23 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.cwpbbComboBox.setToolTip(Commands.get_tooltip(cmds["CWPBB"]["desc"]))
         self.cwppSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPP"]["desc"]))
         self.cwptbpDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPTBP"]["desc"]))
-
+        self.cbtonCheckBox.setToolTip(Commands.get_tooltip(cmds["CBTON"]["desc"]))
+        self.cbtbbComboBox.setToolTip(Commands.get_tooltip(cmds["CBTBB"]["desc"]))
+        self.cbttbpDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CBTTBP"]["desc"]))
+        self.rangeTrackingComboBox.setToolTip(Commands.get_tooltip(cmds["CWPRT"]["desc"]))
+        self.cwprtRangeFractionSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPRT"]["desc"]))
+        self.cwprtMinBinSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPRT"]["desc"]))
+        self.cwprtMaxBinSpinBox.setToolTip(Commands.get_tooltip(cmds["CWPRT"]["desc"]))
+        self.cbiEnabledCheckBox.setToolTip(Commands.get_tooltip(cmds["CBI"]["desc"]))
+        self.cbiBurstIntervalDoubleSpinBox.setToolTip(Commands.get_tooltip(cmds["CBI"]["desc"]))
+        self.cbiInterleaveCheckBox.setToolTip(Commands.get_tooltip(cmds["CBI"]["desc"]))
+        self.cbiNumEnsSpinBox.setToolTip(Commands.get_tooltip(cmds["CBI"]["desc"]))
+        self.cedGroupBox.setToolTip(Commands.get_tooltip(cmds["CED"]["desc"]))
+        self.predictionGroupBox.setToolTip("Prediction results for the subsystem configuration.")
+        self.statusGroupBox.setToolTip("Status of the configuration based off the settings.")
+        self.errorGroupBox.setToolTip("Any errors based off the configuration.")
+        self.numBeamsGroupBox.setToolTip("Number of beams for the subsystem configuration.\nVertical beam configuration will be 1 beam.")
+        self.recommendSettingGroupBox.setToolTip("Select a recommend settings for your deployment.\nThis will load a default setup to begin the configuration.")
 
 
     def stateChanged(self, state):
@@ -667,7 +655,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         :return:
         """
         # Get the JSON file
-        json_cmds = self.get_json()
+        json_cmds = JSON.get_json()
         if json_cmds is None:
             return
 
