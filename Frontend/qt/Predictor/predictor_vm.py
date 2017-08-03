@@ -26,6 +26,8 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.calc_data = 0.0
         self.calc_num_batt = 0.0
 
+        self.revLabel.setText("© RoweTech Inc. Rev 1.0")
+
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)
         self.addSubsystemButton.setStyleSheet("background: #c8e6c9")

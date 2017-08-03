@@ -197,7 +197,7 @@ def pretty_print_accuracy(max_vel, std):
     result += "-The accuracy of the measurement is +/- " + std_cm_str + "\n"
 
     if max_vel < 2.8:
-        error_msg += "\n*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"
+        error_msg += "*If you are collecting data with a boat, you may want to adjust your settings to increase the maximum velocity to exceed 2.8 m/s.\n"
 
     return result, error_msg
 
