@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import qdarkstyle
+import images_qr
 
 from twisted.logger import Logger
 from twisted.internet.defer import inlineCallbacks
@@ -32,7 +33,7 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
         # Set the title of the window
         self.setWindowTitle("RoweTech Inc. - PredictR")
 
-        #self.setWindowIcon(QtGui.QIcon(":/Updater/rti.ico"))
+        self.setWindowIcon(QtGui.QIcon(":/Updater/rti.ico"))
 
         # Show the main window
         self.show()
