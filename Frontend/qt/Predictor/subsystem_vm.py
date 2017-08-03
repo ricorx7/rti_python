@@ -37,11 +37,11 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         # Set the style
         #self.freqLabel.setStyleSheet("font-weight: bold; color: red; font-size: 16px")
         self.pingingTextBrowser.setStyleSheet(
-            "font-weight: bold; font-size: 10pt; background-color: transparent")
+            "font-size: 8pt; background-color: transparent")
         self.errorTextBrowser.setStyleSheet(
-            "font-weight: bold; font-size: 10pt; background-color: transparent")
+            "font-size: 8pt; background-color: transparent")
         self.powerLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
-        self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
+        self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 8pt")
         self.wpRangeLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.btRangeLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.firstBinPosLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")

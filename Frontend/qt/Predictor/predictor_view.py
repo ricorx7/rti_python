@@ -60,7 +60,7 @@ class Ui_RoweTechPredictor(object):
         self.subsystemComboBox.setGeometry(QtCore.QRect(10, 20, 271, 41))
         self.subsystemComboBox.setObjectName("subsystemComboBox")
         self.addSubsystemButton = QtWidgets.QPushButton(self.subsystemConfigGroupBox)
-        self.addSubsystemButton.setGeometry(QtCore.QRect(170, 60, 113, 32))
+        self.addSubsystemButton.setGeometry(QtCore.QRect(170, 70, 113, 32))
         self.addSubsystemButton.setObjectName("addSubsystemButton")
         self.tabSubsystem = QtWidgets.QTabWidget(self.centralWidget)
         self.tabSubsystem.setEnabled(True)

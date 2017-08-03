@@ -68,8 +68,14 @@ Windows must include the path to PyQT5 DLL files.
 
 Compile QT5 .UI files
 ---------------------
+OSX
 ```javascript
 pyuic5 -x file.ui -o file.py
+```
+
+Windows
+```javascript
+C:\Users\XXX\AppData\Local\Programs\Python\Python35\Scripts\pyuic5.exe -x file.ui -o file.py
 ```
 
 
