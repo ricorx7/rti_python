@@ -33,7 +33,7 @@ crossbar start
 This will start the WAMP server, the serial port and GUI
 
 
-Create Predictr application
+Create PredictR application
 ---------------------
 OSX
 ```javascript
@@ -41,6 +41,12 @@ pyinstaller Predictr_installer_OSX.spec
 ```
 
 Windows
+
+You will need to install MSVC 2015 redistribution.
+
+
+Then add C:\Program Files (x86)\Windows Kits\10\Redist\ucrt\DLLs\x64 to environment PATH. Then the warning message about api-ms-win-crt-***.dll will disappear and all works correctly.
+
 ```javascript
 C:\Users\XXX\AppData\Local\Programs\Python\Python35\Scripts\pyinstaller.exe Predictr_installer_WIN.spec
 ```
@@ -48,7 +54,8 @@ C:\Users\XXX\AppData\Local\Programs\Python\Python35\Scripts\pyinstaller.exe Pred
 This will create a dist and build folder.  The exe in is the dist folder.
 
 
-To create a new spec file
+To create a new Pyinstaller spec file
+---------------------
 
 OSX
 ```javascript

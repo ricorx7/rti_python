@@ -30,7 +30,9 @@ class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
 
     def main_window_init(self):
         # Set the title of the window
-        self.setWindowTitle("RoweTech Predictr")
+        self.setWindowTitle("RoweTech Inc. - PredictR")
+
+        #self.setWindowIcon(QtGui.QIcon(":/Updater/rti.ico"))
 
         # Show the main window
         self.show()
