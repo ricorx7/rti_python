@@ -90,6 +90,7 @@ ENV/
 
 # PyCharm seetings
 .idea/workspace.xml
+.idea/
 
 # Recorded data
 recorder/

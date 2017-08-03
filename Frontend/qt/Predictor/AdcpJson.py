@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 
 
 def get_json():
@@ -9,35 +10,36 @@ def get_json():
     is running.  The second location is the root directory.
     :return:
     """
+    json_file = "AdcpCommands.json"
+    json_file_adcp = "ADCP/AdcpCommands.json"
+
     # Get the descriptions from the json file
     # script_dir = ""
     script_dir = os.path.dirname(__file__)
+    bundle_dir = os.path.dirname(os.path.abspath(__file__))
 
-    json_file = "AdcpCommands.json"
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+    elif __file__:
+        application_path = os.path.dirname(__file__)
 
-    # Create a file name with folder path
-    json_file_adcp = os.path.join("ADCP", json_file)
+    # List of possible paths
+    # It varies because, you can run it on windows or OSX, or using the 1 file pyinstaller or from source code
+    json_file_paths = [
+        os.getcwd() + os.sep + json_file,
+        os.path.join(script_dir, os.path.join("ADCP", json_file)),
+        os.getcwd() + os.sep + ".." + os.sep + ".." + os.sep + ".." + os.sep + "ADCP" + os.sep + json_file,
+        'ADCP/AdcpCommands.json',                                                                                   # App Run Local
+    ]
 
-    # The path to this JSON file will not work if run from python script
-    # But if built as an application with pyinstaller, this path will work
-    json_file_path = os.path.join(script_dir, json_file_adcp)
-    cmds = _get_json(json_file_path)
+    # Try to open the file, if found, return it
+    # If found None, try the next file path
+    for path in json_file_paths:
+        cmds = _get_json(path)
+        if cmds is not None:
+            return cmds
 
-    # If JSON not found, try another path
-    if cmds is None:
-        # Try local file path
-        script_dir = ""
-        json_file_path = os.path.join(script_dir, json_file_adcp)
-        cmds = _get_json(json_file_path)
-
-        # If JSON not found, try another path
-        if cmds is None:
-            #script_back = os.path.join()
-            json_file_path = os.getcwd() + os.sep + ".." + os.sep + ".." + os.sep + ".." + os.sep + "ADCP" + os.sep + json_file
-            #json_file_path = os.path.join(script_back, json_file_adcp)
-            cmds = _get_json(json_file_path)
-
-    return cmds
+    return None
 
 
 def _get_json(json_file_path):

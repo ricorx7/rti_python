@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 from predictor_view import Ui_RoweTechPredictor
 from subsystem_view import Ui_Subsystem
 from subsystem_vm import SubsystemVM
@@ -57,6 +58,7 @@ class PredictorVM(Ui_RoweTechPredictor):
 
         # Run initial Calculate
         self.calculate()
+
 
     def init_list(self):
         # Add item to combobox.  Set the userData to subsystem code

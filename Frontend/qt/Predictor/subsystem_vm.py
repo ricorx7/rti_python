@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from subsystem_view import Ui_Subsystem
 from PyQt5.QtWidgets import QWidget
 
