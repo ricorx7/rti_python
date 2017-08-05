@@ -166,7 +166,7 @@ class PredictorVM(Ui_RoweTechPredictor):
 
 
         # Update the display
-        self.powerLabel.setText(str(round(self.calc_power, 2)) + " watts")
+        self.powerLabel.setText(str(round(self.calc_power, 2)) + " watt/hr")
         self.powerLabel.setStyleSheet("font-weight: bold; color: blue")
         self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 2)) + " batteries")
         self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue")

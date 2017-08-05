@@ -105,6 +105,20 @@ def pretty_print_m(length):
     return str(round(length, 2)) + " m"
 
 
+def pretty_print_m_per_sec(length):
+    """
+    Print the speed scaled.
+    :param length: Length in meters.
+    :return: String of the distanced scaled.
+    """
+    if length < 1.0:
+        return str(round((length*100), 2)) + " cm/s"
+
+    if length >= 1000:
+        return str(round(length/1000), 2) + " km/s"
+
+    return str(round(length, 2)) + " m/s"
+
 
 def pretty_print_burst(cei, burst_interval, num_ens, cwpp, cwptbp):
     """
@@ -189,7 +203,7 @@ def pretty_print_accuracy(max_vel, std):
     max_vel_str = str(round(max_vel, 2))
     max_vel_knots_str = str(round(max_vel_knots, 2))
     max_vel_mph_str = str(round(max_vel_mph, 2))
-    std_cm_str = pretty_print_m(std)
+    std_cm_str = pretty_print_m_per_sec(std)
 
     result = ""
     error_msg = ""

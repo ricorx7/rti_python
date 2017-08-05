@@ -40,7 +40,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
             "font-size: 8pt; background-color: transparent")
         self.errorTextBrowser.setStyleSheet(
             "font-size: 8pt; background-color: transparent")
-        self.powerLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
+        self.powerLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 8pt")
         self.numBatteriesLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 8pt")
         self.wpRangeLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
         self.btRangeLabel.setStyleSheet("font-weight: bold; color: blue; font-size: 10pt")
@@ -225,7 +225,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         # Recalculate
         self.predictor.calculate()
 
-
     def cwpon_enable_disable(self, state):
         """
         Change the enable state of the values based off
@@ -313,7 +312,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
 
         # Recalculate
         self.predictor.calculate()
-
 
     def calculate(self):
         """
@@ -450,7 +448,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                                           CBTON=self.cbtonCheckBox.isChecked())
 
         # Update the display
-        self.powerLabel.setText(str(round(self.calc_power, 3)) + " watts")
+        self.powerLabel.setText(str(round(self.calc_power, 3)) + " watt/hr")
         self.numBatteriesLabel.setText(str(round(self.calc_num_batt, 3)) + " batteries")
         self.wpRangeLabel.setText(str(round(self.calc_wp_range, 3)) + " m")
         self.btRangeLabel.setText(str(round(self.calc_bt_range, 3)) + " m")
