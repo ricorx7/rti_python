@@ -7,19 +7,21 @@ Rowe Technologies Inc. Python library
 There is currently no main file to run.  This library contains a variety
 of utility applications.
 
+The Utilities and tests folder contain python applications to test different features and also used for examples.
+
 Dependicencies
 ------------
 
 Must use Python version 3.5
 
 OSX and Linux
-```python
+```javascript
 pip3 install -r requirements.txt -UI --user
 ```
  
  
 Windows
-```python
+```javascript
 python -m pip install -r requirements.txt -UI --user
 ```
 
