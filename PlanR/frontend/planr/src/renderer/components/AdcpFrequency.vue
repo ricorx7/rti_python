@@ -80,27 +80,37 @@
       SystemInformation,
       Multiselect,
     },
+    created() {
+      this.primaryBeamValue = this.$store.getters.primaryBeams;
+      this.secondaryBeamValue = this.$store.getters.secondaryBeams;
+      this.verticalBeamValue = this.$store.getters.verticalBeam;
+    },
     computed: {
       cepoValue() {
         let primVal = '';
         if (this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') {
           primVal = this.primaryBeamValue.value;
+          this.$store.commit('PRIMARY_BEAMS', this.primaryBeamValue);
         }
 
         let secVal = '';
         if (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') {
           secVal = this.secondaryBeamValue.value;
+          this.$store.commit('SECONDARY_BEAMS', this.secondaryBeamValue);
         } else {
           this.secondaryBeamValue = [];
           secVal = '';
+          this.$store.commit('SECONDARY_BEAMS', []);
         }
 
         let vertVal = '';
         if (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined') {
           vertVal = this.verticalBeamValue.value;
+          this.$store.commit('VERTICAL_BEAMS', this.verticalBeamValue);
         } else {
           this.verticalBeamValue = [];
           vertVal = '';
+          this.$store.commit('VERTICAL_BEAMS', []);
         }
 
         // Combined all the beam configurations

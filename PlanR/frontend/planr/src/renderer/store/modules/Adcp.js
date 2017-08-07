@@ -1,6 +1,9 @@
 const state = {
   type: 'SeaProfiler',
   cepo: '',
+  primaryBeams: [],
+  secondaryBeams: [],
+  verticalBeam: [],
 };
 
 const mutations = {
@@ -9,6 +12,15 @@ const mutations = {
   },
   CEPO(state, cepo) {
     state.cepo = cepo;
+  },
+  PRIMARY_BEAMS(state, val) {
+    state.primaryBeams = val;
+  },
+  SECONDARY_BEAMS(state, val) {
+    state.secondaryBeams = val;
+  },
+  VERTICAL_BEAM(state, val) {
+    state.verticalBeam = val;
   },
 };
 
@@ -30,6 +42,9 @@ const actions = {
 const getters = {
   type: state => state.type,
   cepo: state => state.cepo,
+  primaryBeams: state => state.primaryBeams,
+  secondaryBeams: state => state.secondaryBeams,
+  verticalBeam: state => state.verticalBeam,
 };
 
 export default {
