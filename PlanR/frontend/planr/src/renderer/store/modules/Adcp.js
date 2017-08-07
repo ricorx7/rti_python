@@ -1,11 +1,14 @@
 const state = {
   type: 'SeaProfiler',
-  freq: '300',
+  cepo: '',
 };
 
 const mutations = {
   ADCP_TYPE(state, type) {
     state.type = type;
+  },
+  CEPO(state, cepo) {
+    state.cepo = cepo;
   },
 };
 
@@ -18,11 +21,15 @@ const actions = {
     // do something async
     commit('ADCP_TYPE', type);
   },
+  cepoAsyncTask({ commit }, cepo) {
+    // do something async
+    commit('CEPO', cepo);
+  },
 };
 
 const getters = {
   type: state => state.type,
-  freq: state => state.freq,
+  cepo: state => state.cepo,
 };
 
 export default {

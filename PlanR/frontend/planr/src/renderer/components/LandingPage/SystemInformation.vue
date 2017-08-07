@@ -7,8 +7,8 @@
         <div class="value">{{ type }}</div>
       </div>
       <div class="item">
-        <div class="name">Frequency:</div>
-        <div class="value">{{ freq }}</div>
+        <div class="name">CEPO:</div>
+        <div class="value">{{ cepo }}</div>
       </div>
     </div>
   </div>
@@ -24,8 +24,8 @@
       type() {
         return this.$store.getters.type;
       },
-      freq() {
-        return this.$store.getters.freq;
+      cepo() {
+        return this.$store.getters.cepo;
       },
     },
   };

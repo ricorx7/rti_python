@@ -14,14 +14,34 @@
       <div class="right-side">
         <div class="doc">
           <div class="title">ADCP Frequiences</div>
+          <div class="cepo">
+            <p>
+              <div>
+                  <img id="adcp" :src='adcpImage' width="150" height="200" :alt="adcp-image">
+              </div>
+              <div class="cepoLabel">
+                CEPO {{ cepoValue }}
+              </div> 
+            </p>
+          </div>
           <p>
             Select the Frequencies of the ADCP
           </p>
         </div>
-        <div>
-        <label class="typo__label">Groups</label>
-        <multiselect v-model="value" :options="options" :multiple="true" group-values="libs" group-label="config" placeholder="Type to search" track-by="name" label="name"><span slot="noResult">Oops! No elements found. Consider changing the search query.</span></multiselect>
-        <pre class="language-json"><code>{{ value  }}</code></pre>
+        <div class="beams">
+            <label class="beamTypeLabel">Select the Primary Beam Freqency</label>
+            <multiselect v-model="primaryBeamValue" deselect-label="Select a different subsystem" track-by="label" label="label" placeholder="Select one" :options="primaryBeamOptions" :searchable="true" :allow-empty="false"></multiselect>
+            <pre class="language-json"><code>{{ primaryBeamValue  }}</code></pre>
+        </div>
+        <div class="beams">
+            <label class="beamTypeLabel">Select the Secondary Beams Frequency</label>
+            <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+            <pre class="language-json"><code>{{ secondaryBeamValue  }}</code></pre>
+        </div>
+        <div class="beams">
+            <label class="beamTypeLabel">Select the Vertical Beam Frequnency</label>
+            <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+            <pre class="language-json"><code>{{ verticalBeamValue  }}</code></pre>
         </div>
       </div>
     </main>
@@ -36,32 +56,23 @@
     name: 'adcp-freq',
     data() {
       return {
-        value: [],
-        options: [
-          {
-            config: 'Primary',
-            libs: [
-                { name: '2 - 1200kHz', code: '2' },
-                { name: '3 - 600kHz', code: '3' },
-                { name: '4 - 300kHz', code: '4' },
-            ],
-          },
-          {
-            config: '45 degree offset',
-            libs: [
-                { name: '6 - 1200kHz  45 degree offset', code: '6' },
-                { name: '7 - 600kHz  45 degree offset', code: '7' },
-                { name: '8 - 300kHz  45 degree offset', code: '8' },
-            ],
-          },
-          {
-            config: 'Vertical Beam',
-            libs: [
-                { name: 'A - 1200kHz Vertical Beam', code: 'A' },
-                { name: 'B - 600kHz  Vertical Beam', code: 'B' },
-                { name: 'C - 300kHz  Vertical Beam', code: 'C' },
-            ],
-          },
+        primaryBeamValue: [],
+        secondaryBeamValue: [],
+        verticalBeamValue: [],
+        primaryBeamOptions: [
+            { label: '2 - 1200kHz', value: '2' },
+            { label: '3 - 600kHz', value: '3' },
+            { label: '4 - 300kHz', value: '4' },
+        ],
+        secondaryBeamOptions: [
+            { label: '6 - 1200kHz  45 degree offset', value: '6' },
+            { label: '7 - 600kHz  45 degree offset', value: '7' },
+            { label: '8 - 300kHz  45 degree offset', value: '8' },
+        ],
+        verticalBeamOptions: [
+            { label: 'A - 1200kHz Vertical Beam', value: 'A' },
+            { label: 'B - 600kHz  Vertical Beam', value: 'B' },
+            { label: 'C - 300kHz  Vertical Beam', value: 'C' },
         ],
       };
     },
@@ -69,12 +80,81 @@
       SystemInformation,
       Multiselect,
     },
+    computed: {
+      cepoValue() {
+        let primVal = '';
+        if (this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') {
+          primVal = this.primaryBeamValue.value;
+        }
+
+        let secVal = '';
+        if (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') {
+          secVal = this.secondaryBeamValue.value;
+        } else {
+          this.secondaryBeamValue = [];
+          secVal = '';
+        }
+
+        let vertVal = '';
+        if (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined') {
+          vertVal = this.verticalBeamValue.value;
+        } else {
+          this.verticalBeamValue = [];
+          vertVal = '';
+        }
+
+        // Combined all the beam configurations
+        const result = primVal + secVal + vertVal;
+
+        // Pass the configuration
+        this.$store.dispatch('cepoAsyncTask', result);
+
+        return result;
+      },
+      adcpImage() {
+        // 4 Beam
+        if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
+          (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value === 'undefined') &&
+          (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value === 'undefined')) {
+          return this.getImgUrl('4beam');
+        }
+
+        // 5 Beam
+        if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
+          (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value === 'undefined') &&
+          (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined')) {
+          return this.getImgUrl('5beam');
+        }
+
+        // 8 Beam
+        if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
+          (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') &&
+          (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value === 'undefined')) {
+          return this.getImgUrl('8beam');
+        }
+
+        // 7 Beam
+        if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
+          (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') &&
+          (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined')) {
+          return this.getImgUrl('7beam');
+        }
+
+        // Backup value
+        return this.getImgUrl('4beam');
+      },
+    },
     methods: {
-      onAdcpSelection(adcpType) {
-        this.$store.dispatch('adcpTypeAsyncTask', adcpType);
+      nextNav() {
+        this.$router.push({ name: 'adcp-type' });
       },
       backNav() {
         this.$router.push({ name: 'adcp-type' });
+      },
+      getImgUrl(adcpType) {
+        // Workaround for the binding to a path
+        const images = require.context('../assets/', false, /\.png$/);
+        return images(`./${adcpType}.png`);
       },
     },
   };
@@ -115,6 +195,23 @@
     height: auto;
     margin-bottom: 20px;
     width: 420px;
+  }
+
+  .beams {
+      margin-top: 20px;
+  }
+
+  .cepo {
+      margin-top: 40px;
+      margin-bottom: 40px;
+  }
+
+  .cepoLabel {
+  }
+
+  .beamTypeLabel {
+    color: blue;
+    font-weight: bold;
   }
 
   main {
