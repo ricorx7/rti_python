@@ -15,14 +15,10 @@
         <div class="doc">
           <div class="title">ADCP Types</div>
           <p>
-            Select your ADCP Type
+            Select the Number of Batteries
           </p>
+          <img id="battery" src="~@/assets/battery.png" width="200" alt="RTI Battery">
         </div>
-        <button @click="onAdcpSelection('SeaProfiler')"><img id="seaprofiler" src="~@/assets/RoweTech_SeaPROFILER.jpg" alt="SeaPROFILER"></button>
-        <button @click="onAdcpSelection('SeaWatch')"><img id="seawatch" src="~@/assets/RoweTech_SeaWATCH.jpg" alt="SeaWATCH"></button>
-        <button @click="onAdcpSelection('SeaPilot')"><img id="seapilot" src="~@/assets/RoweTech_SeaPILOT.jpg" alt="SeaPILOT"></button>
-        <button @click="onAdcpSelection('SeaWave')"><img id="seawave" src="~@/assets/RoweTech_SeaWAVE.jpg" alt="SeaWAVE"></button>
-        <button @click="onAdcpSelection('SeaSeven')"><img id="seaseaven" src="~@/assets/RoweTech_SeaSEVEN.jpg" alt="SeaSEVEN"></button>
       </div>
     </main>
   </div>
@@ -42,7 +38,7 @@
         this.$router.push({ name: 'freq' });
       },
       backNav() {
-        this.$router.push({ name: 'landing-page' });
+        this.$router.push({ name: 'freq' });
       },
     },
   };

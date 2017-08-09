@@ -4,7 +4,7 @@
     <main>
       <div class="left-side">
         <span class="title">
-          Info
+          System Configuration
         </span>
         <system-information></system-information>
         <button @click="nextNav">NEXT</button> 
@@ -12,16 +12,29 @@
       </div>
 
       <div class="right-side">
+
         <div class="doc">
-          <div class="title">ADCP Frequiences</div>
+            <md-toolbar>
+                <md-button class="md-icon-button" @click="toggleRightSidenav">
+                    <md-icon>menu</md-icon>
+                </md-button>
+                <h2 class="md-title" style="flex: 1">ADCP Frequencies</h2>
+                <md-button class="md-icon-button">
+                    <md-icon>info</md-icon>
+                </md-button>
+            </md-toolbar>
+
           <div class="cepo">
             <p>
               <div>
-                  <img id="adcp" :src='adcpImage' width="150" height="200" :alt="adcp-image">
+                  <img id="adcp" :src='adcpImage' alt="adcp-image">
               </div>
               <div class="cepoLabel">
-                CEPO {{ cepoValue }}
+                CEPO {{ cepoValue }}</br>
               </div> 
+              <div class="adcpDescLabel">
+               {{ adcpDesc }}
+              </div>
             </p>
           </div>
           <p>
@@ -31,18 +44,25 @@
         <div class="beams">
             <label class="beamTypeLabel">Select the Primary Beam Freqency</label>
             <multiselect v-model="primaryBeamValue" deselect-label="Select a different subsystem" track-by="label" label="label" placeholder="Select one" :options="primaryBeamOptions" :searchable="true" :allow-empty="false"></multiselect>
-            <pre class="language-json"><code>{{ primaryBeamValue  }}</code></pre>
         </div>
         <div class="beams">
             <label class="beamTypeLabel">Select the Secondary Beams Frequency</label>
             <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
-            <pre class="language-json"><code>{{ secondaryBeamValue  }}</code></pre>
         </div>
         <div class="beams">
             <label class="beamTypeLabel">Select the Vertical Beam Frequnency</label>
             <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
-            <pre class="language-json"><code>{{ verticalBeamValue  }}</code></pre>
         </div>
+
+        <md-sidenav class="md-right" ref="rightSidenav">
+            <md-toolbar>
+            <div class="md-toolbar-container">
+                <h3 class="md-title">Sidenav content</h3>
+            </div>
+            </md-toolbar>
+            Infomation about frequency.
+        </md-sidenav>
+
       </div>
     </main>
   </div>
@@ -59,6 +79,7 @@
         primaryBeamValue: [],
         secondaryBeamValue: [],
         verticalBeamValue: [],
+        adcpDesc: '',
         primaryBeamOptions: [
             { label: '2 - 1200kHz', value: '2' },
             { label: '3 - 600kHz', value: '3' },
@@ -106,11 +127,11 @@
         let vertVal = '';
         if (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined') {
           vertVal = this.verticalBeamValue.value;
-          this.$store.commit('VERTICAL_BEAMS', this.verticalBeamValue);
+          this.$store.commit('VERTICAL_BEAM', this.verticalBeamValue);
         } else {
           this.verticalBeamValue = [];
           vertVal = '';
-          this.$store.commit('VERTICAL_BEAMS', []);
+          this.$store.commit('VERTICAL_BEAM', []);
         }
 
         // Combined all the beam configurations
@@ -126,6 +147,7 @@
         if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
           (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value === 'undefined') &&
           (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value === 'undefined')) {
+          this.adcpDesc = '4 Beam system';
           return this.getImgUrl('4beam');
         }
 
@@ -133,6 +155,7 @@
         if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
           (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value === 'undefined') &&
           (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined')) {
+          this.adcpDesc = 'Vertical Beam system';
           return this.getImgUrl('5beam');
         }
 
@@ -140,6 +163,7 @@
         if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
           (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') &&
           (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value === 'undefined')) {
+          this.adcpDesc = 'Dual Frequency system';
           return this.getImgUrl('8beam');
         }
 
@@ -147,6 +171,7 @@
         if ((this.primaryBeamValue !== null && typeof this.primaryBeamValue.value !== 'undefined') &&
           (this.secondaryBeamValue !== null && typeof this.secondaryBeamValue.value !== 'undefined') &&
           (this.verticalBeamValue !== null && typeof this.verticalBeamValue.value !== 'undefined')) {
+          this.adcpDesc = 'SeaSeven - Dual Frequency with Vertical Beam system.';
           return this.getImgUrl('7beam');
         }
 
@@ -156,7 +181,7 @@
     },
     methods: {
       nextNav() {
-        this.$router.push({ name: 'adcp-type' });
+        this.$router.push({ name: 'batt' });
       },
       backNav() {
         this.$router.push({ name: 'adcp-type' });
@@ -165,6 +190,9 @@
         // Workaround for the binding to a path
         const images = require.context('../assets/', false, /\.png$/);
         return images(`./${adcpType}.png`);
+      },
+      toggleRightSidenav() {
+        this.$refs.rightSidenav.toggle();
       },
     },
   };
@@ -181,25 +209,11 @@
     padding: 0;
   }
 
-  button {
-      display: block;
-      margin: 5px;
-      border: 0px
+  .md-icon-button {
+      background-color: transparent;
   }
 
   body { font-family: 'Source Sans Pro', sans-serif; }
-
-  #wrapper {
-    background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      );
-    height: 100vh;
-    padding: 60px 80px;
-    width: 100vw;
-  }
 
   #logo {
     height: auto;
@@ -217,6 +231,11 @@
   }
 
   .cepoLabel {
+    font-weight: bold;
+  }
+
+  .adcpDescLabel {
+    background: lightsteelblue;
   }
 
   .beamTypeLabel {
@@ -224,10 +243,6 @@
     font-weight: bold;
   }
 
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
 
   main > div { flex-basis: 50%; }
 
@@ -236,45 +251,5 @@
     flex-direction: column;
   }
 
-  .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
 
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
-  }
 </style>

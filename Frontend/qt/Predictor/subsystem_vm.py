@@ -522,7 +522,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
             # CWPBB
             cwpbb_val = self.cwpbbComboBox.itemData(self.cwpbbComboBox.currentIndex())
             cwpbb_lag = str(self.cwpbbDoubleSpinBox.value())
-            command_list.append((Commands.AdcpCmd("CBTBB", str(cwpbb_val) + ", " + cwpbb_lag)))
+            command_list.append((Commands.AdcpCmd("CWPBB", str(cwpbb_val) + ", " + cwpbb_lag)))
 
             command_list.append(Commands.AdcpCmd("CWPBL", str(self.cwpblDoubleSpinBox.value())))        # CWPBL
             command_list.append(Commands.AdcpCmd("CWPBS", str(self.cwpbsDoubleSpinBox.value())))        # CWPBS

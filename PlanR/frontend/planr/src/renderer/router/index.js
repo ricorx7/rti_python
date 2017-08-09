@@ -21,6 +21,11 @@ export default new Router({
       component: require('@/components/AdcpFrequency'),
     },
     {
+      path: '/batt',
+      name: 'batt',
+      component: require('@/components/Batteries'),
+    },
+    {
       path: '*',
       redirect: '/',
     },
