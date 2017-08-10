@@ -1,28 +1,85 @@
 <template>
   <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     <main>
-      <div class="left-side">
-        <span class="title">
-          System Configuration
-        </span>
-        <system-information></system-information>
-        <button @click="nextNav">NEXT</button> 
-        <button @click="backNav">BACK</button>
-      </div>
+      <div>
+        <md-toolbar>
+            <md-button class="md-icon-button" @click="toggleLeftSidenav">
+                <md-icon>menu</md-icon>
+            </md-button>
+            <h2 class="md-title" style="flex: 3" >ADCP Type</h2>
+            
+            <md-button class="md-icon-button" @click="backNav">
+                <md-icon>chevron_left</md-icon>
+            </md-button>
+            <md-button class="md-icon-button" @click="nextNav">
+                <md-icon>chevron_right</md-icon>
+            </md-button>
 
-      <div class="right-side">
-        <div class="doc">
-          <div class="title">ADCP Types</div>
+            <md-button class="md-icon-button" @click="toggleRightSidenav">
+                <md-icon>info</md-icon>
+            </md-button>
+        </md-toolbar>
+
+        <div class="content">
           <p>
             Select your ADCP Type
           </p>
+          <div class="type">
+            <h2>{{ type }}</h2>
+          </div>
+            <md-button @click="onAdcpSelection('SeaProfiler')"><img id="seaprofiler" src="~@/assets/RoweTech_SeaPROFILER.jpg" alt="SeaPROFILER"></md-button>
+            <md-button @click="onAdcpSelection('SeaWatch')"><img id="seawatch" src="~@/assets/RoweTech_SeaWATCH.jpg" alt="SeaWATCH"></md-button>
+            <md-button @click="onAdcpSelection('SeaPilot')"><img id="seapilot" src="~@/assets/RoweTech_SeaPILOT.jpg" alt="SeaPILOT"></md-button>
+            <md-button @click="onAdcpSelection('SeaWave')"><img id="seawave" src="~@/assets/RoweTech_SeaWAVE.jpg" alt="SeaWAVE"></md-button>
+            <md-button @click="onAdcpSelection('SeaSeven')"><img id="seaseaven" src="~@/assets/RoweTech_SeaSEVEN.jpg" alt="SeaSEVEN"></md-button>
         </div>
-        <button @click="onAdcpSelection('SeaProfiler')"><img id="seaprofiler" src="~@/assets/RoweTech_SeaPROFILER.jpg" alt="SeaPROFILER"></button>
-        <button @click="onAdcpSelection('SeaWatch')"><img id="seawatch" src="~@/assets/RoweTech_SeaWATCH.jpg" alt="SeaWATCH"></button>
-        <button @click="onAdcpSelection('SeaPilot')"><img id="seapilot" src="~@/assets/RoweTech_SeaPILOT.jpg" alt="SeaPILOT"></button>
-        <button @click="onAdcpSelection('SeaWave')"><img id="seawave" src="~@/assets/RoweTech_SeaWAVE.jpg" alt="SeaWAVE"></button>
-        <button @click="onAdcpSelection('SeaSeven')"><img id="seaseaven" src="~@/assets/RoweTech_SeaSEVEN.jpg" alt="SeaSEVEN"></button>
+        <md-sidenav-container>
+        <md-sidenav class="md-right" ref="rightSidenav">
+            <md-toolbar>
+                <div class="md-toolbar-container">
+                    <h3 class="md-title">ADCP Type Details</h3>
+                </div>
+            </md-toolbar>
+            <div class="desc">
+            Select the ADCP type.  This will determine the default setup for your ADCP.
+            </div>
+
+            <h3>SeaPROFILER</h3>
+            <div class="desc">
+            A direct reading ADCP.  This ADCP will have unlimited power to the ADCP through the underwater cable.  It will record all data to a computer.  It will be typically on a moving boat.
+            </div>
+
+            <h3>SeaWATCH</h3>
+            <div class="desc">
+            A self contained ADCP.  This ADCP will be powered by batteries.  It will record to the internal SD card.  It will be typically mounted on the sea floor looking upward.  Pay attention when configuring this ADCP of the power usage in the prediction model.
+            </div>
+
+            <h3>SeaPILOT</h3>
+            <div class="desc">
+            A direct reading ADCP.  This ADCP will have unlimited power to the ADCP through the underwater cable.  It will give data in a DVL NMEA ASCII style format.  It will be typically mounted to a ROV/AUV for navigation purposes.  
+            </div>
+
+            <h3>SeaWAVE</h3>
+            <div class="desc">
+            A self contained ADCP.  This ADCP will be powered by batteries.  It will record to the internal SD card.  This ADCP will typically include a vertical beam and pressure sensor to measure the wave height and vertical velocity.  It will be typically mounted on the sea floor looking upward in around 20 meters of water.  The data will be output in bursts of between 1024 and 4096 ensembles over a 17 minute period.  Pay attention when configuring this ADCP of the power usage and data usage in the prediction model.
+            </div>
+
+            <h3>SeaSEVEN</h3>
+            <div class="desc">
+            A self contained ADCP.  This ADCP will be powered by batteries.  It will record to the internal SD card.  This ADCP is a dual frequency system with a vertical beam.  It will be typically mounted on the sea floor looking upward.  Pay attention when configuring this ADCP of the power usage in the prediction model.
+            </div>
+
+        </md-sidenav>
+        </md-sidenav-container>
+
+        <md-sidenav class="md-left" ref="leftSidenav">
+            <md-toolbar>
+                <div class="md-toolbar-container">
+                    System Configuration
+                </div>
+            </md-toolbar>
+            <system-information></system-information>
+        </md-sidenav>
       </div>
     </main>
   </div>
@@ -34,15 +91,30 @@
   export default {
     name: 'landing-page',
     components: { SystemInformation },
+    data() {
+      return {
+        type: '',
+      };
+    },
+    created() {
+      this.type = this.$store.getters.type;
+    },
     methods: {
       onAdcpSelection(adcpType) {
         this.$store.dispatch('adcpTypeAsyncTask', adcpType);
+        this.type = adcpType;
       },
       nextNav() {
         this.$router.push({ name: 'freq' });
       },
       backNav() {
         this.$router.push({ name: 'landing-page' });
+      },
+      toggleRightSidenav() {
+        this.$refs.rightSidenav.toggle();
+      },
+      toggleLeftSidenav() {
+        this.$refs.leftSidenav.toggle();
       },
     },
   };
@@ -51,89 +123,24 @@
 <style>
   @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  .type {
+    background: lightsteelblue;
+    text-align: center;
+    margin: 20px;
   }
 
-  button {
-      display: block;
-      margin: 5px;
-      border: 0px
+  img {
+      width: 100%;
   }
 
   body { font-family: 'Source Sans Pro', sans-serif; }
 
-  #wrapper {
-    background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      );
-    height: 100vh;
-    padding: 60px 80px;
-    width: 100vw;
+  .desc {
+      margin-top: 0px;
+      margin-bottom: 20px;
+      margin-left: 20px;
+      margin-right: 20px;
   }
 
-  #logo {
-    height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }
 
-  main {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  main > div { flex-basis: 50%; }
-
-  .left-side {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .welcome {
-    color: #555;
-    font-size: 23px;
-    margin-bottom: 10px;
-  }
-
-  .title {
-    color: #2c3e50;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 6px;
-  }
-
-  .title.alt {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  .doc p {
-    color: black;
-    margin-bottom: 10px;
-  }
-
-  .doc button {
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    padding: 0.75em 2em;
-    border-radius: 2em;
-    display: inline-block;
-    color: #fff;
-    background-color: #4fc08d;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-    border: 1px solid #4fc08d;
-  }
-
-  .doc button.alt {
-    color: #42b983;
-    background-color: transparent;
-  }
 </style>

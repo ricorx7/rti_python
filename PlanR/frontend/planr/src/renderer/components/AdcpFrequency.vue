@@ -1,25 +1,25 @@
 <template>
   <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     <main>
-      <div class="left-side">
-        <span class="title">
-          System Configuration
-        </span>
-        <system-information></system-information>
-        <button @click="nextNav">NEXT</button> 
-        <button @click="backNav">BACK</button>
-      </div>
 
-      <div class="right-side">
 
-        <div class="doc">
+      <div>
+
+        <div>
             <md-toolbar>
-                <md-button class="md-icon-button" @click="toggleRightSidenav">
+                <md-button class="md-icon-button" @click="toggleLeftSidenav">
                     <md-icon>menu</md-icon>
                 </md-button>
                 <h2 class="md-title" style="flex: 1">ADCP Frequencies</h2>
-                <md-button class="md-icon-button">
+                
+                <md-button class="md-icon-button" @click="backNav">
+                    <md-icon>chevron_left</md-icon>
+                </md-button>
+                <md-button class="md-icon-button" @click="nextNav">
+                    <md-icon>chevron_right</md-icon>
+                </md-button>
+
+                <md-button class="md-icon-button" @click="toggleRightSidenav">
                     <md-icon>info</md-icon>
                 </md-button>
             </md-toolbar>
@@ -47,20 +47,29 @@
         </div>
         <div class="beams">
             <label class="beamTypeLabel">Select the Secondary Beams Frequency</label>
-            <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+            <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if dual frequency" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
         </div>
         <div class="beams">
             <label class="beamTypeLabel">Select the Vertical Beam Frequnency</label>
-            <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+            <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if contain vertical beam" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
         </div>
 
         <md-sidenav class="md-right" ref="rightSidenav">
             <md-toolbar>
-            <div class="md-toolbar-container">
-                <h3 class="md-title">Sidenav content</h3>
-            </div>
+                <div class="md-toolbar-container">
+                    <h3 class="md-title">ADCP Frequency Details</h3>
+                </div>
             </md-toolbar>
             Infomation about frequency.
+        </md-sidenav>
+
+        <md-sidenav class="md-left" ref="leftSidenav">
+            <md-toolbar>
+                <div class="md-toolbar-container">
+                    System Configuration
+                </div>
+            </md-toolbar>
+            <system-information></system-information>
         </md-sidenav>
 
       </div>
@@ -194,6 +203,9 @@
       toggleRightSidenav() {
         this.$refs.rightSidenav.toggle();
       },
+      toggleLeftSidenav() {
+        this.$refs.leftSidenav.toggle();
+      },
     },
   };
 </script>
@@ -203,23 +215,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  .md-icon-button {
-      background-color: transparent;
-  }
-
   body { font-family: 'Source Sans Pro', sans-serif; }
-
-  #logo {
-    height: auto;
-    margin-bottom: 20px;
-    width: 420px;
-  }
 
   .beams {
       margin-top: 20px;
@@ -241,14 +237,6 @@
   .beamTypeLabel {
     color: blue;
     font-weight: bold;
-  }
-
-
-  main > div { flex-basis: 50%; }
-
-  .left-side {
-    display: flex;
-    flex-direction: column;
   }
 
 

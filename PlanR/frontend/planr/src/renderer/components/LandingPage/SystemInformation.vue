@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="info">
     <div class="title">Information</div>
     <div class="items">
       <div class="item">
@@ -32,6 +32,11 @@
 </script>
 
 <style scoped>
+
+  .info {
+    margin: 20px;
+  }
+
   .title {
     color: #888;
     font-size: 18px;
