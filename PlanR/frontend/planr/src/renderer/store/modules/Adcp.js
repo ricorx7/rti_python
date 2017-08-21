@@ -4,6 +4,7 @@ const state = {
   primaryBeams: [],
   secondaryBeams: [],
   verticalBeam: [],
+  numBatteries: 0,
 };
 
 const mutations = {
@@ -21,6 +22,9 @@ const mutations = {
   },
   VERTICAL_BEAM(state, val) {
     state.verticalBeam = val;
+  },
+  NUMBER_BATTERIES(state, val) {
+    state.numBatteries = val;
   },
 };
 
@@ -45,6 +49,7 @@ const getters = {
   primaryBeams: state => state.primaryBeams,
   secondaryBeams: state => state.secondaryBeams,
   verticalBeam: state => state.verticalBeam,
+  numBatteries: state => state.numBatteries,
 };
 
 export default {

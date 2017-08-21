@@ -1,6 +1,5 @@
 <template>
-  <div id="wrapper">
-    <main>
+  <div>
       <div>
             <md-toolbar>
               <md-button class="md-icon-button" @click="toggleLeftSidenav">
@@ -15,30 +14,54 @@
                   <md-icon>chevron_right</md-icon>
               </md-button>
 
+              <md-button class="md-icon-button" @click="toggleRightSidenavSysConfig">
+                  <md-icon>assignment</md-icon>
+              </md-button>
               <md-button class="md-icon-button" @click="toggleRightSidenav">
                   <md-icon>info</md-icon>
               </md-button>
           </md-toolbar>
 
           <div class="content">
-            <p>
-              Select the Number of Batteries
-            </p>
             <div class="batt-img">
               <img id="battery" src="~@/assets/battery.png" alt="RTI Battery">
             </div>
+
+            <md-input-container class="batt_input">
+              <label>Select the Number of Batteries</label>
+              <md-input type="number" min="0" v-model="numBatt"></md-input>
+            </md-input-container>
           </div>
+
+          <md-card class="card">
+
+            <md-card-media class="batt-life-img">
+              <img id="battery" src="~@/assets/battery_life.png" alt="RTI Battery Life">
+            </md-card-media>
+
+            <md-card-content>
+                Battery Life Plot
+              </md-card-content>
+          </md-card>
+
 
         <md-sidenav class="md-right" ref="rightSidenav">
             <md-toolbar>
                 <div class="md-toolbar-container">
-                    <h3 class="md-title">Sidenav content</h3>
+                    <h3 class="md-title">Battery Information</h3>
                 </div>
             </md-toolbar>
-            Infomation about frequency.
+            <div class="info">
+            Battery consumption is calculated in the prediction model.  An self contained ADCP typically holds 2 batteries.  An additional external battery case can also be used to power the ADCP.  Making in total 4 batteries.  External battery cases can also be daisy chained together if more than 4 batteries are needed. 
+            </br>
+            </br>
+            Battery Voltage: <div class="bold">30v</div></br>
+            ADCP Min Voltage: <div class="bold">12v</div></br>
+            ADCP Max Voltage: <div class="bold">36v</div></br>
+            </div>
         </md-sidenav>
 
-        <md-sidenav class="md-left" ref="leftSidenav">
+        <md-sidenav class="md-right" ref="rightSidenavSysConfig">
             <md-toolbar>
                 <div class="md-toolbar-container">
                     System Configuration
@@ -47,21 +70,49 @@
             <system-information></system-information>
         </md-sidenav>
 
+        <md-sidenav class="md-left" ref="leftSidenav">
+            <md-toolbar>
+                <div class="md-toolbar-container">
+                    Main Menu
+                </div>
+            </md-toolbar>
+            <MainMenu></MainMenu>
+        </md-sidenav>
+
       </div>
-    </main>
   </div>
 </template>
 
 <script>
-  import SystemInformation from './LandingPage/SystemInformation';
+  import SystemInformation from './SystemInformation';
+  import MainMenu from './MainMenu';
 
   export default {
-    name: 'landing-page',
-    components: { SystemInformation },
-    methods: {
-      onAdcpSelection(adcpType) {
-        this.$store.dispatch('adcpTypeAsyncTask', adcpType);
+    name: 'batteries',
+    data() {
+      return {
+      };
+    },
+    components: {
+      SystemInformation,
+      MainMenu,
+    },
+    created() {
+      if (this.$store.getters.numBatteries === 0 && this.$store.getters.type === 'SeaWatch') {
+        this.numBatt = 2;
+      }
+    },
+    computed: {
+      numBatt: {
+        get() {
+          return this.$store.getters.numBatteries;
+        },
+        set(value) {
+          this.$store.commit('NUMBER_BATTERIES', value);
+        },
       },
+    },
+    methods: {
       nextNav() {
         this.$router.push({ name: 'freq' });
       },
@@ -70,6 +121,9 @@
       },
       toggleRightSidenav() {
         this.$refs.rightSidenav.toggle();
+      },
+      toggleRightSidenavSysConfig() {
+        this.$refs.rightSidenavSysConfig.toggle();
       },
       toggleLeftSidenav() {
         this.$refs.leftSidenav.toggle();
@@ -82,11 +136,33 @@
   @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
   .content {
-    margin-top: 40px;
+    margin: 40px;
+  }
+
+  .info {
+    margin: 40px;
   }
 
   .batt-img {
-    width: 50%;
+    width: 35%;
+  }
+
+  .batt-life-img {
+    margin: 20px;
+  }
+
+  .batt-input {
+    margin: 40px;
+  }
+
+  .card {
+    margin: 20px;
+  }
+
+  .bold {
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 5px;
   }
 
   body { font-family: 'Source Sans Pro', sans-serif; }

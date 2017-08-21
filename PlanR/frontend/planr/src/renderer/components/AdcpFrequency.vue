@@ -1,85 +1,91 @@
 <template>
-  <div id="wrapper">
-    <main>
+  <div>
+    <md-toolbar>
+        <md-button class="md-icon-button" @click="toggleLeftSidenav">
+            <md-icon>menu</md-icon>
+        </md-button>
+        <h2 class="md-title" style="flex: 1">ADCP Frequencies</h2>
+        
+        <md-button class="md-icon-button" @click="backNav">
+            <md-icon>chevron_left</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" @click="nextNav">
+            <md-icon>chevron_right</md-icon>
+        </md-button>
 
+        <md-button class="md-icon-button" @click="toggleRightSidenavSysConfig">
+            <md-icon>assignment</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" @click="toggleRightSidenav">
+            <md-icon>info</md-icon>
+        </md-button>
+    </md-toolbar>
 
-      <div>
-
-        <div>
-            <md-toolbar>
-                <md-button class="md-icon-button" @click="toggleLeftSidenav">
-                    <md-icon>menu</md-icon>
-                </md-button>
-                <h2 class="md-title" style="flex: 1">ADCP Frequencies</h2>
-                
-                <md-button class="md-icon-button" @click="backNav">
-                    <md-icon>chevron_left</md-icon>
-                </md-button>
-                <md-button class="md-icon-button" @click="nextNav">
-                    <md-icon>chevron_right</md-icon>
-                </md-button>
-
-                <md-button class="md-icon-button" @click="toggleRightSidenav">
-                    <md-icon>info</md-icon>
-                </md-button>
-            </md-toolbar>
-
-          <div class="cepo">
-            <p>
-              <div>
-                  <img id="adcp" :src='adcpImage' alt="adcp-image">
-              </div>
-              <div class="cepoLabel">
-                CEPO {{ cepoValue }}</br>
-              </div> 
-              <div class="adcpDescLabel">
-               {{ adcpDesc }}
-              </div>
-            </p>
+    <div class="content">
+          
+      <div class="cepo">
+          <div>
+            <img class="adcp-image" id="adcp" :src='adcpImage' alt="adcp-image">
           </div>
-          <p>
-            Select the Frequencies of the ADCP
-          </p>
-        </div>
-        <div class="beams">
-            <label class="beamTypeLabel">Select the Primary Beam Freqency</label>
-            <multiselect v-model="primaryBeamValue" deselect-label="Select a different subsystem" track-by="label" label="label" placeholder="Select one" :options="primaryBeamOptions" :searchable="true" :allow-empty="false"></multiselect>
-        </div>
-        <div class="beams">
-            <label class="beamTypeLabel">Select the Secondary Beams Frequency</label>
-            <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if dual frequency" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
-        </div>
-        <div class="beams">
-            <label class="beamTypeLabel">Select the Vertical Beam Frequnency</label>
-            <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if contain vertical beam" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
-        </div>
 
-        <md-sidenav class="md-right" ref="rightSidenav">
-            <md-toolbar>
-                <div class="md-toolbar-container">
-                    <h3 class="md-title">ADCP Frequency Details</h3>
-                </div>
-            </md-toolbar>
-            Infomation about frequency.
-        </md-sidenav>
-
-        <md-sidenav class="md-left" ref="leftSidenav">
-            <md-toolbar>
-                <div class="md-toolbar-container">
-                    System Configuration
-                </div>
-            </md-toolbar>
-            <system-information></system-information>
-        </md-sidenav>
-
+          <div class="cepoLabel">
+            <h2>CEPO {{ cepoValue }}</h2>
+            <h2>{{ adcpDesc }}</h2>
+          </div> 
       </div>
-    </main>
+
+      <div class="beams">
+          <label class="beamTypeLabel">Select the Primary Beam Freqency</label>
+          <multiselect v-model="primaryBeamValue" deselect-label="Select a different subsystem" track-by="label" label="label" placeholder="Select one" :options="primaryBeamOptions" :searchable="true" :allow-empty="false"></multiselect>
+      </div>
+
+      <div class="beams">
+          <label class="beamTypeLabel">Select the Secondary Beams Frequency</label>
+          <multiselect v-model="secondaryBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if dual frequency" :options="secondaryBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+      </div>
+
+      <div class="beams">
+          <label class="beamTypeLabel">Select the Vertical Beam Frequnency</label>
+          <multiselect v-model="verticalBeamValue" deselect-label="Remove this subsystem" track-by="label" label="label" placeholder="Select one if contain vertical beam" :options="verticalBeamOptions" :searchable="true" :allow-empty="true"></multiselect>
+      </div>
+
+    </div>
+
+    <md-sidenav class="md-right" ref="rightSidenav">
+        <md-toolbar>
+            <div class="md-toolbar-container">
+                <h3 class="md-title">ADCP Frequency Details</h3>
+            </div>
+        </md-toolbar>
+        Infomation about frequency.
+    </md-sidenav>
+
+    <md-sidenav class="md-right" ref="rightSidenavSysConfig">
+        <md-toolbar>
+            <div class="md-toolbar-container">
+                System Configuration
+            </div>
+        </md-toolbar>
+        <system-information></system-information>
+    </md-sidenav>
+
+
+    <md-sidenav class="md-left" ref="leftSidenav">
+        <md-toolbar>
+            <div class="md-toolbar-container">
+                Main Menu
+            </div>
+        </md-toolbar>
+        <MainMenu></MainMenu>
+    </md-sidenav>
+
   </div>
 </template>
 
 <script>
   import Multiselect from 'vue-multiselect';
-  import SystemInformation from './LandingPage/SystemInformation';
+  import SystemInformation from './SystemInformation';
+  import MainMenu from './MainMenu';
 
   export default {
     name: 'adcp-freq',
@@ -109,6 +115,7 @@
     components: {
       SystemInformation,
       Multiselect,
+      MainMenu,
     },
     created() {
       this.primaryBeamValue = this.$store.getters.primaryBeams;
@@ -203,6 +210,9 @@
       toggleRightSidenav() {
         this.$refs.rightSidenav.toggle();
       },
+      toggleRightSidenavSysConfig() {
+        this.$refs.rightSidenavSysConfig.toggle();
+      },
       toggleLeftSidenav() {
         this.$refs.leftSidenav.toggle();
       },
@@ -226,12 +236,26 @@
       margin-bottom: 40px;
   }
 
+  .content {
+    margin: 40px;
+  }
+
+  .adcp-image {
+    width: 50%;
+  }
+
   .cepoLabel {
+    background: lightsteelblue;
+    text-align: center;
+    margin: 20px;
     font-weight: bold;
   }
 
   .adcpDescLabel {
     background: lightsteelblue;
+    text-align: center;
+    margin: 20px;
+    font-weight: bold;
   }
 
   .beamTypeLabel {

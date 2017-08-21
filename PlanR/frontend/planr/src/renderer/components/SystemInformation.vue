@@ -10,6 +10,10 @@
         <div class="name">CEPO:</div>
         <div class="value">{{ cepo }}</div>
       </div>
+      <div class="item">
+        <div class="name">Number of Batteries:</div>
+        <div class="value">{{ numBatteries }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -26,6 +30,9 @@
       },
       cepo() {
         return this.$store.getters.cepo;
+      },
+      numBatteries() {
+        return this.$store.getters.numBatteries;
       },
     },
   };
