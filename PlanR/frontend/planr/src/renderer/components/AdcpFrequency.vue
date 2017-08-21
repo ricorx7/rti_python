@@ -16,7 +16,7 @@
         <md-button class="md-icon-button" @click="toggleRightSidenavSysConfig">
             <md-icon>assignment</md-icon>
         </md-button>
-        <md-button class="md-icon-button" @click="toggleRightSidenav">
+        <md-button class="md-icon-button" @click="openInfoDialog">
             <md-icon>info</md-icon>
         </md-button>
     </md-toolbar>
@@ -51,14 +51,33 @@
 
     </div>
 
-    <md-sidenav class="md-right" ref="rightSidenav">
-        <md-toolbar>
-            <div class="md-toolbar-container">
-                <h3 class="md-title">ADCP Frequency Details</h3>
-            </div>
-        </md-toolbar>
-        Infomation about frequency.
-    </md-sidenav>
+    <md-dialog ref='infoDialog'>
+        <md-dialog-title>
+          <h3 class="md-title">ADCP Frequencies</h3>
+        </md-dialog-title>
+        <md-dialog-content>
+          Select the ADCP frequency of your ADCP.  If your ADCP is a dual frequency, or has a vertical beam, then it will have multiple frequiences.  Select all that pertain to your ADCP.  
+          </br>
+          </br>
+          The serial number will describe these frequencies.  After the first 2 digits, the following 12 characters are the frequency types.  Each character is a subsystem.
+          
+          <div class="title">Primary Beams</div>
+          <div class="desc">
+          If your ADCP only has 4 beams, this will be the only frequency.  If it is a dual frequency or SeaSeven, this will be the larger beams.  This will be the first subsystem in the serial number.
+          </div>
+
+          <div class="title">Secondary Beams</div>
+          <div class="desc">
+          If your ADCP has 7 or 8 beams, this will be the second frequency.  If it is a dual frequency or SeaSeven, this will be the smaller beams.  This will be the second subsystem in the serial number.
+          </div>
+
+          <div class="title">Vertical Beam</div>
+          <div class="desc">
+          If your ADCP has a vertical beam, this will be the vertical beam frequency.  If this is a 5 beam ADCP, this will be the second subsystem in the serial number.  If it is a SeaSeven, this will be the third subsystem in the serial number.
+          </div>
+
+        </md-dialog-content>
+    </md-dialog>
 
     <md-sidenav class="md-right" ref="rightSidenavSysConfig">
         <md-toolbar>
@@ -207,8 +226,8 @@
         const images = require.context('../assets/', false, /\.png$/);
         return images(`./${adcpType}.png`);
       },
-      toggleRightSidenav() {
-        this.$refs.rightSidenav.toggle();
+      openInfoDialog() {
+        this.$refs.infoDialog.open();
       },
       toggleRightSidenavSysConfig() {
         this.$refs.rightSidenavSysConfig.toggle();
@@ -261,6 +280,22 @@
   .beamTypeLabel {
     color: blue;
     font-weight: bold;
+  }
+
+  .title {
+    color: #888;
+    font-size: 18px;
+    font-weight: initial;
+    letter-spacing: .25px;
+    margin-top: 10px;
+  }
+
+  .desc {
+      margin-top: 0px;
+      margin-bottom: 20px;
+      margin-left: 20px;
+      margin-right: 20px;
+      color: #35495e;
   }
 
 

@@ -17,7 +17,7 @@
               <md-button class="md-icon-button" @click="toggleRightSidenavSysConfig">
                   <md-icon>assignment</md-icon>
               </md-button>
-              <md-button class="md-icon-button" @click="toggleRightSidenav">
+              <md-button class="md-icon-button" @click="openInfoDialog">
                   <md-icon>info</md-icon>
               </md-button>
           </md-toolbar>
@@ -33,6 +33,23 @@
             </md-input-container>
           </div>
 
+
+        <md-dialog ref='infoDialog'>
+            <md-dialog-title>
+                <div class="md-toolbar-container">
+                    <h3 class="md-title">Battery Information</h3>
+                </div>
+            </md-dialog-title>
+            <md-dialog-content>
+              <div class="info">
+                Battery consumption is calculated in the prediction model.  An self contained ADCP typically holds 2 batteries.  An additional external battery case can also be used to power the ADCP.  Making in total 4 batteries.  External battery cases can also be daisy chained together if more than 4 batteries are needed. 
+                </br>
+                </br>
+                Battery Voltage: <div class="bold">30v</div></br>
+                ADCP Min Voltage: <div class="bold">12v</div></br>
+                ADCP Max Voltage: <div class="bold">36v</div></br>
+              </div>
+
           <md-card class="card">
 
             <md-card-media class="batt-life-img">
@@ -40,26 +57,12 @@
             </md-card-media>
 
             <md-card-content>
-                Battery Life Plot
+                Plot of the Battery Life from 30v to 12v.
               </md-card-content>
           </md-card>
 
-
-        <md-sidenav class="md-right" ref="rightSidenav">
-            <md-toolbar>
-                <div class="md-toolbar-container">
-                    <h3 class="md-title">Battery Information</h3>
-                </div>
-            </md-toolbar>
-            <div class="info">
-            Battery consumption is calculated in the prediction model.  An self contained ADCP typically holds 2 batteries.  An additional external battery case can also be used to power the ADCP.  Making in total 4 batteries.  External battery cases can also be daisy chained together if more than 4 batteries are needed. 
-            </br>
-            </br>
-            Battery Voltage: <div class="bold">30v</div></br>
-            ADCP Min Voltage: <div class="bold">12v</div></br>
-            ADCP Max Voltage: <div class="bold">36v</div></br>
-            </div>
-        </md-sidenav>
+            </md-dialog-content>
+        </md-dialog>
 
         <md-sidenav class="md-right" ref="rightSidenavSysConfig">
             <md-toolbar>
@@ -119,8 +122,8 @@
       backNav() {
         this.$router.push({ name: 'freq' });
       },
-      toggleRightSidenav() {
-        this.$refs.rightSidenav.toggle();
+      openInfoDialog() {
+        this.$refs.infoDialog.open();
       },
       toggleRightSidenavSysConfig() {
         this.$refs.rightSidenavSysConfig.toggle();
