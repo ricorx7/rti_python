@@ -5,6 +5,7 @@ const state = {
   secondaryBeams: [],
   verticalBeam: [],
   numBatteries: 0,
+  salinity: 35,
 };
 
 const mutations = {
@@ -25,6 +26,9 @@ const mutations = {
   },
   NUMBER_BATTERIES(state, val) {
     state.numBatteries = val;
+  },
+  SALINITY(state, val) {
+    state.salinity = val;
   },
 };
 
@@ -50,6 +54,7 @@ const getters = {
   secondaryBeams: state => state.secondaryBeams,
   verticalBeam: state => state.verticalBeam,
   numBatteries: state => state.numBatteries,
+  salinity: state => state.salinity,
 };
 
 export default {

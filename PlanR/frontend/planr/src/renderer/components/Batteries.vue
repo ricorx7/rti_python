@@ -117,7 +117,7 @@
     },
     methods: {
       nextNav() {
-        this.$router.push({ name: 'freq' });
+        this.$router.push({ name: 'salinity' });
       },
       backNav() {
         this.$router.push({ name: 'freq' });

@@ -14,6 +14,10 @@
         <div class="name">Number of Batteries:</div>
         <div class="value">{{ numBatteries }}</div>
       </div>
+      <div class="item">
+        <div class="name">Salinity:</div>
+        <div class="value">{{ salinity }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +37,9 @@
       },
       numBatteries() {
         return this.$store.getters.numBatteries;
+      },
+      salinity() {
+        return this.$store.getters.salinity;
       },
     },
   };

@@ -26,6 +26,11 @@ export default new Router({
       component: require('@/components/Batteries'),
     },
     {
+      path: '/salinity',
+      name: 'salinity',
+      component: require('@/components/Salinity'),
+    },
+    {
       path: '*',
       redirect: '/',
     },
