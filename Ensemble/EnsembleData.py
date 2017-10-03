@@ -1,6 +1,7 @@
 import struct
 from Ensemble.Ensemble import Ensemble
 from log import logger
+from datetime import datetime
 
 
 class EnsembleData:
@@ -80,3 +81,8 @@ class EnsembleData:
         """
         return str(self.Year).zfill(4) + "/" + str(self.Month).zfill(2) + "/" + str(self.Day).zfill(2) + " " + str(self.Hour).zfill(2) + ":" + str(self.Minute).zfill(2) + ":" + str(self.Second).zfill(2) + "." + str(self.HSec).zfill(2)
 
+    def datetime(self):
+        return datetime(self.Year, self.Month, self.Day, self.Hour, self.Minute, self.Second, self.HSec * 10)
+
+    def firmware_str(self):
+        return "{0}.{1}.{2} - {3}".format(self.SysFirmwareMajor, self.SysFirmwareMinor, self.SysFirmwareRevision, self.SysFirmwareSubsystemCode)

@@ -1,6 +1,6 @@
 from Ensemble.Ensemble import Ensemble
 from log import logger
-
+import pandas as pd
 
 class Correlation:
     """
