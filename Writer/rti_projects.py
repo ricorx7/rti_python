@@ -138,6 +138,50 @@ class RtiProjects:
                              ens.Correlation.num_elements,
                              ens.Correlation.element_multiplier,
                              ens_idx)
+
+            # Amplitude
+            self.add_dataset("amplitude",
+                             ens.Amplitude.Amplitude,
+                             ens.Amplitude.num_elements,
+                             ens.Amplitude.element_multiplier,
+                             ens_idx)
+
+            # Beam Velocity
+            self.add_dataset("beamvelocity",
+                             ens.BeamVelocity.Velocities,
+                             ens.BeamVelocity.num_elements,
+                             ens.BeamVelocity.element_multiplier,
+                             ens_idx)
+
+            # Instrument Velocity
+            self.add_dataset("instrumentvelocity",
+                             ens.InstrumentVelocity.Velocities,
+                             ens.InstrumentVelocity.num_elements,
+                             ens.InstrumentVelocity.element_multiplier,
+                             ens_idx)
+
+            # Earth Velocity
+            self.add_dataset("earthvelocity",
+                             ens.EarthVelocity.Velocities,
+                             ens.EarthVelocity.num_elements,
+                             ens.EarthVelocity.element_multiplier,
+                             ens_idx)
+
+            # Good Beam Ping
+            #self.add_dataset("goodbeamping",
+            #                 ens.GoodBeam.GoodBeam,
+            #                 ens.GoodBeam.num_elements,
+            #                 ens.GoodBeam.element_multiplier,
+            #                 ens_idx)
+
+            # Good Earth Ping
+            #self.add_dataset("goodearthping",
+            #                 ens.GoodEarth.GoodEarth,
+            #                 ens.GoodEarth.num_elements,
+            #                 ens.GoodEarth.element_multiplier,
+            #                 ens_idx)
+
+
         else:
             print("Batch import not started.  Please call begin_batch() first.")
 
