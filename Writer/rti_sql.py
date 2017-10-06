@@ -113,7 +113,9 @@ class rti_sql:
                             'rawMagFieldStrength real,'
                             'pitchGravityVector real, '
                             'rollGravityVector real, '
-                            'verticalGravityVector real);')
+                            'verticalGravityVector real, '
+                            'created timestamp, '
+                            'modified timestamp);')
         print("Ancillary table created")
 
         # Bottom Track
@@ -190,14 +192,19 @@ class rti_sql:
                             'corrPulseCoherentBeam0 real, '
                             'corrPulseCoherentBeam1 real, '
                             'corrPulseCoherentBeam2 real, '
-                            'corrPulseCoherentBeam3 real);')
+                            'corrPulseCoherentBeam3 real, '
+                            'created timestamp, '
+                            'modified timestamp);')
         print("Bottom Track table created")
 
         # Beam Velocity
-        query = 'CREATE TABLE IF NOT EXISTS beamVelocity (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS beamVelocity (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' real, '
+            query += 'Bin' + str(ensBin) + ' real, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -205,10 +212,13 @@ class rti_sql:
         print("Beam Velocity table created")
 
         # Instrument Velocity
-        query = 'CREATE TABLE IF NOT EXISTS instrumentVelocity (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS instrumentVelocity (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' real, '
+            query += 'Bin' + str(ensBin) + ' real, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -216,10 +226,13 @@ class rti_sql:
         print("Instrument Velocity table created")
 
         # Earth Velocity
-        query = 'CREATE TABLE IF NOT EXISTS earthVelocity (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS earthVelocity (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' real, '
+            query += 'Bin' + str(ensBin) + ' real, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -227,10 +240,13 @@ class rti_sql:
         print("Earth Velocity table created")
 
         # Amplitude
-        query = 'CREATE TABLE IF NOT EXISTS amplitude (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS amplitude (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' real, '
+            query += 'Bin' + str(ensBin) + ' real, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -238,10 +254,13 @@ class rti_sql:
         print("Amplitude table created")
 
         # Correlation
-        query = 'CREATE TABLE IF NOT EXISTS correlation (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS correlation (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' real, '
+            query += 'Bin' + str(ensBin) + ' real, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -249,10 +268,13 @@ class rti_sql:
         print("Correlation table created")
 
         # Good Beam Ping
-        query = 'CREATE TABLE IF NOT EXISTS goodBeamPing (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS goodBeamPing (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' integer, '
+            query += 'Bin' + str(ensBin) + ' integer, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -260,10 +282,13 @@ class rti_sql:
         print("Good Beam Ping table created")
 
         # Good Earth Ping
-        query = 'CREATE TABLE IF NOT EXISTS goodEarthPing (id SERIAL PRIMARY KEY, ensIndex integer NOT NULL, '
+        query = 'CREATE TABLE IF NOT EXISTS goodEarthPing (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'beam integer NOT NULL, ' \
+                'created timestamp, ' \
+                'modified timestamp, '
         for ensBin in range(0, 200):
-            for beam in range(0, 4):
-                query += 'Beam' + str(beam) + 'Bin' + str(ensBin) + ' integer, '
+            query += 'Bin' + str(ensBin) + ' integer, '
 
         query = query[:-2]          # Remove final comma
         query += ');'
@@ -274,14 +299,16 @@ class rti_sql:
         query = ' '
         self.cursor.execute('CREATE TABLE IF NOT EXISTS nmea (id SERIAL PRIMARY KEY, '
                             'ensIndex integer NOT NULL, '
-                            'nmea text);')
+                            'nmea text, '
+                            'created timestamp, '
+                            'modified timestamp);')
         print("NMEA table created")
 
         print("Table Creation Complete")
         self.conn.commit()
 
 if __name__ == "__main__":
-    conn_string = "host='192.168.0.143' port='32769' dbname='rti' user='rico' password='123456'"
+    conn_string = "host='192.168.0.143' port='32771' dbname='rti' user='rico' password='123456'"
     sql = rti_sql(conn_string)
     sql.create_tables()
     sql.close()

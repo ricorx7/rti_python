@@ -115,7 +115,7 @@ class RtiProjects:
 
         # Get the index for the given project name
         self.batch_prj_id = self.batch_sql.query('SELECT id FROM projects WHERE name=\'{0}\''.format(prj_name))
-        print(self.batch_prj_id)
+        print("Project ID: " + str(self.batch_prj_id))
 
     def end_batch(self):
 
@@ -130,56 +130,161 @@ class RtiProjects:
 
     def add_ensemble(self, ens):
         if self.batch_sql is not None:
-            # Get Date and time for created and modified
-            dt = datetime.now()
+            ens_idx = self.add_ensemble_ds(ens)         # Ensemble dataset
 
-            # Add line for each dataset type
-            ens_ds = "INSERT INTO ensembles (" \
-                     "ensnum, " \
-                     "numbins, " \
-                     "numbeams, " \
-                     "desiredpings, " \
-                     "actualpings, " \
-                     "status, " \
-                     "datetime, " \
-                     "serialnumber, " \
-                     "firmware, " \
-                     "subsystemconfig, " \
-                     "project_id, " \
-                     "created, " \
-                     "modified)" \
-                     "VALUES( " \
-                     "{0}, " \
-                     "{1}, " \
-                     "{2}, " \
-                     "{3}, " \
-                     "{4}, " \
-                     "{5}, " \
-                     "\'{6}\', " \
-                     "\'{7}\', " \
-                     "\'{8}\', " \
-                     "\'{9}\', " \
-                     "\'{10}\', " \
-                     "\'{11}\', " \
-                     "\'{12}\');".format(ens.EnsembleData.EnsembleNumber,
-                                         ens.EnsembleData.NumBins,
-                                         ens.EnsembleData.NumBeams,
-                                         ens.EnsembleData.DesiredPingCount,
-                                         ens.EnsembleData.ActualPingCount,
-                                         ens.EnsembleData.Status,
-                                         ens.EnsembleData.datetime(),
-                                         ens.EnsembleData.SerialNumber,
-                                         ens.EnsembleData.firmware_str(),
-                                         ens.EnsembleData.SysFirmwareSubsystemCode,
-                                         self.batch_prj_id[0][0],
-                                         dt,
-                                         dt)
+            # Correlation
+            self.add_dataset("correlation",
+                             ens.Correlation.Correlation,
+                             ens.Correlation.num_elements,
+                             ens.Correlation.element_multiplier,
+                             ens_idx)
+        else:
+            print("Batch import not started.  Please call begin_batch() first.")
 
-            ens_id = self.batch_sql.execute(ens_ds)
-            print(ens_id)
+    def add_ensemble_ds(self, ens):
+        """
+        Add the Ensemble dataset to the database.
+        """
 
-            # Monitor how many inserts have been done so it does not get too big
-            self.batch_count += 1
-            if self.batch_count > 10:
-                self.batch_sql.commit()
-                self.batch_count = 0
+        # Get Date and time for created and modified
+        dt = datetime.now()
+
+        # Add line for each dataset type
+        ens_query = "INSERT INTO ensembles (" \
+                    "ensnum, " \
+                    "numbins, " \
+                    "numbeams, " \
+                    "desiredpings, " \
+                    "actualpings, " \
+                    "status, " \
+                    "datetime, " \
+                    "serialnumber, " \
+                    "firmware, " \
+                    "subsystemconfig, " \
+                    "project_id, " \
+                    "created, " \
+                    "modified)" \
+                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING ID;"
+
+        self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
+                                                  ens.EnsembleData.NumBins,
+                                                  ens.EnsembleData.NumBeams,
+                                                  ens.EnsembleData.DesiredPingCount,
+                                                  ens.EnsembleData.ActualPingCount,
+                                                  ens.EnsembleData.Status,
+                                                  ens.EnsembleData.datetime(),
+                                                  ens.EnsembleData.SerialNumber,
+                                                  ens.EnsembleData.firmware_str(),
+                                                  ens.EnsembleData.SysFirmwareSubsystemCode,
+                                                  self.batch_prj_id[0][0],
+                                                  dt,
+                                                  dt))
+        ens_idx = self.batch_sql.cursor.fetchone()[0]
+        print("Ens Index: " + str(ens_idx))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
+
+        return ens_idx
+
+    def add_dataset(self, table, data, num_elements, element_multiplier, ens_idx):
+        """
+        Add a dataset to the database.  Give the table name, data, number of beams and bins and the ensemble index.
+        :param table: Table name as a string.
+        :param data: 2D Array of the data.
+        :param num_elements: Number of bins.
+        :param element_multiplier: Number of beams.
+        :param ens_idx: Ensemble index in Ensembles table.
+        """
+        # Get Date and time for created and modified
+        dt = datetime.now()
+
+        beam0_avail = False
+        beam1_avail = False
+        beam2_avail = False
+        beam3_avail = False
+        query_b0_label = ""
+        query_b0_val = ""
+        query_b1_label = ""
+        query_b1_val = ""
+        query_b2_label = ""
+        query_b2_val = ""
+        query_b3_label = ""
+        query_b3_val = ""
+        for bin_num in range(num_elements):
+            for beam in range(element_multiplier):
+                if beam == 0:
+                    query_b0_label += "Bin{0}, ".format(bin_num)
+                    query_b0_val += "{0}, ".format(data[bin_num][beam])
+                    beam0_avail = True
+                if beam == 1:
+                    query_b1_label += "Bin{0}, ".format(bin_num)
+                    query_b1_val += "{0}, ".format(data[bin_num][beam])
+                    beam1_avail = True
+                if beam == 2:
+                    query_b2_label += "Bin{0}, ".format(bin_num)
+                    query_b2_val += "{0}, ".format(data[bin_num][beam])
+                    beam2_avail = True
+                if beam == 3:
+                    query_b3_label += "Bin{0}, ".format(bin_num)
+                    query_b3_val += "{0}, ".format(data[bin_num][beam])
+                    beam3_avail = True
+
+        query_b0_label = query_b0_label[:-2]        # Remove final comma
+        query_b0_val = query_b0_val[:-2]            # Remove final comma
+        query_b1_label = query_b1_label[:-2]        # Remove final comma
+        query_b1_val = query_b0_val[:-2]            # Remove final comma
+        query_b2_label = query_b2_label[:-2]        # Remove final comma
+        query_b2_val = query_b2_val[:-2]            # Remove final comma
+        query_b3_label = query_b3_label[:-2]        # Remove final comma
+        query_b3_val = query_b3_val[:-2]            # Remove final comma
+
+        # Add line for each beam
+        if beam0_avail:
+            query = "INSERT INTO {0} (" \
+                    "ensIndex, " \
+                    "beam, " \
+                    "{1}, " \
+                    "created, " \
+                    "modified) " \
+                     "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b0_label, query_b0_val)
+            self.batch_sql.cursor.execute(query, (ens_idx, 0, dt, dt))
+
+        if beam1_avail:
+            query = "INSERT INTO {0} (" \
+                    "ensIndex, " \
+                    "beam, " \
+                    "{1}, " \
+                    "created, " \
+                    "modified) " \
+                     "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b1_label, query_b1_val)
+            self.batch_sql.cursor.execute(query, (ens_idx, 1, dt, dt))
+
+        if beam2_avail:
+            query = "INSERT INTO {0} (" \
+                    "ensIndex, " \
+                    "beam, " \
+                    "{1}, " \
+                    "created, " \
+                    "modified) " \
+                     "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b2_label, query_b2_val)
+            self.batch_sql.cursor.execute(query, (ens_idx, 2, dt, dt))
+
+        if beam3_avail:
+            query = "INSERT INTO {0} (" \
+                    "ensIndex, " \
+                    "beam, " \
+                    "{1}, " \
+                    "created, " \
+                    "modified) " \
+                     "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b3_label, query_b3_val)
+            self.batch_sql.cursor.execute(query, (ens_idx, 3, dt, dt))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
