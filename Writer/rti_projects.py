@@ -1,4 +1,5 @@
 from rti_python.Writer.rti_sql import rti_sql
+from rti_python.Ensemble import Ensemble
 
 from datetime import datetime
 
@@ -168,19 +169,20 @@ class RtiProjects:
                              ens_idx)
 
             # Good Beam Ping
-            #self.add_dataset("goodbeamping",
-            #                 ens.GoodBeam.GoodBeam,
-            #                 ens.GoodBeam.num_elements,
-            #                 ens.GoodBeam.element_multiplier,
-            #                 ens_idx)
+            self.add_dataset("goodbeamping",
+                             ens.GoodBeam.GoodBeam,
+                             ens.GoodBeam.num_elements,
+                             ens.GoodBeam.element_multiplier,
+                             ens_idx,
+                             bad_val=0)
 
             # Good Earth Ping
-            #self.add_dataset("goodearthping",
-            #                 ens.GoodEarth.GoodEarth,
-            #                 ens.GoodEarth.num_elements,
-            #                 ens.GoodEarth.element_multiplier,
-            #                 ens_idx)
-
+            self.add_dataset("goodearthping",
+                             ens.GoodEarth.GoodEarth,
+                             ens.GoodEarth.num_elements,
+                             ens.GoodEarth.element_multiplier,
+                             ens_idx,
+                             bad_val=0)
 
         else:
             print("Batch import not started.  Please call begin_batch() first.")
@@ -234,7 +236,7 @@ class RtiProjects:
 
         return ens_idx
 
-    def add_dataset(self, table, data, num_elements, element_multiplier, ens_idx):
+    def add_dataset(self, table, data, num_elements, element_multiplier, ens_idx, bad_val=Ensemble.Ensemble.BadVelocity):
         """
         Add a dataset to the database.  Give the table name, data, number of beams and bins and the ensemble index.
         :param table: Table name as a string.
@@ -242,6 +244,7 @@ class RtiProjects:
         :param num_elements: Number of bins.
         :param element_multiplier: Number of beams.
         :param ens_idx: Ensemble index in Ensembles table.
+        :param bad_val: If a value is bad or missing, replace it with this value.
         """
         # Get Date and time for created and modified
         dt = datetime.now()
@@ -262,25 +265,37 @@ class RtiProjects:
             for beam in range(element_multiplier):
                 if beam == 0:
                     query_b0_label += "Bin{0}, ".format(bin_num)
-                    query_b0_val += "{0}, ".format(data[bin_num][beam])
+                    if data[bin_num][beam]:
+                        query_b0_val += "{0}, ".format(data[bin_num][beam])
+                    else:
+                        query_b0_val += "{0}, ".format(bad_val)
                     beam0_avail = True
                 if beam == 1:
                     query_b1_label += "Bin{0}, ".format(bin_num)
-                    query_b1_val += "{0}, ".format(data[bin_num][beam])
+                    if data[bin_num][beam]:
+                        query_b1_val += "{0}, ".format(data[bin_num][beam])
+                    else:
+                        query_b1_val += "{0}, ".format(bad_val)
                     beam1_avail = True
                 if beam == 2:
                     query_b2_label += "Bin{0}, ".format(bin_num)
-                    query_b2_val += "{0}, ".format(data[bin_num][beam])
+                    if data[bin_num][beam]:
+                        query_b2_val += "{0}, ".format(data[bin_num][beam])
+                    else:
+                        query_b2_val += "{0}, ".format(bad_val)
                     beam2_avail = True
                 if beam == 3:
                     query_b3_label += "Bin{0}, ".format(bin_num)
-                    query_b3_val += "{0}, ".format(data[bin_num][beam])
+                    if data[bin_num][beam]:
+                        query_b3_val += "{0}, ".format(data[bin_num][beam])
+                    else:
+                        query_b3_val += "{0}, ".format(bad_val)
                     beam3_avail = True
 
         query_b0_label = query_b0_label[:-2]        # Remove final comma
         query_b0_val = query_b0_val[:-2]            # Remove final comma
         query_b1_label = query_b1_label[:-2]        # Remove final comma
-        query_b1_val = query_b0_val[:-2]            # Remove final comma
+        query_b1_val = query_b1_val[:-2]            # Remove final comma
         query_b2_label = query_b2_label[:-2]        # Remove final comma
         query_b2_val = query_b2_val[:-2]            # Remove final comma
         query_b3_label = query_b3_label[:-2]        # Remove final comma
@@ -295,6 +310,7 @@ class RtiProjects:
                     "created, " \
                     "modified) " \
                      "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b0_label, query_b0_val)
+            #print(query)
             self.batch_sql.cursor.execute(query, (ens_idx, 0, dt, dt))
 
         if beam1_avail:
@@ -305,6 +321,7 @@ class RtiProjects:
                     "created, " \
                     "modified) " \
                      "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b1_label, query_b1_val)
+            #print(query)
             self.batch_sql.cursor.execute(query, (ens_idx, 1, dt, dt))
 
         if beam2_avail:
@@ -315,6 +332,7 @@ class RtiProjects:
                     "created, " \
                     "modified) " \
                      "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b2_label, query_b2_val)
+            #print(query)
             self.batch_sql.cursor.execute(query, (ens_idx, 2, dt, dt))
 
         if beam3_avail:
@@ -325,6 +343,7 @@ class RtiProjects:
                     "created, " \
                     "modified) " \
                      "VALUES ( %s, %s, {2}, %s, %s);".format(table, query_b3_label, query_b3_val)
+            #print(query)
             self.batch_sql.cursor.execute(query, (ens_idx, 3, dt, dt))
 
         # Monitor how many inserts have been done so it does not get too big

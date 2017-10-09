@@ -308,7 +308,7 @@ class rti_sql:
         self.conn.commit()
 
 if __name__ == "__main__":
-    conn_string = "host='192.168.0.143' port='32771' dbname='rti' user='rico' password='123456'"
+    conn_string = "host='localhost' port='5432' dbname='rti' user='test' password='123456'"
     sql = rti_sql(conn_string)
     sql.create_tables()
     sql.close()
