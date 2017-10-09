@@ -40,6 +40,11 @@ class BottomTrack:
         self.InstrumentGood = []
         self.EarthVelocity = []
         self.EarthGood = []
+        self.SNR_PulseCoherent = []
+        self.Amp_PulseCoherent = []
+        self.Vel_PulseCoherent = []
+        self.Noise_PulseCoherent = []
+        self.Corr_PulseCoherent = []
 
         """
         for beams in range(element_multiplier):
@@ -109,6 +114,21 @@ class BottomTrack:
 
         for beams in range(numBeam):
             self.EarthGood.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+
+        for beams in range(numBeam):
+            self.SNR_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+
+        for beams in range(numBeam):
+            self.Amp_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+
+        for beams in range(numBeam):
+            self.Vel_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+
+        for beams in range(numBeam):
+            self.Noise_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+
+        for beams in range(numBeam):
+            self.Corr_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
 
         logger.debug(self.FirstPingTime)
         logger.debug(self.LastPingTime)

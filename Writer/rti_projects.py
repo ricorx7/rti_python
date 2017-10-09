@@ -184,6 +184,9 @@ class RtiProjects:
                              ens_idx,
                              bad_val=0)
 
+            # Bottom Track
+            self.add_bottomtrack_ds(ens, ens_idx)
+
         else:
             print("Batch import not started.  Please call begin_batch() first.")
 
@@ -235,6 +238,221 @@ class RtiProjects:
             self.batch_count = 0
 
         return ens_idx
+
+    def add_bottomtrack_ds(self, ens, ens_idx):
+        # Get Date and time for created and modified
+        dt = datetime.now()
+
+        query_range_label = ""
+        query_range_val = ""
+        query_snr_label = ""
+        query_snr_val = ""
+        query_amp_label = ""
+        query_amp_val = ""
+        query_corr_label = ""
+        query_corr_val = ""
+        query_beam_vel_label = ""
+        query_beam_vel_val = ""
+        query_beam_ping_label = ""
+        query_beam_ping_val = ""
+        query_instr_vel_label = ""
+        query_instr_vel_val = ""
+        query_instr_good_label = ""
+        query_instr_good_val = ""
+        query_earth_vel_label = ""
+        query_earth_vel_val = ""
+        query_earth_good_label = ""
+        query_earth_good_val = ""
+        query_snr_pc_label = ""
+        query_snr_pc_val = ""
+        query_amp_pc_label = ""
+        query_amp_pc_val = ""
+        query_vel_pc_label = ""
+        query_vel_pc_val = ""
+        query_noise_pc_label = ""
+        query_noise_pc_val = ""
+        query_corr_pc_label = ""
+        query_corr_pc_val = ""
+
+        for beam in range(int(ens.BottomTrack.NumBeams)):
+            query_range_label += "rangeBeam{0}, ".format(beam)
+            query_range_val += "{0}, ".format(ens.BottomTrack.Range[beam])
+
+            query_snr_label += "snrBeam{0}, ".format(beam)
+            query_snr_val += "{0}, ".format(ens.BottomTrack.SNR[beam])
+
+            query_amp_label += "ampBeam{0}, ".format(beam)
+            query_amp_val += "{0}, ".format(ens.BottomTrack.Amplitude[beam])
+
+            query_corr_label += "corrBeam{0}, ".format(beam)
+            query_corr_val += "{0}, ".format(ens.BottomTrack.Correlation[beam])
+
+            query_beam_vel_label += "beamVelBeam{0}, ".format(beam)
+            query_beam_vel_val += "{0}, ".format(ens.BottomTrack.BeamVelocity[beam])
+
+            query_beam_ping_label += "beamGoodBeam{0}, ".format(beam)
+            query_beam_ping_val += "{0}, ".format(int(ens.BottomTrack.BeamGood[beam]))
+
+            query_instr_vel_label += "instrVelBeam{0}, ".format(beam)
+            query_instr_vel_val += "{0}, ".format(ens.BottomTrack.InstrumentVelocity[beam])
+
+            query_instr_good_label += "instrGoodBeam{0}, ".format(beam)
+            query_instr_good_val += "{0}, ".format(int(ens.BottomTrack.InstrumentGood[beam]))
+
+            query_earth_vel_label += "earthVelBeam{0}, ".format(beam)
+            query_earth_vel_val += "{0}, ".format(ens.BottomTrack.EarthVelocity[beam])
+
+            query_earth_good_label += "earthGoodBeam{0}, ".format(beam)
+            query_earth_good_val += "{0}, ".format(int(ens.BottomTrack.EarthGood[beam]))
+
+            query_snr_pc_label += "snrPulseCoherentBeam{0}, ".format(beam)
+            query_snr_pc_val += "{0}, ".format(ens.BottomTrack.SNR_PulseCoherent[beam])
+
+            query_amp_pc_label += "ampPulseCoherentBeam{0}, ".format(beam)
+            query_amp_pc_val += "{0}, ".format(ens.BottomTrack.Amp_PulseCoherent[beam])
+
+            query_vel_pc_label += "velPulseCoherentBeam{0}, ".format(beam)
+            query_vel_pc_val += "{0}, ".format(ens.BottomTrack.Vel_PulseCoherent[beam])
+
+            query_noise_pc_label += "noisePulseCoherentBeam{0}, ".format(beam)
+            query_noise_pc_val += "{0}, ".format(ens.BottomTrack.Noise_PulseCoherent[beam])
+
+            query_corr_pc_label += "corrPulseCoherentBeam{0}, ".format(beam)
+            query_corr_pc_val += "{0}, ".format(ens.BottomTrack.Corr_PulseCoherent[beam])
+
+        query_range_label = query_range_label[:-2]              # Remove final comma
+        query_range_val = query_range_val[:-2]                  # Remove final comma
+        query_snr_label = query_snr_label[:-2]                  # Remove final comma
+        query_snr_val = query_snr_val[:-2]                      # Remove final comma
+        query_amp_label = query_amp_label[:-2]                  # Remove final comma
+        query_amp_val = query_amp_val[:-2]                      # Remove final comma
+        query_corr_label = query_corr_label[:-2]                # Remove final comma
+        query_corr_val = query_corr_val[:-2]                    # Remove final comma
+        query_beam_vel_label = query_beam_vel_label[:-2]        # Remove final comma
+        query_beam_vel_val = query_beam_vel_val[:-2]            # Remove final comma
+        query_beam_ping_label = query_beam_ping_label[:-2]      # Remove final comma
+        query_beam_ping_val = query_beam_ping_val[:-2]          # Remove final comma
+        query_instr_vel_label = query_instr_vel_label[:-2]      # Remove final comma
+        query_instr_vel_val = query_instr_vel_val[:-2]          # Remove final comma
+        query_instr_good_label = query_instr_good_label[:-2]    # Remove final comma
+        query_instr_good_val = query_instr_good_val[:-2]        # Remove final comma
+        query_earth_vel_label = query_earth_vel_label[:-2]      # Remove final comma
+        query_earth_vel_val = query_earth_vel_val[:-2]          # Remove final comma
+        query_earth_good_label = query_earth_good_label[:-2]    # Remove final comma
+        query_earth_good_val = query_earth_good_val[:-2]        # Remove final comma
+        query_snr_pc_label = query_snr_pc_label[:-2]            # Remove final comma
+        query_snr_pc_val = query_snr_pc_val[:-2]                # Remove final comma
+        query_amp_pc_label = query_amp_pc_label[:-2]            # Remove final comma
+        query_amp_pc_val = query_amp_pc_val[:-2]                # Remove final comma
+        query_vel_pc_label = query_vel_pc_label[:-2]            # Remove final comma
+        query_vel_pc_val = query_vel_pc_val[:-2]                # Remove final comma
+        query_noise_pc_label = query_noise_pc_label[:-2]        # Remove final comma
+        query_noise_pc_val = query_noise_pc_val[:-2]            # Remove final comma
+        query_corr_pc_label = query_corr_pc_label[:-2]          # Remove final comma
+        query_corr_pc_val = query_corr_pc_val[:-2]              # Remove final comma
+
+        # Add line for each dataset type
+        query = "INSERT INTO bottomtrack (" \
+                'ensIndex, ' \
+                'firstPingTime, ' \
+                'lastPingTime, ' \
+                'heading, ' \
+                'pitch, ' \
+                'roll, ' \
+                'waterTemp, ' \
+                'salinity, ' \
+                'xdcrDepth, ' \
+                'pressure, ' \
+                'sos, ' \
+                'status, ' \
+                'numBeams, ' \
+                'pingCount, ' \
+                '{0}, ' \
+                '{1}, ' \
+                '{2}, ' \
+                '{3}, ' \
+                '{4}, ' \
+                '{5}, ' \
+                '{6}, ' \
+                '{7}, ' \
+                '{8}, ' \
+                '{9}, ' \
+                '{10}, ' \
+                '{11}, ' \
+                '{12}, ' \
+                '{13}, ' \
+                '{14}, ' \
+                'created, ' \
+                "modified)" \
+                "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s," \
+                "{15}," \
+                "{16}," \
+                "{17}," \
+                "{18}," \
+                "{19}," \
+                "{20}," \
+                "{21}," \
+                "{22}," \
+                "{23}," \
+                "{24}," \
+                "{25}," \
+                "{26}," \
+                "{27}," \
+                "{28}," \
+                "{29}," \
+                "%s,%s);".format(query_range_label,
+                                 query_snr_label,
+                                 query_amp_label,
+                                 query_corr_label,
+                                 query_beam_vel_label,
+                                 query_beam_ping_label,
+                                 query_instr_vel_label,
+                                 query_instr_good_label,
+                                 query_earth_vel_label,
+                                 query_earth_good_label,
+                                 query_snr_pc_label,
+                                 query_amp_pc_label,
+                                 query_vel_pc_label,
+                                 query_noise_pc_label,
+                                 query_corr_pc_label,
+                                 query_range_val,
+                                 query_snr_val,
+                                 query_amp_val,
+                                 query_corr_val,
+                                 query_beam_vel_val,
+                                 query_beam_ping_val,
+                                 query_instr_vel_val,
+                                 query_instr_good_val,
+                                 query_earth_vel_val,
+                                 query_earth_good_val,
+                                 query_snr_pc_val,
+                                 query_amp_pc_val,
+                                 query_vel_pc_val,
+                                 query_noise_pc_val,
+                                 query_corr_pc_val)
+
+        self.batch_sql.cursor.execute(query, (ens_idx,
+                                              ens.BottomTrack.FirstPingTime,
+                                              ens.BottomTrack.LastPingTime,
+                                              ens.BottomTrack.Heading,
+                                              ens.BottomTrack.Pitch,
+                                              ens.BottomTrack.Roll,
+                                              ens.BottomTrack.WaterTemp,
+                                              ens.BottomTrack.Salinity,
+                                              ens.BottomTrack.TransducerDepth,
+                                              ens.BottomTrack.Pressure,
+                                              ens.BottomTrack.SpeedOfSound,
+                                              int(ens.BottomTrack.Status),
+                                              int(ens.BottomTrack.NumBeams),
+                                              int(ens.BottomTrack.ActualPingCount),
+                                              dt,
+                                              dt))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
 
     def add_dataset(self, table, data, num_elements, element_multiplier, ens_idx, bad_val=Ensemble.Ensemble.BadVelocity):
         """
