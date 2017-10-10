@@ -25,8 +25,7 @@ class RtiProjects:
         self.batch_prj_id = 0
         self.batch_count = 0
 
-
-    def add_prj_sql(self, prj_name):
+    def add_prj_sql(self, prj_name, prj_file_path):
         """
         Add the given project name to the projects table.
         :param prj_name: Project name
@@ -186,6 +185,9 @@ class RtiProjects:
 
             # Bottom Track
             self.add_bottomtrack_ds(ens, ens_idx)
+
+            # NMEA
+            self.add_nmea_ds(ens, ens_idx)
 
         else:
             print("Batch import not started.  Please call begin_batch() first.")
@@ -453,6 +455,62 @@ class RtiProjects:
         if self.batch_count > 10:
             self.batch_sql.commit()
             self.batch_count = 0
+
+    def add_nmea_ds(self, ens, ens_idx):
+        """
+        Add the NMEA dataset to the database.
+        """
+
+        # Get Date and time for created and modified
+        dt = datetime.now()
+
+        # Add line for each dataset type
+        ens_query = "INSERT INTO nmea (" \
+                    "ensIndex, " \
+                    "nmea, " \
+                    "GPGGA, " \
+                    "GPVTG, " \
+                    "GPRMC, " \
+                    "GPRMF, " \
+                    "GPGLL, " \
+                    "GPGSV, " \
+                    "GPGSA, " \
+                    "GPHDT, " \
+                    "latitude, " \
+                    "longitude, "\
+                    "speed_knots, " \
+                    "heading, " \
+                    "datetime, " \
+                    "created, " \
+                    "modified)" \
+                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+
+        self.batch_sql.cursor.execute(ens_query, (ens_idx,
+                                                  ens.NmeaData.nmea_sentences,
+                                                  ens.NmeaData.GPGGA,
+                                                  ens.NmeaData.GPVTG,
+                                                  ens.NmeaData.GPRMC,
+                                                  ens.NmeaData.GPRMF,
+                                                  ens.NmeaData.GPGLL,
+                                                  ens.NmeaData.GPGLL,
+                                                  ens.NmeaData.GPGSV,
+                                                  ens.NmeaData.GPGSA,
+                                                  ens.NmeaData.GPHDT,
+                                                  ens.NmeaData.latitude,
+                                                  ens.NmeaData.longitude,
+                                                  ens.NmeaData.speed_knots,
+                                                  ens.NmeaData.heading,
+                                                  ens.NmeaData.datetime,
+                                                  dt,
+                                                  dt))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
+
+        return ens_idx
 
     def add_dataset(self, table, data, num_elements, element_multiplier, ens_idx, bad_val=Ensemble.Ensemble.BadVelocity):
         """

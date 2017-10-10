@@ -297,12 +297,25 @@ class rti_sql:
         print("Good Earth Ping table created")
 
         # NMEA
-        query = ' '
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS nmea (id SERIAL PRIMARY KEY, '
-                            'ensIndex integer NOT NULL, '
-                            'nmea text, '
-                            'created timestamp, '
-                            'modified timestamp);')
+        query = 'CREATE TABLE IF NOT EXISTS nmea (id SERIAL PRIMARY KEY, ' \
+                'ensIndex integer NOT NULL, ' \
+                'nmea text, ' \
+                'GPGGA text, ' \
+                'GPVTG text,' \
+                'GPRMC text, ' \
+                'GPRMF text, ' \
+                'GPGLL text, ' \
+                'GPGSV text, ' \
+                'GPGSA text, ' \
+                'GPHDT text,' \
+                'latitude real, ' \
+                'longitude real, ' \
+                'speed_knots real, ' \
+                'heading real, ' \
+                'datetime timestamp, ' \
+                'created timestamp, ' \
+                'modified timestamp);'
+        self.cursor.execute(query)
         print("NMEA table created")
 
         print("Table Creation Complete")

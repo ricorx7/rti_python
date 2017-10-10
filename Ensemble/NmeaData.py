@@ -15,7 +15,7 @@ class NmeaData:
         self.image = 0
         self.name_len = 8
         self.Name = "E000011"
-        self.NmeaStrings = []
+        self.nmea_sentences = []
 
         # Initialize with bad values
         self.GPGGA = None
@@ -26,6 +26,11 @@ class NmeaData:
         self.GPGSV = None
         self.GPGSA = None
         self.GPHDT = None
+        self.lat = 0.0
+        self.lon = 0.0
+        self.speed_knots = 0.0
+        self.heading = 0.0
+        self.dt = None                              # Date and Time from GGA
 
     def decode(self, data):
         """
@@ -37,17 +42,21 @@ class NmeaData:
 
         nmea_str = str(data[packet_pointer:], "UTF-8")
 
-        self.NmeaStrings = nmea_str.split()
+        self.nmea_sentences = nmea_str.split()
 
-        for msg in self.NmeaStrings:
+        for msg in self.nmea_sentences:
             try:
                 # Parse the NMEA data
                 nmea_msg = pynmea2.parse(msg)
 
                 if isinstance(nmea_msg, pynmea2.types.talker.GGA):
                     self.GPGGA = nmea_msg
+                    self.lat = nmea_msg.latitude
+                    self.lon = nmea_msg.longitude
+                    self.dt = nmea_msg.timestamp
                 if isinstance(nmea_msg, pynmea2.types.talker.VTG):
                     self.GPVTG = nmea_msg
+                    self.speed_knots = nmea_msg.spd_over_grnd_kts
                 if isinstance(nmea_msg, pynmea2.types.talker.RMC):
                     self.GPRMC = nmea_msg
                 if isinstance(nmea_msg, pynmea2.types.talker.RMF):
@@ -60,10 +69,11 @@ class NmeaData:
                     self.GPGSA = nmea_msg
                 if isinstance(nmea_msg, pynmea2.types.talker.HDT):
                     self.GPHDT = nmea_msg
+                    self.heading = nmea_msg.heading
 
             except Exception:
                 logger.debug("Error decoding NMEA msg")
 
         logger.debug(nmea_str)
-        logger.debug(self.NmeaStrings)
+        logger.debug(self.nmea_sentences)
 
