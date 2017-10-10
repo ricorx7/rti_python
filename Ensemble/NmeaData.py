@@ -26,11 +26,12 @@ class NmeaData:
         self.GPGSV = None
         self.GPGSA = None
         self.GPHDT = None
-        self.lat = 0.0
-        self.lon = 0.0
+        self.GPHDG = None
+        self.latitude = 0.0
+        self.longitude = 0.0
         self.speed_knots = 0.0
         self.heading = 0.0
-        self.dt = None                              # Date and Time from GGA
+        self.datetime = None                              # Date and Time from GGA
 
     def decode(self, data):
         """
@@ -51,9 +52,9 @@ class NmeaData:
 
                 if isinstance(nmea_msg, pynmea2.types.talker.GGA):
                     self.GPGGA = nmea_msg
-                    self.lat = nmea_msg.latitude
-                    self.lon = nmea_msg.longitude
-                    self.dt = nmea_msg.timestamp
+                    self.latitude = nmea_msg.latitude
+                    self.longitude = nmea_msg.longitude
+                    self.datetime = nmea_msg.timestamp
                 if isinstance(nmea_msg, pynmea2.types.talker.VTG):
                     self.GPVTG = nmea_msg
                     self.speed_knots = nmea_msg.spd_over_grnd_kts
@@ -70,6 +71,8 @@ class NmeaData:
                 if isinstance(nmea_msg, pynmea2.types.talker.HDT):
                     self.GPHDT = nmea_msg
                     self.heading = nmea_msg.heading
+                if isinstance(nmea_msg, pynmea2.types.talker.HDG):
+                    self.GPHDG = nmea_msg
 
             except Exception:
                 logger.debug("Error decoding NMEA msg")

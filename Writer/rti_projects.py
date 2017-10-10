@@ -1,7 +1,7 @@
 from rti_python.Writer.rti_sql import rti_sql
 from rti_python.Ensemble import Ensemble
 
-from datetime import datetime
+from datetime import datetime, date, time
 
 
 class RtiProjects:
@@ -187,7 +187,14 @@ class RtiProjects:
             self.add_bottomtrack_ds(ens, ens_idx)
 
             # NMEA
-            self.add_nmea_ds(ens, ens_idx)
+            year = 2017
+            month = 1
+            day = 1
+            if ens.IsEnsembleData:
+                year = ens.EnsembleData.Year
+                month = ens.EnsembleData.Month
+                day = ens.EnsembleData.Day
+            self.add_nmea_ds(ens, ens_idx, year=year, month=month, day=day)
 
         else:
             print("Batch import not started.  Please call begin_batch() first.")
@@ -456,7 +463,7 @@ class RtiProjects:
             self.batch_sql.commit()
             self.batch_count = 0
 
-    def add_nmea_ds(self, ens, ens_idx):
+    def add_nmea_ds(self, ens, ens_idx, year=2017, month=1, day=1):
         """
         Add the NMEA dataset to the database.
         """
@@ -464,45 +471,89 @@ class RtiProjects:
         # Get Date and time for created and modified
         dt = datetime.now()
 
-        # Add line for each dataset type
-        ens_query = "INSERT INTO nmea (" \
-                    "ensIndex, " \
-                    "nmea, " \
-                    "GPGGA, " \
-                    "GPVTG, " \
-                    "GPRMC, " \
-                    "GPRMF, " \
-                    "GPGLL, " \
-                    "GPGSV, " \
-                    "GPGSA, " \
-                    "GPHDT, " \
-                    "latitude, " \
-                    "longitude, "\
-                    "speed_knots, " \
-                    "heading, " \
-                    "datetime, " \
-                    "created, " \
-                    "modified)" \
-                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        # GPS DateTime
+        ens_date = date(year, month, day)
+        gps_time = ens.NmeaData.datetime
+        gps_datetime = datetime.combine(ens_date, gps_time)
 
-        self.batch_sql.cursor.execute(ens_query, (ens_idx,
-                                                  ens.NmeaData.nmea_sentences,
-                                                  ens.NmeaData.GPGGA,
-                                                  ens.NmeaData.GPVTG,
-                                                  ens.NmeaData.GPRMC,
-                                                  ens.NmeaData.GPRMF,
-                                                  ens.NmeaData.GPGLL,
-                                                  ens.NmeaData.GPGLL,
-                                                  ens.NmeaData.GPGSV,
-                                                  ens.NmeaData.GPGSA,
-                                                  ens.NmeaData.GPHDT,
-                                                  ens.NmeaData.latitude,
-                                                  ens.NmeaData.longitude,
-                                                  ens.NmeaData.speed_knots,
-                                                  ens.NmeaData.heading,
-                                                  ens.NmeaData.datetime,
-                                                  dt,
-                                                  dt))
+        # Set null if does not exist
+        gga = str(ens.NmeaData.GPGGA)
+        if ens.NmeaData.GPGGA is None:
+            gga = None
+
+        vtg = str(ens.NmeaData.GPVTG)
+        if ens.NmeaData.GPVTG is None:
+            vtg = None
+
+        rmc = str(ens.NmeaData.GPRMC)
+        if ens.NmeaData.GPRMC is None:
+            rmc = None
+
+        rmf = str(ens.NmeaData.GPRMF)
+        if ens.NmeaData.GPRMF is None:
+            rmf = None
+
+        gll = str(ens.NmeaData.GPGLL)
+        if ens.NmeaData.GPGLL is None:
+            gll = None
+
+        gsv = str(ens.NmeaData.GPGSV)
+        if ens.NmeaData.GPGSV is None:
+            gsv = None
+
+        gsa = str(ens.NmeaData.GPGSA)
+        if ens.NmeaData.GPGSA is None:
+            gsa = None
+
+        hdt = str(ens.NmeaData.GPHDT)
+        if ens.NmeaData.GPHDT is None:
+            hdt = None
+
+        hdg = str(ens.NmeaData.GPHDG)
+        if ens.NmeaData.GPHDG is None:
+            hdg = None
+
+        # Add line for each dataset type
+        query = "INSERT INTO nmea (" \
+                "ensIndex, " \
+                "nmea, " \
+                "GPGGA, " \
+                "GPVTG, " \
+                "GPRMC, " \
+                "GPRMF, " \
+                "GPGLL, " \
+                "GPGSV, " \
+                "GPGSA, " \
+                "GPHDT, " \
+                "GPHDG, " \
+                "latitude, " \
+                "longitude, "\
+                "speed_knots, " \
+                "heading, " \
+                "datetime, " \
+                "created, " \
+                "modified) " \
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+        #print(query)
+
+        self.batch_sql.cursor.execute(query, (ens_idx,
+                                              ens.NmeaData.nmea_sentences,
+                                              gga,
+                                              vtg,
+                                              rmc,
+                                              rmf,
+                                              gll,
+                                              gsv,
+                                              gsa,
+                                              hdt,
+                                              hdg,
+                                              ens.NmeaData.latitude,
+                                              ens.NmeaData.longitude,
+                                              ens.NmeaData.speed_knots,
+                                              ens.NmeaData.heading,
+                                              gps_datetime,
+                                              dt,
+                                              dt))
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1

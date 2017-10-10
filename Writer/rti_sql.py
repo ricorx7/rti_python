@@ -308,6 +308,7 @@ class rti_sql:
                 'GPGSV text, ' \
                 'GPGSA text, ' \
                 'GPHDT text,' \
+                'GPHDG text,' \
                 'latitude real, ' \
                 'longitude real, ' \
                 'speed_knots real, ' \
