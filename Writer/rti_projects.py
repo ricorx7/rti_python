@@ -38,11 +38,18 @@ class RtiProjects:
             # Add project to database
             dt = datetime.now()
             sql = rti_sql(self.sql_conn_string)
-            sql.insert('INSERT INTO projects (name, created, modified) VALUES (\'{0}\', \'{1}\', \'{2}\');'.format(prj_name, dt, dt))
-            return True
+
+            query = 'INSERT INTO projects (name, path, created, modified) VALUES (%s,%s,%s,%s) RETURNING ID;'
+
+            sql.cursor.execute(query, (prj_name, prj_file_path, dt, dt))
+            prj_idx = sql.cursor.fetchone()[0]
+            sql.conn.commit()
+            print(prj_idx)
+            sql.close()
+            return prj_idx
         elif project_exist > 0:
             # Send a warning and make them give a new name
-            return False
+            return -1
 
     def check_project_exist(self, prj_name):
         """
@@ -50,35 +57,35 @@ class RtiProjects:
         :param prj_name: Project Name.
         :return: TRUE = Project exists.
         """
-        count = 0
+        idx = -1
 
         # Make connection
         try:
             sql = rti_sql(self.sql_conn_string)
         except Exception as e:
             print("Unable to connect to the database")
+            sql.close()
             return -1
 
         # Check if the project exists
         try:
-            result = sql.query('SELECT 1 FROM projects WHERE name = \'{0}\';'.format(prj_name))
+            result = sql.query('SELECT id FROM projects WHERE name = \'{0}\' LIMIT 1;'.format(prj_name))
 
-            # Count the results
-            for row in result:
-                count += 1
-                print(row)
-
-            # Check if any results were returned
-            print("Count: " + str(count))
+            # Check for a result
+            if not result:
+                idx = 0                     # No project found
+            else:
+                idx = result[0][0]          # Index found
 
         except Exception as e:
             print("Unable to run query", e)
+            sql.close()
             return -2
 
         # Close connection
         sql.close()
 
-        return count
+        return idx
 
     def get_all_projects(self):
         """
