@@ -309,8 +309,8 @@ class rti_sql:
                 'GPGSA text, ' \
                 'GPHDT text,' \
                 'GPHDG text,' \
-                'latitude real, ' \
-                'longitude real, ' \
+                'latitude DECIMAL(8,6), ' \
+                'longitude DECIMAL(9,6), ' \
                 'speed_knots real, ' \
                 'heading real, ' \
                 'datetime timestamp, ' \
@@ -327,3 +327,40 @@ if __name__ == "__main__":
     sql = rti_sql(conn_string)
     sql.create_tables()
     sql.close()
+
+
+"""
+Delete all tables.
+
+DROP TABLE projects;
+DROP TABLE amplitude;
+DROP TABLE ancillary;
+DROP TABLE beamvelocity;
+DROP TABLE bottomtrack;
+DROP TABLE correlation;
+DROP TABLE earthvelocity;
+DROP TABLE ensembles;
+DROP TABLE goodbeamping;
+DROP TABLE goodearthping;
+DROP TABLE instrumentvelocity;
+DROP TABLE nmea;
+"""
+
+"""
+Remove all data from all tables.
+
+DELETE FROM projects;
+DELETE FROM amplitude;
+DELETE FROM ancillary;
+DELETE FROM beamvelocity;
+DELETE FROM bottomtrack;
+DELETE FROM correlation;
+DELETE FROM earthvelocity;
+DELETE FROM ensembles;
+DELETE FROM goodbeamping;
+DELETE FROM goodearthping;
+DELETE FROM instrumentvelocity;
+DELETE FROM nmea;
+
+
+"""
