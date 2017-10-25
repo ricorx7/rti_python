@@ -1,5 +1,5 @@
 import psycopg2
-
+import pandas as pd
 
 """
 Update tables
@@ -72,6 +72,7 @@ class rti_sql:
         self.cursor.execute('CREATE TABLE IF NOT EXISTS projects (id SERIAL PRIMARY KEY, '
                             'name text NOT NULL, '
                             'path text,'
+                            'meta json,'
                             'created timestamp, '
                             'modified timestamp);')
         print("Projects table created")
@@ -90,6 +91,7 @@ class rti_sql:
                             'firmware text,'
                             'subsystemConfig character, '
                             'project_id integer, '
+                            'meta json,'
                             'created timestamp, '
                             'modified timestamp);')
         print("Ensemble Table created")
@@ -114,6 +116,7 @@ class rti_sql:
                             'pitchGravityVector real, '
                             'rollGravityVector real, '
                             'verticalGravityVector real, '
+                            'meta json,'
                             'created timestamp, '
                             'modified timestamp);')
         print("Ancillary table created")
@@ -194,6 +197,7 @@ class rti_sql:
                             'corrPulseCoherentBeam1 real, '
                             'corrPulseCoherentBeam2 real, '
                             'corrPulseCoherentBeam3 real, '
+                            'meta json,'
                             'created timestamp, '
                             'modified timestamp);')
         print("Bottom Track table created")
@@ -202,6 +206,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS beamVelocity (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -216,6 +221,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS instrumentVelocity (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -230,6 +236,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS earthVelocity (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -244,6 +251,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS amplitude (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -258,6 +266,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS correlation (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -272,6 +281,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS goodBeamPing (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -286,6 +296,7 @@ class rti_sql:
         query = 'CREATE TABLE IF NOT EXISTS goodEarthPing (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
                 'beam integer NOT NULL, ' \
+                'meta json,' \
                 'created timestamp, ' \
                 'modified timestamp, '
         for ensBin in range(0, 200):
@@ -313,6 +324,7 @@ class rti_sql:
                 'longitude DECIMAL(9,6), ' \
                 'speed_knots real, ' \
                 'heading real, ' \
+                'meta json,' \
                 'datetime timestamp, ' \
                 'created timestamp, ' \
                 'modified timestamp);'
@@ -322,11 +334,79 @@ class rti_sql:
         print("Table Creation Complete")
         self.conn.commit()
 
+    def get_earth_vel_data(self, project_idx, beam):
+        """
+        Get all the earth velocity data for the given project and beam.
+        :param project_idx: Project index.
+        :param beam: Beam number.
+        :return: Earth velocity data for beam in the project.
+        """
+
+        # Create the string of bins for query
+        bin_nums = ""
+        for x in range(0, 200):
+            bin_nums += "bin" + str(x) + ", "
+        bin_nums = bin_nums[:-2]  # Remove final comma
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensembles.ensnum, earthvelocity.beam, {} FROM ensembles INNER JOIN earthvelocity ON ensembles.id = earthvelocity.ensindex WHERE ensembles.project_id = %s AND earthvelocity.beam = %s ORDER BY ensembles.ensnum ASC;'.format(
+                bin_nums)
+            self.cursor.execute(ens_query, (project_idx, beam))
+            vel_results = self.cursor.fetchall()
+            self.conn.commit()
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        # Make a dataframe
+        df = pd.DataFrame(vel_results)
+        columns = ['ensnum', 'beam']
+        for x in range(0, 200):
+            columns.append('bin' + str(x))
+        df.columns = columns
+        #print(df.head())
+
+        return df
+
+    def get_adcp_info(self, project_idx):
+        """
+        Get information about the ensemble data.
+        :param project_idx: Project index.
+        :return: Earth velocity data for beam in the project.
+        """
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensnum, datetime, serialnumber, firmware, numbins, numbeams, subsystemconfig FROM ensembles WHERE project_id = %s ORDER BY ensnum ASC;'
+            self.cursor.execute(ens_query, (project_idx,))
+            results = self.cursor.fetchall()
+            self.conn.commit()
+
+            ens_data = {}
+            ens_data['ensnum'] = results[0][0]
+            ens_data['datetime'] = results[0][1]
+            ens_data['serialnumber'] = results[0][2]
+            ens_data['firmware'] = results[0][3]
+            ens_data['numbins'] = results[0][4]
+            ens_data['numbeams'] = results[0][5]
+            ens_data['subsystemconfig'] = results[0][6]
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        return ens_data
+
 if __name__ == "__main__":
     conn_string = "host='localhost' port='5432' dbname='rti' user='test' password='123456'"
     sql = rti_sql(conn_string)
     sql.create_tables()
     sql.close()
+
 
 
 """
