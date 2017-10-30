@@ -87,48 +87,81 @@ class BottomTrack:
         numBeam = int(self.NumBeams)
         for beams in range(numBeam):
             self.Range.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.SNR.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.Amplitude.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.Correlation.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.BeamVelocity.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.BeamGood.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.InstrumentVelocity.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.InstrumentGood.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.EarthVelocity.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
         for beams in range(numBeam):
             self.EarthGood.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            index += 1
 
-        for beams in range(numBeam):
-            self.SNR_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+        if self.num_elements > 54:
+            for beams in range(numBeam):
+                self.SNR_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+                index += 1
 
-        for beams in range(numBeam):
-            self.Amp_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            for beams in range(numBeam):
+                self.Amp_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+                index += 1
 
-        for beams in range(numBeam):
-            self.Vel_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            for beams in range(numBeam):
+                self.Vel_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+                index += 1
 
-        for beams in range(numBeam):
-            self.Noise_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            for beams in range(numBeam):
+                self.Noise_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+                index += 1
 
-        for beams in range(numBeam):
-            self.Corr_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+            for beams in range(numBeam):
+                self.Corr_PulseCoherent.append(Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * index, Ensemble().BytesInFloat, data))
+                index += 1
+        else:
+            # Fill in with 0.0
+            for beams in range(numBeam):
+                self.SNR_PulseCoherent.append(0.0)
+
+            for beams in range(numBeam):
+                self.Amp_PulseCoherent.append(0.0)
+
+            for beams in range(numBeam):
+                self.Vel_PulseCoherent.append(0.0)
+
+            for beams in range(numBeam):
+                self.Noise_PulseCoherent.append(0.0)
+
+            for beams in range(numBeam):
+                self.Corr_PulseCoherent.append(0.0)
+
 
         logger.debug(self.FirstPingTime)
         logger.debug(self.LastPingTime)

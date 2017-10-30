@@ -371,6 +371,37 @@ class rti_sql:
 
         return df
 
+    def get_bottom_track_vel(self, project_idx):
+        """
+        Get Bottom track velocities.
+        :param project_idx: Project index.
+        :return: Dataframe with all the velocities. (Beam, Instrument and Earth)
+        """
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensembles.ensnum, ensembles.numbins, ' \
+                        'beamvelbeam0, beamvelbeam1, beamvelbeam2, beamvelbeam3, ' \
+                        'instrvelbeam0, instrvelbeam1, instrvelbeam2, instrvelbeam3, ' \
+                        'earthvelbeam0, earthvelbeam1, earthvelbeam2, earthvelbeam3 ' \
+                        'FROM ensembles ' \
+                        'INNER JOIN bottomtrack ON ensembles.id = bottomtrack.ensindex ' \
+                        'WHERE ensembles.project_id = %s ORDER BY ensembles.ensnum ASC;'
+            self.cursor.execute(ens_query, (project_idx,))
+            vel_results = self.cursor.fetchall()
+            self.conn.commit()
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        # Make a dataframe
+        df = pd.DataFrame(vel_results)
+        df.columns = ['ensnum', 'numbins', 'Beam0', 'Beam1', 'Beam2', 'Beam3', 'Instr0', 'Instr1', 'Instr2', 'Instr3', 'Earth0', 'Earth1', 'Earth2', 'Earth3']
+
+        return df
+
     def get_adcp_info(self, project_idx):
         """
         Get information about the ensemble data.
