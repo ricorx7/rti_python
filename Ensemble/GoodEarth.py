@@ -34,9 +34,9 @@ class GoodEarth:
         """
         packet_pointer = Ensemble.GetBaseDataSize(self.name_len)
 
-        for bin in range(self.num_elements):
-            for beam in range(self.element_multiplier):
-                self.GoodEarth[bin][beam] = Ensemble.GetInt32(packet_pointer, Ensemble().BytesInInt32, data)
+        for beam in range(self.element_multiplier):
+            for bin_num in range(self.num_elements):
+                self.GoodEarth[bin_num][beam] = Ensemble.GetInt32(packet_pointer, Ensemble().BytesInInt32, data)
                 packet_pointer += Ensemble().BytesInInt32
 
         logger.debug(self.GoodEarth)

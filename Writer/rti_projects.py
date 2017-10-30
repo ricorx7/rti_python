@@ -596,35 +596,37 @@ class RtiProjects:
         query_b3_label = ""
         query_b3_val = ""
         for bin_num in range(num_elements):
-            for beam in range(element_multiplier):
-                if beam == 0:
-                    query_b0_label += "Bin{0}, ".format(bin_num)
-                    if data[bin_num][beam]:
-                        query_b0_val += "{0}, ".format(data[bin_num][beam])
-                    else:
-                        query_b0_val += "{0}, ".format(bad_val)
-                    beam0_avail = True
-                if beam == 1:
-                    query_b1_label += "Bin{0}, ".format(bin_num)
-                    if data[bin_num][beam]:
-                        query_b1_val += "{0}, ".format(data[bin_num][beam])
-                    else:
-                        query_b1_val += "{0}, ".format(bad_val)
-                    beam1_avail = True
-                if beam == 2:
-                    query_b2_label += "Bin{0}, ".format(bin_num)
-                    if data[bin_num][beam]:
-                        query_b2_val += "{0}, ".format(data[bin_num][beam])
-                    else:
-                        query_b2_val += "{0}, ".format(bad_val)
-                    beam2_avail = True
-                if beam == 3:
-                    query_b3_label += "Bin{0}, ".format(bin_num)
-                    if data[bin_num][beam]:
-                        query_b3_val += "{0}, ".format(data[bin_num][beam])
-                    else:
-                        query_b3_val += "{0}, ".format(bad_val)
-                    beam3_avail = True
+            if element_multiplier > 0:
+                query_b0_label += "Bin{0}, ".format(bin_num)
+                if data[bin_num][0]:
+                    query_b0_val += "{0}, ".format(data[bin_num][0])
+                else:
+                    query_b0_val += "{0}, ".format(bad_val)
+                beam0_avail = True
+
+            if element_multiplier >= 1:
+                query_b1_label += "Bin{0}, ".format(bin_num)
+                if data[bin_num][1]:
+                    query_b1_val += "{0}, ".format(data[bin_num][1])
+                else:
+                    query_b1_val += "{0}, ".format(bad_val)
+                beam1_avail = True
+
+            if element_multiplier >= 2:
+                query_b2_label += "Bin{0}, ".format(bin_num)
+                if data[bin_num][2]:
+                    query_b2_val += "{0}, ".format(data[bin_num][2])
+                else:
+                    query_b2_val += "{0}, ".format(bad_val)
+                beam2_avail = True
+
+            if element_multiplier >= 3:
+                query_b3_label += "Bin{0}, ".format(bin_num)
+                if data[bin_num][3]:
+                    query_b3_val += "{0}, ".format(data[bin_num][3])
+                else:
+                    query_b3_val += "{0}, ".format(bad_val)
+                beam3_avail = True
 
         query_b0_label = query_b0_label[:-2]        # Remove final comma
         query_b0_val = query_b0_val[:-2]            # Remove final comma

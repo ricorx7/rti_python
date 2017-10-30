@@ -33,9 +33,9 @@ class Correlation:
         """
         packet_pointer = Ensemble.GetBaseDataSize(self.name_len)
 
-        for bin in range(self.num_elements):
-            for beam in range(self.element_multiplier):
-                self.Correlation[bin][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
+        for beam in range(self.element_multiplier):
+            for bin_num in range(self.num_elements):
+                self.Correlation[bin_num][beam] = Ensemble.GetFloat(packet_pointer, Ensemble().BytesInFloat, data)
                 packet_pointer += Ensemble().BytesInFloat
 
         logger.debug(self.Correlation)

@@ -33,9 +33,9 @@ class InstrumentVelocity:
         """
         packetpointer = Ensemble.GetBaseDataSize(self.name_len)
 
-        for bin in range(self.num_elements):
-            for beam in range(self.element_multiplier):
-                self.Velocities[bin][beam] = Ensemble.GetFloat(packetpointer, Ensemble().BytesInFloat, data)
+        for beam in range(self.element_multiplier):
+            for bin_num in range(self.num_elements):
+                self.Velocities[bin_num][beam] = Ensemble.GetFloat(packetpointer, Ensemble().BytesInFloat, data)
                 packetpointer += Ensemble().BytesInFloat
 
         logger.debug(self.Velocities)
