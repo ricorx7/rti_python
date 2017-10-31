@@ -29,6 +29,10 @@ class AncillaryData:
         self.Pressure = 0.0             # Pressure from pressure sensor in Pascals
         self.TransducerDepth = 0.0      # Transducer Depth, used by Pressure sensor in meters
         self.SpeedOfSound = 0.0         # Speed of Sound in m/s.
+        self.RawMagFieldStrength = 0.0  # Raw magnetic field strength
+        self.PitchGravityVector = 0.0   # Pitch Gravity Vector
+        self.RollGravityVector = 0.0    # Roll Gravity Vector
+        self.VerticalGravityVector = 0.0 # Vertical Gravity Vector
 
     def decode(self, data):
         """
@@ -51,6 +55,12 @@ class AncillaryData:
         self.Pressure = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 10, Ensemble().BytesInFloat, data)
         self.TransducerDepth = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 11, Ensemble().BytesInFloat, data)
         self.SpeedOfSound = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 12, Ensemble().BytesInFloat, data)
+
+        if self.num_elements > 13:
+            self.RawMagFieldStrength = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 13, Ensemble().BytesInFloat, data)
+            self.PitchGravityVector = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 14, Ensemble().BytesInFloat, data)
+            self.RollGravityVector = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 15, Ensemble().BytesInFloat, data)
+            self.VerticalGravityVector = Ensemble.GetFloat(packet_pointer + Ensemble().BytesInFloat * 16, Ensemble().BytesInFloat, data)
 
         logger.debug(self.FirstBinRange)
         logger.debug(self.BinSize)

@@ -226,10 +226,28 @@ class RtiProjects:
                     "serialnumber, " \
                     "firmware, " \
                     "subsystemconfig, " \
+                    'rangeFirstBin, ' \
+                    'binSize, ' \
+                    'firstPingTime, ' \
+                    'lastPingTime, ' \
+                    'heading, ' \
+                    'pitch, ' \
+                    'roll, ' \
+                    'waterTemp, ' \
+                    'sysTemp, ' \
+                    'salinity, ' \
+                    'pressure, ' \
+                    'xdcrDepth, ' \
+                    'sos, ' \
+                    'rawMagFieldStrength,' \
+                    'pitchGravityVector, ' \
+                    'rollGravityVector, ' \
+                    'verticalGravityVector, ' \
                     "project_id, " \
                     "created, " \
                     "modified)" \
-                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING ID;"
+                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) " \
+                    "RETURNING ID;"
 
         self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
                                                   ens.EnsembleData.NumBins,
@@ -241,11 +259,36 @@ class RtiProjects:
                                                   ens.EnsembleData.SerialNumber,
                                                   ens.EnsembleData.firmware_str(),
                                                   ens.EnsembleData.SysFirmwareSubsystemCode,
+                                                  ens.AncillaryData.FirstBinRange,
+                                                  ens.AncillaryData.BinSize,
+                                                  ens.AncillaryData.FirstPingTime,
+                                                  ens.AncillaryData.LastPingTime,
+                                                  ens.AncillaryData.Heading,
+                                                  ens.AncillaryData.Pitch,
+                                                  ens.AncillaryData.Roll,
+                                                  ens.AncillaryData.WaterTemp,
+                                                  ens.AncillaryData.SystemTemp,
+                                                  ens.AncillaryData.Salinity,
+                                                  ens.AncillaryData.Pressure,
+                                                  ens.AncillaryData.TransducerDepth,
+                                                  ens.AncillaryData.SpeedOfSound,
+                                                  ens.AncillaryData.RawMagFieldStrength,
+                                                  ens.AncillaryData.PitchGravityVector,
+                                                  ens.AncillaryData.RollGravityVector,
+                                                  ens.AncillaryData.VerticalGravityVector,
                                                   self.batch_prj_id[0][0],
                                                   dt,
                                                   dt))
         ens_idx = self.batch_sql.cursor.fetchone()[0]
         print("Ens Index: " + str(ens_idx))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
+
+        return ens_idx
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1

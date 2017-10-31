@@ -90,15 +90,6 @@ class rti_sql:
                             'serialNumber text, '
                             'firmware text,'
                             'subsystemConfig character, '
-                            'project_id integer, '
-                            'meta json,'
-                            'created timestamp, '
-                            'modified timestamp);')
-        print("Ensemble Table created")
-
-        # Ancillary
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS ancillary (id SERIAL PRIMARY KEY, '
-                            'ensIndex integer NOT NULL, '
                             'rangeFirstBin real, '
                             'binSize real, '
                             'firstPingTime real, '
@@ -116,10 +107,11 @@ class rti_sql:
                             'pitchGravityVector real, '
                             'rollGravityVector real, '
                             'verticalGravityVector real, '
+                            'project_id integer, '
                             'meta json,'
                             'created timestamp, '
                             'modified timestamp);')
-        print("Ancillary table created")
+        print("Ensemble Table created")
 
         # Bottom Track
         self.cursor.execute('CREATE TABLE IF NOT EXISTS bottomtrack (id SERIAL PRIMARY KEY,'
@@ -402,6 +394,36 @@ class rti_sql:
 
         return df
 
+    def get_bottom_track_range(self, project_idx):
+        """
+        Get Bottom track Range.
+        :param project_idx: Project index.
+        :return: Dataframe with all the velocities. (Beam, Instrument and Earth)
+        """
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensembles.ensnum, ensembles.numbeams, ensembles.numbins, ' \
+                        'ensembles.binsize, ensembles.rangefirstbin, ' \
+                        'rangebeam0, rangebeam1, rangebeam2, rangebeam3 ' \
+                        'FROM ensembles ' \
+                        'INNER JOIN bottomtrack ON ensembles.id = bottomtrack.ensindex ' \
+                        'WHERE ensembles.project_id = %s ORDER BY ensembles.ensnum ASC;'
+            self.cursor.execute(ens_query, (project_idx,))
+            vel_results = self.cursor.fetchall()
+            self.conn.commit()
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        # Make a dataframe
+        df = pd.DataFrame(vel_results)
+        df.columns = ['ensnum', 'NumBeams', 'NumBins', 'BinSize', 'RangeFirstBin', 'RangeBeam0', 'RangeBeam1', 'RangeBeam2', 'RangeBeam3']
+
+        return df
+
     def get_adcp_info(self, project_idx):
         """
         Get information about the ensemble data.
@@ -445,7 +467,6 @@ Delete all tables.
 
 DROP TABLE projects;
 DROP TABLE amplitude;
-DROP TABLE ancillary;
 DROP TABLE beamvelocity;
 DROP TABLE bottomtrack;
 DROP TABLE correlation;
@@ -462,7 +483,6 @@ Remove all data from all tables.
 
 DELETE FROM projects;
 DELETE FROM amplitude;
-DELETE FROM ancillary;
 DELETE FROM beamvelocity;
 DELETE FROM bottomtrack;
 DELETE FROM correlation;
