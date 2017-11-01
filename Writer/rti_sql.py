@@ -343,7 +343,7 @@ class rti_sql:
         # Get all projects
         try:
             # Get all the ensembles for the project
-            ens_query = 'SELECT ensembles.ensnum, earthvelocity.beam, {} FROM ensembles INNER JOIN earthvelocity ON ensembles.id = earthvelocity.ensindex WHERE ensembles.project_id = %s AND earthvelocity.beam = %s ORDER BY ensembles.ensnum ASC;'.format(
+            ens_query = 'SELECT ensembles.ensnum, ensembles.numbins, earthvelocity.beam, {} FROM ensembles INNER JOIN earthvelocity ON ensembles.id = earthvelocity.ensindex WHERE ensembles.project_id = %s AND earthvelocity.beam = %s ORDER BY ensembles.ensnum ASC;'.format(
                 bin_nums)
             self.cursor.execute(ens_query, (project_idx, beam))
             vel_results = self.cursor.fetchall()
@@ -355,7 +355,7 @@ class rti_sql:
 
         # Make a dataframe
         df = pd.DataFrame(vel_results)
-        columns = ['ensnum', 'beam']
+        columns = ['ensnum', 'numbins', 'beam']
         for x in range(0, 200):
             columns.append('bin' + str(x))
         df.columns = columns
@@ -388,9 +388,12 @@ class rti_sql:
             print("Unable to run query", e)
             return
 
-        # Make a dataframe
-        df = pd.DataFrame(vel_results)
-        df.columns = ['ensnum', 'numbins', 'Beam0', 'Beam1', 'Beam2', 'Beam3', 'Instr0', 'Instr1', 'Instr2', 'Instr3', 'Earth0', 'Earth1', 'Earth2', 'Earth3']
+        if vel_results:
+            # Make a dataframe
+            df = pd.DataFrame(vel_results)
+            df.columns = ['ensnum', 'numbins', 'Beam0', 'Beam1', 'Beam2', 'Beam3', 'Instr0', 'Instr1', 'Instr2', 'Instr3', 'Earth0', 'Earth1', 'Earth2', 'Earth3']
+        else:
+            df = pd.DataFrame()
 
         return df
 

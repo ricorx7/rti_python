@@ -140,68 +140,77 @@ class RtiProjects:
             ens_idx = self.add_ensemble_ds(ens)         # Ensemble dataset
 
             # Correlation
-            self.add_dataset("correlation",
-                             ens.Correlation.Correlation,
-                             ens.Correlation.num_elements,
-                             ens.Correlation.element_multiplier,
-                             ens_idx)
+            if ens.IsCorrelation:
+                self.add_dataset("correlation",
+                                 ens.Correlation.Correlation,
+                                 ens.Correlation.num_elements,
+                                 ens.Correlation.element_multiplier,
+                                 ens_idx)
 
             # Amplitude
-            self.add_dataset("amplitude",
-                             ens.Amplitude.Amplitude,
-                             ens.Amplitude.num_elements,
-                             ens.Amplitude.element_multiplier,
-                             ens_idx)
+            if ens.IsAmplitude:
+                self.add_dataset("amplitude",
+                                 ens.Amplitude.Amplitude,
+                                 ens.Amplitude.num_elements,
+                                 ens.Amplitude.element_multiplier,
+                                 ens_idx)
 
             # Beam Velocity
-            self.add_dataset("beamvelocity",
-                             ens.BeamVelocity.Velocities,
-                             ens.BeamVelocity.num_elements,
-                             ens.BeamVelocity.element_multiplier,
-                             ens_idx)
+            if ens.IsBeamVelocity:
+                self.add_dataset("beamvelocity",
+                                 ens.BeamVelocity.Velocities,
+                                 ens.BeamVelocity.num_elements,
+                                 ens.BeamVelocity.element_multiplier,
+                                 ens_idx)
 
             # Instrument Velocity
-            self.add_dataset("instrumentvelocity",
-                             ens.InstrumentVelocity.Velocities,
-                             ens.InstrumentVelocity.num_elements,
-                             ens.InstrumentVelocity.element_multiplier,
-                             ens_idx)
+            if ens.IsInstrumentVelocity:
+                self.add_dataset("instrumentvelocity",
+                                 ens.InstrumentVelocity.Velocities,
+                                 ens.InstrumentVelocity.num_elements,
+                                 ens.InstrumentVelocity.element_multiplier,
+                                 ens_idx)
 
             # Earth Velocity
-            self.add_dataset("earthvelocity",
-                             ens.EarthVelocity.Velocities,
-                             ens.EarthVelocity.num_elements,
-                             ens.EarthVelocity.element_multiplier,
-                             ens_idx)
+            if ens.IsEarthVelocity:
+                self.add_dataset("earthvelocity",
+                                 ens.EarthVelocity.Velocities,
+                                 ens.EarthVelocity.num_elements,
+                                 ens.EarthVelocity.element_multiplier,
+                                 ens_idx)
 
             # Good Beam Ping
-            self.add_dataset("goodbeamping",
-                             ens.GoodBeam.GoodBeam,
-                             ens.GoodBeam.num_elements,
-                             ens.GoodBeam.element_multiplier,
-                             ens_idx,
-                             bad_val=0)
+            if ens.IsGoodBeam:
+                self.add_dataset("goodbeamping",
+                                 ens.GoodBeam.GoodBeam,
+                                 ens.GoodBeam.num_elements,
+                                 ens.GoodBeam.element_multiplier,
+                                 ens_idx,
+                                 bad_val=0)
 
             # Good Earth Ping
-            self.add_dataset("goodearthping",
-                             ens.GoodEarth.GoodEarth,
-                             ens.GoodEarth.num_elements,
-                             ens.GoodEarth.element_multiplier,
-                             ens_idx,
-                             bad_val=0)
+            if ens.IsGoodEarth:
+                self.add_dataset("goodearthping",
+                                 ens.GoodEarth.GoodEarth,
+                                 ens.GoodEarth.num_elements,
+                                 ens.GoodEarth.element_multiplier,
+                                 ens_idx,
+                                 bad_val=0)
 
             # Bottom Track
-            self.add_bottomtrack_ds(ens, ens_idx)
+            if ens.IsBottomTrack:
+                self.add_bottomtrack_ds(ens, ens_idx)
 
             # NMEA
-            year = 2017
-            month = 1
-            day = 1
-            if ens.IsEnsembleData:
-                year = ens.EnsembleData.Year
-                month = ens.EnsembleData.Month
-                day = ens.EnsembleData.Day
-            self.add_nmea_ds(ens, ens_idx, year=year, month=month, day=day)
+            if ens.IsNmeaData:
+                year = 2017
+                month = 1
+                day = 1
+                if ens.IsEnsembleData:
+                    year = ens.EnsembleData.Year
+                    month = ens.EnsembleData.Month
+                    day = ens.EnsembleData.Day
+                self.add_nmea_ds(ens, ens_idx, year=year, month=month, day=day)
 
         else:
             print("Batch import not started.  Please call begin_batch() first.")
@@ -210,6 +219,9 @@ class RtiProjects:
         """
         Add the Ensemble dataset to the database.
         """
+        if not ens.IsEnsembleData or not ens.IsAncillaryData:
+            return
+
 
         # Get Date and time for created and modified
         dt = datetime.now()
@@ -280,7 +292,7 @@ class RtiProjects:
                                                   dt,
                                                   dt))
         ens_idx = self.batch_sql.cursor.fetchone()[0]
-        print("Ens Index: " + str(ens_idx))
+        print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1
@@ -299,6 +311,9 @@ class RtiProjects:
         return ens_idx
 
     def add_bottomtrack_ds(self, ens, ens_idx):
+        if not ens.IsBottomTrack:
+            return
+
         # Get Date and time for created and modified
         dt = datetime.now()
 
@@ -517,6 +532,9 @@ class RtiProjects:
         """
         Add the NMEA dataset to the database.
         """
+        if not ens.IsNmeaData:
+            return
+
 
         # Get Date and time for created and modified
         dt = datetime.now()
@@ -647,7 +665,7 @@ class RtiProjects:
                     query_b0_val += "{0}, ".format(bad_val)
                 beam0_avail = True
 
-            if element_multiplier >= 1:
+            if element_multiplier > 1:
                 query_b1_label += "Bin{0}, ".format(bin_num)
                 if data[bin_num][1]:
                     query_b1_val += "{0}, ".format(data[bin_num][1])
@@ -655,7 +673,7 @@ class RtiProjects:
                     query_b1_val += "{0}, ".format(bad_val)
                 beam1_avail = True
 
-            if element_multiplier >= 2:
+            if element_multiplier > 2:
                 query_b2_label += "Bin{0}, ".format(bin_num)
                 if data[bin_num][2]:
                     query_b2_val += "{0}, ".format(data[bin_num][2])
@@ -663,7 +681,7 @@ class RtiProjects:
                     query_b2_val += "{0}, ".format(bad_val)
                 beam2_avail = True
 
-            if element_multiplier >= 3:
+            if element_multiplier > 3:
                 query_b3_label += "Bin{0}, ".format(bin_num)
                 if data[bin_num][3]:
                     query_b3_val += "{0}, ".format(data[bin_num][3])
