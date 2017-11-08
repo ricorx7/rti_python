@@ -237,7 +237,8 @@ class RtiProjects:
                     "datetime, " \
                     "serialnumber, " \
                     "firmware, " \
-                    "subsystemconfig, " \
+                    "subsystemCode, " \
+                    "subsystemConfig, " \
                     'rangeFirstBin, ' \
                     'binSize, ' \
                     'firstPingTime, ' \
@@ -258,7 +259,7 @@ class RtiProjects:
                     "project_id, " \
                     "created, " \
                     "modified)" \
-                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) " \
+                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) " \
                     "RETURNING ID;"
 
         self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
@@ -271,6 +272,7 @@ class RtiProjects:
                                                   ens.EnsembleData.SerialNumber,
                                                   ens.EnsembleData.firmware_str(),
                                                   ens.EnsembleData.SysFirmwareSubsystemCode,
+                                                  ens.EnsembleData.SubsystemConfig,
                                                   ens.AncillaryData.FirstBinRange,
                                                   ens.AncillaryData.BinSize,
                                                   ens.AncillaryData.FirstPingTime,

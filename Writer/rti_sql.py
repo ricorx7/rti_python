@@ -1,5 +1,6 @@
 import psycopg2
 import pandas as pd
+import numpy as np
 
 """
 Update tables
@@ -89,7 +90,8 @@ class rti_sql:
                             'dateTime timestamp, '
                             'serialNumber text, '
                             'firmware text,'
-                            'subsystemConfig character, '
+                            'subsystemCode character,'
+                            'subsystemConfig integer, '
                             'rangeFirstBin real, '
                             'binSize real, '
                             'firstPingTime real, '
@@ -326,11 +328,13 @@ class rti_sql:
         print("Table Creation Complete")
         self.conn.commit()
 
-    def get_earth_vel_data(self, project_idx, beam):
+    def get_earth_vel_data(self, project_idx, beam, ss_code=None, ss_config=None):
         """
         Get all the earth velocity data for the given project and beam.
         :param project_idx: Project index.
         :param beam: Beam number.
+        :param ss_code: Subsystem Code.
+        :param ss_config: Subsystem Configuration.
         :return: Earth velocity data for beam in the project.
         """
 
@@ -340,11 +344,28 @@ class rti_sql:
             bin_nums += "bin" + str(x) + ", "
         bin_nums = bin_nums[:-2]  # Remove final comma
 
+        # Use Subsystem code if given
+        if ss_code:
+            ss_code_str = "AND ensembles.subsystemcode = \'{}\'".format(ss_code)
+        else:
+            ss_code_str = ""
+
+        # Use Subsystem configuration if given
+        if ss_config:
+            ss_config_str = "AND ensembles.subsystemconfig = {} ".format(ss_config)
+        else:
+            ss_config_str = ""
+
         # Get all projects
         try:
             # Get all the ensembles for the project
-            ens_query = 'SELECT ensembles.ensnum, ensembles.numbins, earthvelocity.beam, {} FROM ensembles INNER JOIN earthvelocity ON ensembles.id = earthvelocity.ensindex WHERE ensembles.project_id = %s AND earthvelocity.beam = %s ORDER BY ensembles.ensnum ASC;'.format(
-                bin_nums)
+            ens_query = 'SELECT ensembles.ensnum, ensembles.numbeams, ensembles.numbins, earthvelocity.beam, {} ' \
+                        'FROM ensembles ' \
+                        'INNER JOIN earthvelocity ON ensembles.id = earthvelocity.ensindex ' \
+                        'WHERE ensembles.project_id = %s AND earthvelocity.beam = %s ' \
+                        '{} {}' \
+                        'ORDER BY ensembles.ensnum ASC;'.format(bin_nums, ss_code_str, ss_config_str)
+            print(ens_query)
             self.cursor.execute(ens_query, (project_idx, beam))
             vel_results = self.cursor.fetchall()
             self.conn.commit()
@@ -355,7 +376,7 @@ class rti_sql:
 
         # Make a dataframe
         df = pd.DataFrame(vel_results)
-        columns = ['ensnum', 'numbins', 'beam']
+        columns = ['ensnum', 'numbeams', 'numbins', 'beam']
         for x in range(0, 200):
             columns.append('bin' + str(x))
         df.columns = columns
@@ -456,6 +477,58 @@ class rti_sql:
             return
 
         return ens_data
+
+    def get_compass_data(self, project_idx):
+        """
+        Get compass ensemble data.
+        :param project_idx: Project index.
+        :return: Compass data in the project.
+        """
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensnum, datetime, heading, pitch, roll  FROM ensembles WHERE project_id = %s ORDER BY ensnum ASC;'
+            self.cursor.execute(ens_query, (project_idx,))
+            results = self.cursor.fetchall()
+            self.conn.commit()
+
+            df = pd.DataFrame(results)
+            df.columns = ['ensnum', 'datetime', 'heading', 'pitch', 'roll']
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        return df
+
+    def get_subsystem_configs(self, project_idx):
+        """
+        Get compass ensemble data.
+        :param project_idx: Project index.
+        :return: Compass data in the project.
+        """
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT subsystemcode, subsystemconfig  FROM ensembles WHERE project_id = %s ORDER BY ensnum ASC;'
+            self.cursor.execute(ens_query, (project_idx,))
+            results = self.cursor.fetchall()
+            self.conn.commit()
+
+            df = pd.DataFrame(results)
+            df.columns = ['subsystemcode', 'subsystemconfig']
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        #codes = df.subsystemcode.unique()
+        #configs = df.subsystemconfig.unique()
+        #configs = pd.unique(df['subsystemcode', 'subsystemconfig'].values.ravel())
+
+        return df.drop_duplicates()
 
 if __name__ == "__main__":
     conn_string = "host='localhost' port='5432' dbname='rti' user='test' password='123456'"
