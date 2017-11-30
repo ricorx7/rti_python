@@ -2,7 +2,7 @@ from bokeh.layouts import gridplot
 from bokeh.plotting import figure, show, save, output_file
 from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper, BasicTicker, PrintfTickFormatter, ColorBar, Range1d
 from bokeh.transform import transform
-from bokeh.palettes import RdBu, Spectral, RdYlBu, RdGy, YlGnBu, Inferno, Plasma, PuBu
+from bokeh.palettes import RdBu, Spectral, RdYlBu, RdGy, YlGnBu, Inferno, Plasma, PuBu, Greys, Magma, Viridis
 
 import os
 import pandas as pd
@@ -10,13 +10,17 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 
-def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_code=None, ss_config=None, max_vel=80.0, smoothing='hamming', smoothing_win=50, flip_y_axis=False):
+def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, num_bins, bt_range_df=None, ss_code=None, ss_config=None, max_vel=80.0, smoothing='hamming', smoothing_win=50, flip_y_axis=False):
     """
     Create a magnitude and direction plots.  This will use the incoming East and North velocities.
     :param project_name: Project name for the file name.
     :param adcp: ADCP information.
     :param earth_vel_east_df: East velocity dataframe. [ensnum, numbeams, numbins, beam, bin0 ... bin199]
     :param earth_vel_north_df: North velocity dataframe. [ensnum, numbeams, numbins, beam, bin0 ... bin199]
+    :param num_bins: Number of bins to plot.
+    :param bt_range_df: Average depth for each ensemble.
+    :param ss_code: Subsystem code.
+    :param ss_config: Subsystem Config Index.
     :param max_vel: Maximum velocity to remove the BAD_Velocity and screen data.
     :param smoothing: Smoothing function to use. (boxcar,blackman,hamming,bartlett,blackmanharris,NONE)
     :param smoothing_win: Smoothing window.
@@ -33,13 +37,20 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
     if earth_vel_north_df is None or earth_vel_east_df is None:
         return
 
+    # If there is no data, than we cannot create a plot
+    if earth_vel_east_df.empty or earth_vel_north_df.empty:
+        return
+
+    # Create a default subsystem query string
     ss_str = "_{}_{}".format(ss_config, ss_code)
 
     # Get the number of bins in the df
     # Get the number of ensembles in the df
-    num_bins = adcp['numbins']
+    if num_bins <= 0:
+        num_bins = adcp['numbins']
     num_ens = len(earth_vel_east_df.index)
 
+    # Init the data
     x0_ens = []
     y0_ens = []
     x1_ens = []
@@ -47,8 +58,11 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
     length_vals = []
     speed_vals = []
 
+    # Clean up the data
     earth_vel_east_df = earth_vel_east_df.drop(['ensnum', 'numbeams', 'numbins', 'beam'], axis=1)      # Ensemble number and beam column not needed
     earth_vel_north_df = earth_vel_north_df.drop(['ensnum', 'numbeams', 'numbins', 'beam'], axis=1)    # Ensemble number and beam column not needed
+    earth_vel_east_df = earth_vel_east_df.interpolate()                         # Fill in any missing data (mean of prev/next)
+    earth_vel_north_df = earth_vel_north_df.interpolate()                       # Fill in any missing data
     earth_vel_east_df = earth_vel_east_df.replace([None], 0.0)                  # Remove None so we can square
     earth_vel_north_df = earth_vel_north_df.replace([None], 0.0)                # Remove None so we can square
     earth_vel_east_df[earth_vel_east_df >= max_vel] = 0.0                       # Values marked bad set to 0
@@ -66,11 +80,15 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
         df_mag = df_mag.rolling(window=smoothing_win, win_type=smoothing).mean()
         df_mag = df_mag.replace([None], 0.0)                # Remove NaN
 
+        if bt_range_df is not None and not bt_range_df.empty:
+            print(bt_range_df)
+            bt_range_df["SmoothedBinRange"] = bt_range_df["BinRange"].rolling(window=5).mean()
+            #bt_range_df["BinRange"] = bt_range_df["SmoothedBinRange"].bfill()         # bfill used to replace NaN for the first window values with the first good value
+            bt_range_df["BinRange"] = bt_range_df["BinRange"].interpolate()           # Fill in any missing data (mean of prev/next)
+            print(bt_range_df)
+
     # Calculate the direction
     df_dir = pd.DataFrame(np.degrees(np.arctan2(earth_vel_east_df, earth_vel_north_df)))
-
-    df_U = pd.DataFrame(-1 - earth_vel_east_df ** 2 + earth_vel_north_df)
-    df_V = pd.DataFrame(1 + earth_vel_east_df - earth_vel_north_df ** 2)
 
     # Create the quivers
     for index, row in df_mag.iterrows():
@@ -104,9 +122,11 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
     length = np.asarray(length_vals)
     speed = np.asarray(speed_vals)
 
-    # xs, ys = self.streamlines(x0_ens, y0_ens, df_U.T, df_V.T, density=2)
-
     """
+    # Calculate the U and V directions for the direction lines
+    df_U = pd.DataFrame(-1 - earth_vel_east_df ** 2 + earth_vel_north_df)
+    df_V = pd.DataFrame(1 + earth_vel_east_df - earth_vel_north_df ** 2)
+    
     Y, X = np.meshgrid(xx, yy)
     #U = -1 - X ** 2 + Y
     #V = 1 + X - Y ** 2
@@ -125,13 +145,17 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
 
     # cm = np.array(["#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"])  # Green / White / Red
     # cm = np.array(["#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#0C2C84"])      #  Green / Blue
-    # cm = np.array(['#084594', '#2171b5', '#4292c6', '#6baed6', '#9ecae1', '#c6dbef', '#deebf7', '#f7fbff'])  # Blue to white
+    #cm = np.array(['#084594', '#2171b5', '#4292c6', '#6baed6', '#9ecae1', '#c6dbef', '#deebf7', '#f7fbff'])  # Blue to white
     # cm = np.array(['#000000', '#084594', '#2171b5', '#4292c6', '#6baed6', '#9ecae1', '#c6dbef', '#deebf7', '#f7fbff'])  # Black to Blue to white
     # cm = np.array(YlGnBu[9])  # 9 Is the colormap version
-    # cm = np.array(Spectral[9])
+    cm = np.array(Spectral[11])
     # cm = np.array(Inferno[9])
     # cm = np.array(RdYlBu[9])
-    cm = np.array(Plasma[9])
+    #cm = np.array(Plasma[256])
+    #cm = np.array(Greys[256])
+    # cm = np.array(Inferno[256])
+    # cm = np.array(Magma[256])
+    # cm = np.array(Virdis[256])
     # cm = np.array(PuBu[9])
     # cm = np.array(['#f7fbff', '#deebf7', '#c6dbef', '#6baed6', '#9ecae1', '#4292c6', '#2171b5', '#084594'])  # White to Blue
     ix = ((length - length.min()) / (length.max() - length.min()) * 5).astype('int')
@@ -144,12 +168,14 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
 
     TOOLS = "hover,save,pan,box_zoom,reset,wheel_zoom"
 
-    p1 = figure(x_range=(0, num_ens), y_range=(0, num_bins), tools=TOOLS, title="Water Profile - Magnitude and Direction")
+    # Create Vector plot
+    p1 = figure(x_range=(0, num_ens), y_range=(0, num_bins), tools=TOOLS, title="{} - Water Profile - Magnitude and Direction".format(project_name))
     p1.segment(x0_ens, y0_ens, x1_ens, y1_ens, color=colors, line_width=1)
     p1.xaxis.axis_label = "Ensembles"
     p1.yaxis.axis_label = 'Bins'
-    if flip_y_axis:
+    if not flip_y_axis:
         p1.y_range = Range1d(num_bins, 0)
+        print("Upward Facing ADCP")
 
 
     # p3 = figure(x_range=p1.x_range, y_range=p1.y_range)
@@ -162,8 +188,9 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
     speed_df['bin'] = y0_ens
     source = ColumnDataSource(speed_df)
 
+    # Create Magnitude plot
     p2 = figure(x_range=p1.x_range, y_range=p1.y_range, tools=TOOLS, toolbar_location='left',
-                title="Water Profile - Water Velocity")
+                title="{} - Water Profile - Water Velocity".format(project_name))
     p2.rect(x='ens', y='bin', width=1, height=1, source=source, fill_color=transform('speed', mapper), dilate=True,
             line_color=None)
     p2.xaxis.axis_label = "Ensembles"
@@ -174,8 +201,15 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, ss_c
         ('bin', '@bin'),
         ('speed', '@speed'),
     ]
-    if flip_y_axis:
+    if not flip_y_axis:
         p2.y_range = Range1d(num_bins, 0)
+
+    # Draw the bottom track line
+    if bt_range_df is not None and not bt_range_df.empty:
+        # Combine the data into a Data frame for ColumnDataSource for the plot
+        source_bt_range = ColumnDataSource(bt_range_df)
+
+        p2.line(x='index', y='BinRange', source=source_bt_range, line_width=5, line_color="White")
 
     # Save Combined Vector and Mag HTML
     file_name = project_name + '{}_combined_vector.html'.format(ss_str)

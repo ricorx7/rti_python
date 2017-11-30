@@ -328,6 +328,29 @@ class rti_sql:
         print("Table Creation Complete")
         self.conn.commit()
 
+    def ss_query(self, ss_code=None, ss_config=None):
+        """
+        Create a query string for the subsystem code and subsystem configuration.
+        If no values are given, then empty strings are created.
+        :param ss_code: Subsystem Code.
+        :param ss_config: Subsystem Configuration.
+        :return: Subsystem Code Query Str, Subsystem Config Index Query Str
+        """
+
+        # Use Subsystem code if given
+        if ss_code:
+            ss_code_str = "AND ensembles.subsystemcode = \'{}\'".format(ss_code)
+        else:
+            ss_code_str = ""
+
+        # Use Subsystem configuration if given
+        if ss_config:
+            ss_config_str = "AND ensembles.subsystemconfig = {} ".format(ss_config)
+        else:
+            ss_config_str = ""
+
+        return ss_code_str, ss_config_str
+
     def get_earth_vel_data(self, project_idx, beam, ss_code=None, ss_config=None):
         """
         Get all the earth velocity data for the given project and beam.
@@ -344,6 +367,7 @@ class rti_sql:
             bin_nums += "bin" + str(x) + ", "
         bin_nums = bin_nums[:-2]  # Remove final comma
 
+        """
         # Use Subsystem code if given
         if ss_code:
             ss_code_str = "AND ensembles.subsystemcode = \'{}\'".format(ss_code)
@@ -355,6 +379,8 @@ class rti_sql:
             ss_config_str = "AND ensembles.subsystemconfig = {} ".format(ss_config)
         else:
             ss_config_str = ""
+        """
+        ss_code_str, ss_config_str = self.ss_query(ss_code, ss_config)
 
         # Get all projects
         try:
@@ -376,11 +402,12 @@ class rti_sql:
 
         # Make a dataframe
         df = pd.DataFrame(vel_results)
-        columns = ['ensnum', 'numbeams', 'numbins', 'beam']
-        for x in range(0, 200):
-            columns.append('bin' + str(x))
-        df.columns = columns
-        #print(df.head())
+        if not df.empty:
+            columns = ['ensnum', 'numbeams', 'numbins', 'beam']
+            for x in range(0, 200):
+                columns.append('bin' + str(x))
+            df.columns = columns
+            #print(df.head())
 
         return df
 
@@ -418,12 +445,17 @@ class rti_sql:
 
         return df
 
-    def get_bottom_track_range(self, project_idx):
+    def get_bottom_track_range(self, project_idx, ss_code=None, ss_config=None):
         """
         Get Bottom track Range.
         :param project_idx: Project index.
+        :param ss_code: Subsystem Code.
+        :param ss_config: Subsystem Configuration.
         :return: Dataframe with all the velocities. (Beam, Instrument and Earth)
         """
+
+        # Set the Subsystem query
+        ss_code_str, ss_config_str = self.ss_query(ss_code, ss_config)
 
         # Get all projects
         try:
@@ -433,7 +465,9 @@ class rti_sql:
                         'rangebeam0, rangebeam1, rangebeam2, rangebeam3 ' \
                         'FROM ensembles ' \
                         'INNER JOIN bottomtrack ON ensembles.id = bottomtrack.ensindex ' \
-                        'WHERE ensembles.project_id = %s ORDER BY ensembles.ensnum ASC;'
+                        'WHERE ensembles.project_id = %s ' \
+                        '{} {}' \
+                        'ORDER BY ensembles.ensnum ASC;'.format(ss_code_str, ss_config_str)
             self.cursor.execute(ens_query, (project_idx,))
             vel_results = self.cursor.fetchall()
             self.conn.commit()
@@ -444,7 +478,8 @@ class rti_sql:
 
         # Make a dataframe
         df = pd.DataFrame(vel_results)
-        df.columns = ['ensnum', 'NumBeams', 'NumBins', 'BinSize', 'RangeFirstBin', 'RangeBeam0', 'RangeBeam1', 'RangeBeam2', 'RangeBeam3']
+        if not df.empty:
+            df.columns = ['ensnum', 'NumBeams', 'NumBins', 'BinSize', 'RangeFirstBin', 'RangeBeam0', 'RangeBeam1', 'RangeBeam2', 'RangeBeam3']
 
         return df
 

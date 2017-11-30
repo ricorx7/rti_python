@@ -137,80 +137,112 @@ class RtiProjects:
 
     def add_ensemble(self, ens):
         if self.batch_sql is not None:
-            ens_idx = self.add_ensemble_ds(ens)         # Ensemble dataset
+            # Ensemble and Ancillary dataset
+            try:
+                ens_idx = self.add_ensemble_ds(ens)
+            except Exception as ex:
+                print("Error adding Ensemble and Ancillary Dataset to project.", ex)
+                return
 
             # Correlation
-            if ens.IsCorrelation:
-                self.add_dataset("correlation",
-                                 ens.Correlation.Correlation,
-                                 ens.Correlation.num_elements,
-                                 ens.Correlation.element_multiplier,
-                                 ens_idx)
+            try:
+                if ens.IsCorrelation:
+                    self.add_dataset("correlation",
+                                     ens.Correlation.Correlation,
+                                     ens.Correlation.num_elements,
+                                     ens.Correlation.element_multiplier,
+                                     ens_idx)
+            except Exception as ex:
+                print("Error adding Correlation to project.", ex)
 
             # Amplitude
-            if ens.IsAmplitude:
-                self.add_dataset("amplitude",
-                                 ens.Amplitude.Amplitude,
-                                 ens.Amplitude.num_elements,
-                                 ens.Amplitude.element_multiplier,
-                                 ens_idx)
+            try:
+                if ens.IsAmplitude:
+                    self.add_dataset("amplitude",
+                                     ens.Amplitude.Amplitude,
+                                     ens.Amplitude.num_elements,
+                                     ens.Amplitude.element_multiplier,
+                                     ens_idx)
+            except Exception as ex:
+                print("Error adding Amplitude to project.", ex)
 
             # Beam Velocity
-            if ens.IsBeamVelocity:
-                self.add_dataset("beamvelocity",
-                                 ens.BeamVelocity.Velocities,
-                                 ens.BeamVelocity.num_elements,
-                                 ens.BeamVelocity.element_multiplier,
-                                 ens_idx)
+            try:
+                if ens.IsBeamVelocity:
+                    self.add_dataset("beamvelocity",
+                                     ens.BeamVelocity.Velocities,
+                                     ens.BeamVelocity.num_elements,
+                                     ens.BeamVelocity.element_multiplier,
+                                     ens_idx)
+            except Exception as ex:
+                print("Error adding Beam Velocity to project.", ex)
 
             # Instrument Velocity
-            if ens.IsInstrumentVelocity:
-                self.add_dataset("instrumentvelocity",
-                                 ens.InstrumentVelocity.Velocities,
-                                 ens.InstrumentVelocity.num_elements,
-                                 ens.InstrumentVelocity.element_multiplier,
-                                 ens_idx)
+            try:
+                if ens.IsInstrumentVelocity:
+                    self.add_dataset("instrumentvelocity",
+                                     ens.InstrumentVelocity.Velocities,
+                                     ens.InstrumentVelocity.num_elements,
+                                     ens.InstrumentVelocity.element_multiplier,
+                                     ens_idx)
+            except Exception as ex:
+                print("Error adding Instrument Velocity to project.", ex)
 
             # Earth Velocity
-            if ens.IsEarthVelocity:
-                self.add_dataset("earthvelocity",
-                                 ens.EarthVelocity.Velocities,
-                                 ens.EarthVelocity.num_elements,
-                                 ens.EarthVelocity.element_multiplier,
-                                 ens_idx)
+            try:
+                if ens.IsEarthVelocity:
+                    self.add_dataset("earthvelocity",
+                                     ens.EarthVelocity.Velocities,
+                                     ens.EarthVelocity.num_elements,
+                                     ens.EarthVelocity.element_multiplier,
+                                     ens_idx)
+            except Exception as ex:
+                print("Error adding Earth Velocity to project.", ex)
 
             # Good Beam Ping
-            if ens.IsGoodBeam:
-                self.add_dataset("goodbeamping",
-                                 ens.GoodBeam.GoodBeam,
-                                 ens.GoodBeam.num_elements,
-                                 ens.GoodBeam.element_multiplier,
-                                 ens_idx,
-                                 bad_val=0)
+            try:
+                if ens.IsGoodBeam:
+                    self.add_dataset("goodbeamping",
+                                     ens.GoodBeam.GoodBeam,
+                                     ens.GoodBeam.num_elements,
+                                     ens.GoodBeam.element_multiplier,
+                                     ens_idx,
+                                     bad_val=0)
+            except Exception as ex:
+                print("Error adding Good Beam to project.", ex)
 
             # Good Earth Ping
-            if ens.IsGoodEarth:
-                self.add_dataset("goodearthping",
-                                 ens.GoodEarth.GoodEarth,
-                                 ens.GoodEarth.num_elements,
-                                 ens.GoodEarth.element_multiplier,
-                                 ens_idx,
-                                 bad_val=0)
+            try:
+                if ens.IsGoodEarth:
+                    self.add_dataset("goodearthping",
+                                     ens.GoodEarth.GoodEarth,
+                                     ens.GoodEarth.num_elements,
+                                     ens.GoodEarth.element_multiplier,
+                                     ens_idx,
+                                     bad_val=0)
+            except Exception as ex:
+                print("Error adding Good Earth to project.", ex)
 
             # Bottom Track
-            if ens.IsBottomTrack:
-                self.add_bottomtrack_ds(ens, ens_idx)
+            try:
+                if ens.IsBottomTrack:
+                    self.add_bottomtrack_ds(ens, ens_idx)
+            except Exception as ex:
+                print("Error adding Bottom Track to project.", ex)
 
             # NMEA
-            if ens.IsNmeaData:
-                year = 2017
-                month = 1
-                day = 1
-                if ens.IsEnsembleData:
-                    year = ens.EnsembleData.Year
-                    month = ens.EnsembleData.Month
-                    day = ens.EnsembleData.Day
-                self.add_nmea_ds(ens, ens_idx, year=year, month=month, day=day)
+            try:
+                if ens.IsNmeaData:
+                    year = 2017
+                    month = 1
+                    day = 1
+                    if ens.IsEnsembleData:
+                        year = ens.EnsembleData.Year
+                        month = ens.EnsembleData.Month
+                        day = ens.EnsembleData.Day
+                    self.add_nmea_ds(ens, ens_idx, year=year, month=month, day=day)
+            except Exception as ex:
+                print("Error adding NMEA to project.", ex)
 
         else:
             print("Batch import not started.  Please call begin_batch() first.")
@@ -221,7 +253,6 @@ class RtiProjects:
         """
         if not ens.IsEnsembleData or not ens.IsAncillaryData:
             return
-
 
         # Get Date and time for created and modified
         dt = datetime.now()

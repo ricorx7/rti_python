@@ -105,11 +105,14 @@ class BinaryCodec:
 
             if checksum[0] == calcChecksum:
                 logger.debug(ensNum[0])
-                # Decode data
-                ensemble = self.decode_data_sets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
+                try:
+                    # Decode data
+                    ensemble = self.decode_data_sets(self.buffer[ensStart:ensStart + Ensemble().HeaderSize + payloadSize[0]])
 
-                # ************************
-                self.process_ensemble(ensemble)
+                    # ************************
+                    self.process_ensemble(ensemble)
+                except Exception as e:
+                    logger.error("Error decoding ensemble. ", e)
 
             # Remove ensemble from buffer
             ensEnd = ensStart + Ensemble().HeaderSize + payloadSize[0] + Ensemble().ChecksumSize
