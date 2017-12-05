@@ -8,6 +8,8 @@ import os
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
+import rti_python.Plots.dataframe_html_table_summary as df_summary
+import rti_python.Plots.csv_summary as csv_summary
 
 
 def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, num_bins, bt_range_df=None, ss_code=None, ss_config=None, max_vel=80.0, smoothing='hamming', smoothing_win=50, flip_y_axis=False):
@@ -67,6 +69,21 @@ def plot_mag_dir(project_name, adcp, earth_vel_east_df, earth_vel_north_df, num_
     earth_vel_north_df = earth_vel_north_df.replace([None], 0.0)                # Remove None so we can square
     earth_vel_east_df[earth_vel_east_df >= max_vel] = 0.0                       # Values marked bad set to 0
     earth_vel_north_df[earth_vel_north_df >= max_vel] = 0.0                     # Values marked bad set to 0
+
+    # DataTable and CSV for East and North Velocity
+    file_name = project_name + '{}_Summary East Velocity.html'.format(ss_str)
+    file_name = os.path.join('html', file_name)
+    df_summary.generate_html_page(file_name, project_name, "Summary East Velocity", earth_vel_east_df)
+    file_name = project_name + '{}_Summary East Velocity.csv'.format(ss_str)
+    file_name = os.path.join('html', file_name)
+    csv_summary.generate_csv(file_name, earth_vel_east_df)
+    file_name = project_name + '{}_Summary North Velocity.html'.format(ss_str)
+    file_name = os.path.join('html', file_name)
+    df_summary.generate_html_page(file_name, project_name, "Summary North Velocity", earth_vel_north_df)
+    file_name = project_name + '{}_Summary North Velocity.csv'.format(ss_str)
+    file_name = os.path.join('html', file_name)
+    csv_summary.generate_csv(file_name, earth_vel_north_df)
+
 
     # Calculate the magnitude
     df_mag = pd.DataFrame(np.sqrt(np.square(earth_vel_east_df) + np.square(earth_vel_north_df)))
