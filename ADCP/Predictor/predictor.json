@@ -4,7 +4,7 @@
 	"SystemBootPower": 1.80,
 	"SystemWakeupTime": 0.40,
 	"SystemInitPower": 2.80,
-	"SystemInitTime": 0.25,
+	"SystemInitTime": 2.4,
 	"BroadbandPower": true,
 	"SystemSavePower": 1.80,
 	"SystemSaveTime": 0.15,

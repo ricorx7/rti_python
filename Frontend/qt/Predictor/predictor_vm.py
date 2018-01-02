@@ -26,7 +26,7 @@ class PredictorVM(Ui_RoweTechPredictor):
         self.calc_data = 0.0
         self.calc_num_batt = 0.0
 
-        self.revLabel.setText("© RoweTech Inc. Rev 1.0")
+        self.revLabel.setText("© RoweTech Inc. Rev 1.1")
 
         # Connect the buttons
         self.addSubsystemButton.clicked.connect(self.add_subsystem)

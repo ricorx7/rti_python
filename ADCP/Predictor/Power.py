@@ -441,7 +441,7 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Transmit Watt
     # Get the sum of all the selected XmtW
-    sum_xmt_w = 0.0;
+    sum_xmt_w = 0.0
 
     if _system_frequency_ > config["DEFAULT"]["1200000"]["FREQ"]:                                                                       # 1200khz
         sum_xmt_w = config["DEFAULT"]["1200000"]["XMIT_W"]
