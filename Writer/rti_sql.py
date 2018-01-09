@@ -9,8 +9,8 @@ ALTER TABLE ensembles ADD COLUMN created timestamp;
 ALTER TABLE ensembles ADD COLUMN modified timestamp;
 """
 
-class rti_sql:
 
+class rti_sql:
 
     def __init__(self, conn):
         """
@@ -109,6 +109,7 @@ class rti_sql:
                             'pitchGravityVector real, '
                             'rollGravityVector real, '
                             'verticalGravityVector real, '
+                            'burstNum integer, '
                             'project_id integer, '
                             'meta json,'
                             'created timestamp, '
@@ -566,7 +567,8 @@ class rti_sql:
         return df.drop_duplicates()
 
 if __name__ == "__main__":
-    conn_string = "host='localhost' port='5432' dbname='rti' user='test' password='123456'"
+    #conn_string = "host='localhost' port='5432' dbname='rti' user='test' password='123456'"
+    conn_string = "host='184.177.73.234' port='32770' dbname='rti' user='rowetech' password='rowetechinc123'"
     sql = rti_sql(conn_string)
     sql.create_tables()
     sql.close()

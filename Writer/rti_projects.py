@@ -135,11 +135,17 @@ class RtiProjects:
         # Set the connection to none
         self.batch_sql = None
 
-    def add_ensemble(self, ens):
+    def add_ensemble(self, ens, burst_num=0):
+        '''
+        Add the ensemble to the database.
+        :param ens: Ensemble to store data.
+        :param burst_num: Burst number if a waves deployment.
+        :return:
+        '''
         if self.batch_sql is not None:
             # Ensemble and Ancillary dataset
             try:
-                ens_idx = self.add_ensemble_ds(ens)
+                ens_idx = self.add_ensemble_ds(ens, burst_num)
             except Exception as ex:
                 print("Error adding Ensemble and Ancillary Dataset to project.", ex)
                 return
@@ -247,7 +253,7 @@ class RtiProjects:
         else:
             print("Batch import not started.  Please call begin_batch() first.")
 
-    def add_ensemble_ds(self, ens):
+    def add_ensemble_ds(self, ens, burst_num=0):
         """
         Add the Ensemble dataset to the database.
         """
@@ -287,11 +293,12 @@ class RtiProjects:
                     'pitchGravityVector, ' \
                     'rollGravityVector, ' \
                     'verticalGravityVector, ' \
-                    "project_id, " \
-                    "created, " \
-                    "modified)" \
-                    "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) " \
-                    "RETURNING ID;"
+                    'burstNum, ' \
+                    'project_id, ' \
+                    'created, ' \
+                    'modified)' \
+                    'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ' \
+                    'RETURNING ID;'
 
         self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
                                                   ens.EnsembleData.NumBins,
@@ -321,11 +328,12 @@ class RtiProjects:
                                                   ens.AncillaryData.PitchGravityVector,
                                                   ens.AncillaryData.RollGravityVector,
                                                   ens.AncillaryData.VerticalGravityVector,
+                                                  burst_num,
                                                   self.batch_prj_id[0][0],
                                                   dt,
                                                   dt))
         ens_idx = self.batch_sql.cursor.fetchone()[0]
-        print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
+        #print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1
