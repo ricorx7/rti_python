@@ -56,6 +56,8 @@ class Ensemble:
         self.WavesInfo = None
         self.IsRangeTracking = False
         self.RangeTracking = None
+        self.IsSystemSetup = False
+        self.SystemSetup = None
         self.IsNmeaData = False
         self.NmeaData = None
 
@@ -164,6 +166,15 @@ class Ensemble:
         """
         self.IsRangeTracking = True
         self.RangeTracking = ds
+
+    def AddSystemSetup(self, ds):
+        """
+        Add a System Setup object to the ensemble.
+        Set the flag that the dataset is added.
+        :param ds: System Setup Data object.
+        """
+        self.IsSystemSetup = True
+        self.SystemSetup = ds
 
     def AddNmeaData(self, ds):
         """

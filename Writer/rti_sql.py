@@ -514,17 +514,23 @@ class rti_sql:
 
         return ens_data
 
-    def get_compass_data(self, project_idx):
+    def get_compass_data(self, project_idx, ss_code=None, ss_config=None):
         """
         Get compass ensemble data.
         :param project_idx: Project index.
         :return: Compass data in the project.
         """
 
+        # Set the Subsystem query
+        ss_code_str, ss_config_str = self.ss_query(ss_code, ss_config)
+
         # Get all projects
         try:
             # Get all the ensembles for the project
-            ens_query = 'SELECT ensnum, datetime, heading, pitch, roll  FROM ensembles WHERE project_id = %s ORDER BY ensnum ASC;'
+            ens_query = 'SELECT ensnum, datetime, heading, pitch, roll  FROM ensembles ' \
+                        'WHERE ensembles.project_id = %s ' \
+                        '{} {}' \
+                        'ORDER BY ensembles.ensnum ASC;'.format(ss_code_str, ss_config_str)
             self.cursor.execute(ens_query, (project_idx,))
             results = self.cursor.fetchall()
             self.conn.commit()
@@ -537,6 +543,7 @@ class rti_sql:
             return
 
         return df
+
 
     def get_subsystem_configs(self, project_idx):
         """

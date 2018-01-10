@@ -15,6 +15,7 @@ from Ensemble.AncillaryData import AncillaryData
 from Ensemble.BottomTrack import BottomTrack
 from Ensemble.NmeaData import NmeaData
 from Ensemble.RangeTracking import RangeTracking
+from Ensemble.SystemSetup import SystemSetup
 
 from PyCRC.CRCCCITT import CRCCCITT
 
@@ -239,12 +240,20 @@ class BinaryCodec:
                 nd.decode(ens[packetPointer:packetPointer + data_set_size])
                 ensemble.AddNmeaData(nd)
 
+            # System Setup
+            if "E000014" in name:
+                logger.debug(name)
+                ss = SystemSetup(num_elements, element_multiplier)
+                ss.decode(ens[packetPointer:packetPointer + data_set_size])
+                ensemble.AddSystemSetup(ss)
+
             # Range Tracking
             if "E000015" in name:
                 logger.debug(name)
                 rt = RangeTracking(num_elements, element_multiplier)
                 rt.decode(ens[packetPointer:packetPointer + data_set_size])
                 ensemble.AddRangeTracking(rt)
+
 
             # Move to the next dataset
             packetPointer += data_set_size
