@@ -257,7 +257,7 @@ class RtiProjects:
         """
         Add the Ensemble dataset to the database.
         """
-        if not ens.IsEnsembleData or not ens.IsAncillaryData:
+        if not ens.IsEnsembleData or not ens.IsAncillaryData or not ens.IsSystemSetup:
             return
 
         # Get Date and time for created and modified
@@ -293,11 +293,32 @@ class RtiProjects:
                     'pitchGravityVector, ' \
                     'rollGravityVector, ' \
                     'verticalGravityVector, ' \
+                    'BtSamplesPerSecond, ' \
+                    'BtSystemFreqHz, ' \
+                    'BtCPCE, ' \
+                    'BtNCE, ' \
+                    'BtRepeatN, ' \
+                    'WpSamplesPerSecond, ' \
+                    'WpSystemFreqHz, ' \
+                    'WpCPCE, ' \
+                    'WpNCE, ' \
+                    'WpRepeatN, ' \
+                    'WpLagSamples, ' \
+                    'Voltage, ' \
+                    'XmtVoltage, ' \
+                    'BtBroadband, ' \
+                    'BtLagLength, ' \
+                    'BtNarrowband, ' \
+                    'BtBeamMux, ' \
+                    'WpBroadband, ' \
+                    'WpLagLength, ' \
+                    'WpTransmitBandwidth, ' \
+                    'WpReceiveBandwidth, ' \
                     'burstNum, ' \
                     'project_id, ' \
                     'created, ' \
                     'modified)' \
-                    'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ' \
+                    'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ' \
                     'RETURNING ID;'
 
         self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
@@ -328,6 +349,27 @@ class RtiProjects:
                                                   ens.AncillaryData.PitchGravityVector,
                                                   ens.AncillaryData.RollGravityVector,
                                                   ens.AncillaryData.VerticalGravityVector,
+                                                  ens.SystemSetup.BtSamplesPerSecond,
+                                                  ens.SystemSetup.BtSystemFreqHz,
+                                                  ens.SystemSetup.BtCPCE,
+                                                  ens.SystemSetup.BtNCE,
+                                                  ens.SystemSetup.BtRepeatN,
+                                                  ens.SystemSetup.WpSamplesPerSecond,
+                                                  ens.SystemSetup.WpSystemFreqHz,
+                                                  ens.SystemSetup.WpCPCE,
+                                                  ens.SystemSetup.WpNCE,
+                                                  ens.SystemSetup.WpRepeatN,
+                                                  ens.SystemSetup.WpLagSamples,
+                                                  ens.SystemSetup.Voltage,
+                                                  ens.SystemSetup.XmtVoltage,
+                                                  ens.SystemSetup.BtBroadband,
+                                                  ens.SystemSetup.BtLagLength,
+                                                  ens.SystemSetup.BtNarrowband,
+                                                  ens.SystemSetup.BtBeamMux,
+                                                  ens.SystemSetup.WpBroadband,
+                                                  ens.SystemSetup.WpLagLength,
+                                                  ens.SystemSetup.WpTransmitBandwidth,
+                                                  ens.SystemSetup.WpReceiveBandwidth,
                                                   burst_num,
                                                   self.batch_prj_id[0][0],
                                                   dt,
