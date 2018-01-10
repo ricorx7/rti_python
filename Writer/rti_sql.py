@@ -218,6 +218,47 @@ class rti_sql:
                             'modified timestamp);')
         print("Bottom Track table created")
 
+        # Bottom Track
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS rangetracking (id SERIAL PRIMARY KEY,'
+                            'ensIndex integer NOT NULL, '
+                            'numBeams integer, '
+                            'snrBeam0 real, '
+                            'snrBeam1 real, '
+                            'snrBeam2 real, '
+                            'snrBeam3 real, '
+                            'rangeBeam0 real, '
+                            'rangeBeam1 real, '
+                            'rangeBeam2 real, '
+                            'rangeBeam3 real, '
+                            'pingsBeam0 integer, '
+                            'pingsBeam1 integer, '
+                            'pingsBeam2 integer, '
+                            'pingsBeam3 integer, '
+                            'amplitudeBeam0 real, '
+                            'amplitudeBeam1 real, '
+                            'amplitudeBeam2 real, '
+                            'amplitudeBeam3 real, '
+                            'correlationBeam0 real, '
+                            'correlationBeam1 real, '
+                            'correlationBeam2 real, '
+                            'correlationBeam3 real, '
+                            'beamVelocityBeam0 real, '
+                            'beamVelocityBeam1 real, '
+                            'beamVelocityBeam2 real, '
+                            'beamVelocityBeam3 real, '
+                            'instrVelBeam0 real, '
+                            'instrVelBeam1 real, '
+                            'instrVelBeam2 real, '
+                            'instrVelBeam3 real, '
+                            'earthVelBeam0 real, '
+                            'earthVelBeam1 real, '
+                            'earthVelBeam2 real, '
+                            'earthVelBeam3 real, '
+                            'meta json,'
+                            'created timestamp, '
+                            'modified timestamp);')
+        print("Range Tracking table created")
+
         # Beam Velocity
         query = 'CREATE TABLE IF NOT EXISTS beamVelocity (id SERIAL PRIMARY KEY, ' \
                 'ensIndex integer NOT NULL, ' \
@@ -565,6 +606,36 @@ class rti_sql:
 
         return df
 
+    def get_voltage_data(self, project_idx, ss_code=None, ss_config=None):
+        """
+        Get voltage ensemble data.
+        :param project_idx: Project index.
+        :return: Compass data in the project.
+        """
+
+        # Set the Subsystem query
+        ss_code_str, ss_config_str = self.ss_query(ss_code, ss_config)
+
+        # Get all projects
+        try:
+            # Get all the ensembles for the project
+            ens_query = 'SELECT ensnum, datetime, voltage  FROM ensembles ' \
+                        'WHERE ensembles.project_id = %s ' \
+                        '{} {}' \
+                        'ORDER BY ensembles.ensnum ASC;'.format(ss_code_str, ss_config_str)
+            self.cursor.execute(ens_query, (project_idx,))
+            results = self.cursor.fetchall()
+            self.conn.commit()
+
+            df = pd.DataFrame(results)
+            df.columns = ['ensnum', 'datetime', 'voltage']
+
+        except Exception as e:
+            print("Unable to run query", e)
+            return
+
+        return df
+
 
     def get_subsystem_configs(self, project_idx):
         """
@@ -610,6 +681,7 @@ DROP TABLE projects;
 DROP TABLE amplitude;
 DROP TABLE beamvelocity;
 DROP TABLE bottomtrack;
+DROP TABLE rangetracking;
 DROP TABLE correlation;
 DROP TABLE earthvelocity;
 DROP TABLE ensembles;
@@ -626,6 +698,7 @@ DELETE FROM projects;
 DELETE FROM amplitude;
 DELETE FROM beamvelocity;
 DELETE FROM bottomtrack;
+DELETE FROM rangetracking;
 DELETE FROM correlation;
 DELETE FROM earthvelocity;
 DELETE FROM ensembles;

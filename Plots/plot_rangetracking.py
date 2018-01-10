@@ -6,7 +6,7 @@ from bokeh.transform import transform
 from bokeh.palettes import RdBu, Spectral, RdYlBu, RdGy, YlGnBu, Inferno, Plasma, PuBu, Greys, Magma, Viridis
 
 
-def plot_voltage(project_name, voltage_df, ss_code=None, ss_config=None):
+def plot_rangetracking(project_name, voltage_df, ss_code=None, ss_config=None):
 
     # Check for data to plot
     if voltage_df is None:
@@ -35,7 +35,7 @@ def plot_voltage(project_name, voltage_df, ss_code=None, ss_config=None):
     plot.select_one(HoverTool).tooltips = [
         ('ENS Num', '@ensnum'),
         ('Date/Time', '@datetime{%F}'),
-        ('Voltage', '@voltage'),
+        ('Beam', '@beam'),
     ]
     plot.select_one(HoverTool).formatters = {
         'datetime': 'datetime'                          # use 'datetime' formatter for 'datetime' field
@@ -43,7 +43,7 @@ def plot_voltage(project_name, voltage_df, ss_code=None, ss_config=None):
     plot.select_one(HoverTool).mode = 'vline'           # display a tooltip whenever the cursor is vertically in line with a glyph
 
     # Save plot to HTML
-    file_name = project_name + '{}_voltage.html'.format(ss_str)
+    file_name = project_name + '{}_rt.html'.format(ss_str)
     file_name = os.path.join('html', file_name)
-    output_file(file_name, title="{} - Voltage".format(project_name))
+    output_file(file_name, title="{} - Range Tracking".format(project_name))
     save(gridplot([[plot]], sizing_mode='stretch_both'))  # Just save to file

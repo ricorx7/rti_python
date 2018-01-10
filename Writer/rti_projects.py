@@ -236,6 +236,13 @@ class RtiProjects:
             except Exception as ex:
                 print("Error adding Bottom Track to project.", ex)
 
+            # Range Tracking
+            try:
+                if ens.IsRangeTracking:
+                    self.add_rangetracking_ds(ens, ens_idx)
+            except Exception as ex:
+                print("Error adding Range Tracking to project.", ex)
+
             # NMEA
             try:
                 if ens.IsNmeaData:
@@ -375,7 +382,7 @@ class RtiProjects:
                                                   dt,
                                                   dt))
         ens_idx = self.batch_sql.cursor.fetchone()[0]
-        print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
+        #print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1
@@ -594,6 +601,123 @@ class RtiProjects:
                                               int(ens.BottomTrack.Status),
                                               int(ens.BottomTrack.NumBeams),
                                               int(ens.BottomTrack.ActualPingCount),
+                                              dt,
+                                              dt))
+
+        # Monitor how many inserts have been done so it does not get too big
+        self.batch_count += 1
+        if self.batch_count > 10:
+            self.batch_sql.commit()
+            self.batch_count = 0
+
+    def add_rangetracking_ds(self, ens, ens_idx):
+        if not ens.IsRangeTracking:
+            return
+
+        # Get Date and time for created and modified
+        dt = datetime.now()
+
+        query_range_label = ""
+        query_range_val = ""
+        query_snr_label = ""
+        query_snr_val = ""
+        query_pings_label = ""
+        query_pings_val = ""
+        query_amp_label = ""
+        query_amp_val = ""
+        query_corr_label = ""
+        query_corr_val = ""
+        query_beam_vel_label = ""
+        query_beam_vel_val = ""
+        query_instr_vel_label = ""
+        query_instr_vel_val = ""
+        query_earth_vel_label = ""
+        query_earth_vel_val = ""
+
+        for beam in range(int(ens.RangeTracking.NumBeams)):
+            query_range_label += "rangeBeam{0}, ".format(beam)
+            query_range_val += "{0}, ".format(ens.RangeTracking.Range[beam])
+
+            query_snr_label += "snrBeam{0}, ".format(beam)
+            query_snr_val += "{0}, ".format(ens.RangeTracking.SNR[beam])
+
+            query_amp_label += "ampBeam{0}, ".format(beam)
+            query_amp_val += "{0}, ".format(ens.RangeTracking.Amplitude[beam])
+
+            query_corr_label += "corrBeam{0}, ".format(beam)
+            query_corr_val += "{0}, ".format(ens.RangeTracking.Correlation[beam])
+
+            query_beam_vel_label += "beamVelBeam{0}, ".format(beam)
+            query_beam_vel_val += "{0}, ".format(ens.RangeTracking.BeamVelocity[beam])
+
+            query_pings_label += "pingsBeam{0}, ".format(beam)
+            query_pings_val += "{0}, ".format(int(ens.RangeTracking.Pings[beam]))
+
+            query_instr_vel_label += "instrVelBeam{0}, ".format(beam)
+            query_instr_vel_val += "{0}, ".format(ens.BottomTrack.InstrumentVelocity[beam])
+
+            query_earth_vel_label += "earthVelBeam{0}, ".format(beam)
+            query_earth_vel_val += "{0}, ".format(ens.BottomTrack.EarthVelocity[beam])
+
+        query_range_label = query_range_label[:-2]              # Remove final comma
+        query_range_val = query_range_val[:-2]                  # Remove final comma
+        query_snr_label = query_snr_label[:-2]                  # Remove final comma
+        query_snr_val = query_snr_val[:-2]                      # Remove final comma
+        query_amp_label = query_amp_label[:-2]                  # Remove final comma
+        query_amp_val = query_amp_val[:-2]                      # Remove final comma
+        query_corr_label = query_corr_label[:-2]                # Remove final comma
+        query_corr_val = query_corr_val[:-2]                    # Remove final comma
+        query_beam_vel_label = query_beam_vel_label[:-2]        # Remove final comma
+        query_beam_vel_val = query_beam_vel_val[:-2]            # Remove final comma
+        query_beam_ping_label = query_pings_label[:-2]      # Remove final comma
+        query_beam_ping_val = query_pings_val[:-2]          # Remove final comma
+        query_instr_vel_label = query_instr_vel_label[:-2]      # Remove final comma
+        query_instr_vel_val = query_instr_vel_val[:-2]          # Remove final comma
+        query_earth_vel_label = query_earth_vel_label[:-2]      # Remove final comma
+        query_earth_vel_val = query_earth_vel_val[:-2]          # Remove final comma
+
+        # Add line for each dataset type
+        query = "INSERT INTO rangetracking (" \
+                'ensIndex, ' \
+                'numBeams, ' \
+                '{0}, ' \
+                '{1}, ' \
+                '{2}, ' \
+                '{3}, ' \
+                '{4}, ' \
+                '{5}, ' \
+                '{6}, ' \
+                '{7}, ' \
+                'created, ' \
+                "modified)" \
+                "VALUES(%s," \
+                "{8}," \
+                "{9}," \
+                "{10}," \
+                "{11}," \
+                "{12}," \
+                "{13}," \
+                "{14}," \
+                "{15}," \
+                "%s,%s);".format(query_range_label,
+                                 query_snr_label,
+                                 query_amp_label,
+                                 query_corr_label,
+                                 query_beam_vel_label,
+                                 query_pings_label,
+                                 query_instr_vel_label,
+                                 query_earth_vel_label,
+                                 query_range_val,
+                                 query_snr_val,
+                                 query_amp_val,
+                                 query_corr_val,
+                                 query_beam_vel_val,
+                                 query_beam_ping_val,
+                                 query_instr_vel_val,
+                                 query_earth_vel_val)
+
+        self.batch_sql.cursor.execute(query, (ens_idx,
+                                              int(ens.BottomTrack.NumBeams),
                                               dt,
                                               dt))
 
