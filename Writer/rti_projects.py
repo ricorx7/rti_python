@@ -147,7 +147,7 @@ class RtiProjects:
             try:
                 ens_idx = self.add_ensemble_ds(ens, burst_num)
             except Exception as ex:
-                print("Error adding Ensemble and Ancillary Dataset to project.", ex)
+                print("Error adding Ensemble, Ancillary and System Setup Dataset to project.", ex)
                 return
 
             # Correlation
@@ -318,7 +318,7 @@ class RtiProjects:
                     'project_id, ' \
                     'created, ' \
                     'modified)' \
-                    'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ' \
+                    'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ' \
                     'RETURNING ID;'
 
         self.batch_sql.cursor.execute(ens_query, (ens.EnsembleData.EnsembleNumber,
@@ -375,15 +375,7 @@ class RtiProjects:
                                                   dt,
                                                   dt))
         ens_idx = self.batch_sql.cursor.fetchone()[0]
-        #print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
-
-        # Monitor how many inserts have been done so it does not get too big
-        self.batch_count += 1
-        if self.batch_count > 10:
-            self.batch_sql.commit()
-            self.batch_count = 0
-
-        return ens_idx
+        print("rti_projects:add_ensemble_ds() Ens Index: " + str(ens_idx))
 
         # Monitor how many inserts have been done so it does not get too big
         self.batch_count += 1
