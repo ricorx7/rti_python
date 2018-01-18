@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['Frontend\\qt\\Predictor\\mainwindow.py'],
-             pathex=['C:\\Users\\rico\\AppData\\Roaming\\Python\\Python35\\site-packages\\PyQt5\\Qt\\bin', 'C:\\rti\\python\\rti_python'],
+a = Analysis(['mainwindow.py'],
+             pathex=['C:\\Users\\rico\\AppData\\Roaming\\Python\\Python35\\site-packages\\PyQt5\\Qt\\bin', 'G:\\rti\\python\\rti_python'],
              binaries=[],
-             datas=[('ADCP/Predictor/predictor.json', 'ADCP/Predictor/.'), ('Updater\\rti.ico', '.'), ('ADCP/AdcpCommands.json', 'ADCP/.')],
+             datas=[('rti_python/ADCP/Predictor/predictor.json', 'ADCP/Predictor/.'), ('rti.ico', '.'), ('rti_python/ADCP/AdcpCommands.json', 'ADCP/.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -26,4 +26,4 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='Updater\\rti.ico')
+          icon='rti.ico')

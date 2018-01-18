@@ -1,8 +1,8 @@
 import math
 import json
 import os
-import ADCP.AdcpCommands
-import ADCP.Predictor.Range
+import rti_python.ADCP.AdcpCommands
+import rti_python.ADCP.Predictor.Range
 
 
 def calculate_power(**kwargs):
@@ -278,7 +278,7 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
 
     # Bottom Track Time
-    bottom_track_range = ADCP.Predictor.Range._calculate_predicted_range(_cwpon_, _cwpbb_transmit_pulse_type_, _cwpbs_, _cwpbn_, _cwpbl_, _cbton_, _cbtbb_transmit_pulse_type_, _system_frequency_, _beam_diameter_, _cycles_per_element_, _beam_angle_, _speed_of_sound_, _cwpbb_lag_length_, _broadband_power_)[0]
+    bottom_track_range = rti_python.ADCP.Predictor.Range._calculate_predicted_range(_cwpon_, _cwpbb_transmit_pulse_type_, _cwpbs_, _cwpbn_, _cwpbl_, _cbton_, _cbtbb_transmit_pulse_type_, _system_frequency_, _beam_diameter_, _cycles_per_element_, _beam_angle_, _speed_of_sound_, _cwpbb_lag_length_, _broadband_power_)[0]
     bottom_track_time = 0.0015 * bottom_track_range
 
 
@@ -411,13 +411,13 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
     # Transmit Code Time
     transmit_code_time = 1
     # If using Broadband
-    if _cwpbb_transmit_pulse_type_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.BROADBAND.value:
+    if _cwpbb_transmit_pulse_type_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.BROADBAND.value:
         if code_repeats < 3:
             transmit_code_time = 2.0 * bin_time
         else:
             transmit_code_time = code_repeats * lag_time
     else:
-        if _cwpbb_transmit_pulse_type_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+        if _cwpbb_transmit_pulse_type_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
             transmit_code_time = bin_time
         else:
             transmit_code_time = 2.0 * bin_time
@@ -425,7 +425,7 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Transmit Scale
     xmt_scale = 0.0
-    if _cwpbb_transmit_pulse_type_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:          # Checck if NB
+    if _cwpbb_transmit_pulse_type_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:          # Checck if NB
         xmt_scale = 1.0
     else:
         # Check for bad value

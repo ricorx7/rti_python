@@ -1,7 +1,7 @@
 import math
 import json
 import os
-import ADCP.AdcpCommands
+import rti_python.ADCP.AdcpCommands
 
 
 def calculate_predicted_range(**kwargs):
@@ -120,7 +120,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_1200000 = 2.0 * rScale_1200000 * (config["DEFAULT"]["1200000"]["RANGE"] + config["DEFAULT"]["1200000"]["BIN"] * dB_1200000 + 15.0 * config["DEFAULT"]["1200000"]["BIN"])
             else:
                 btRange_1200000 = 2.0 * rScale_1200000 * (config["DEFAULT"]["1200000"]["RANGE"]  + config["DEFAULT"]["1200000"]["BIN"] * dB_1200000)
@@ -129,7 +129,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Check if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_1200000 = rScale_1200000 * (config["DEFAULT"]["1200000"]["RANGE"]  + config["DEFAULT"]["1200000"]["BIN"] * dB_1200000 + 20.0 * config["DEFAULT"]["1200000"]["BIN"])
             else:
                 wpRange_1200000 = rScale_1200000 * (config["DEFAULT"]["1200000"]["RANGE"]  + config["DEFAULT"]["1200000"]["BIN"] * dB_1200000)
@@ -161,7 +161,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_600000 = 2.0 * rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"]  + config["DEFAULT"]["600000"]["BIN"]  * dB_600000 + 15.0 * config["DEFAULT"]["600000"]["BIN"] )
             else:
                 btRange_600000 = 2.0 * rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"]  + config["DEFAULT"]["600000"]["BIN"]  * dB_600000)
@@ -170,7 +170,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Checck if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_600000 = rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"]  + config["DEFAULT"]["600000"]["BIN"] * dB_600000 + 20.0 * config["DEFAULT"]["600000"]["BIN"] )
             else:
                 wpRange_600000 = rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"] + config["DEFAULT"]["600000"]["BIN"]  * dB_600000)
@@ -202,7 +202,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_300000 = 2.0 * rScale_300000 * (config["DEFAULT"]["300000"]["RANGE"] + config["DEFAULT"]["300000"]["BIN"] * dB_300000 + 15.0 * config["DEFAULT"]["300000"]["BIN"])
             else:
                 btRange_300000 = 2.0 * rScale_300000 * (config["DEFAULT"]["300000"]["RANGE"] + config["DEFAULT"]["300000"]["BIN"] * dB_300000)
@@ -211,7 +211,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Checck if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_300000 = rScale_300000 * (config["DEFAULT"]["300000"]["RANGE"] + config["DEFAULT"]["300000"]["BIN"] * dB_300000 + 20.0 * config["DEFAULT"]["300000"]["BIN"])
             else:
                 wpRange_300000 = rScale_300000 * (config["DEFAULT"]["300000"]["RANGE"] + config["DEFAULT"]["300000"]["BIN"] * dB_300000)
@@ -244,7 +244,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_150000 = 2.0 * rScale_150000 * (config["DEFAULT"]["150000"]["RANGE"] + config["DEFAULT"]["150000"]["BIN"] * dB_150000 + 15.0 * config["DEFAULT"]["150000"]["BIN"])
             else:
                 btRange_150000 = 2.0 * rScale_150000 * (config["DEFAULT"]["150000"]["RANGE"] + config["DEFAULT"]["150000"]["BIN"] * dB_150000)
@@ -253,7 +253,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Checck if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_150000 = rScale_150000 * (config["DEFAULT"]["150000"]["RANGE"] + config["DEFAULT"]["150000"]["BIN"] * dB_150000 + 20.0 * config["DEFAULT"]["150000"]["BIN"])
             else:
                 wpRange_150000 = rScale_150000 * (config["DEFAULT"]["150000"]["RANGE"]  + config["DEFAULT"]["150000"]["BIN"] * dB_150000)
@@ -286,7 +286,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_75000 = 2.0 * rScale_75000 * (config["DEFAULT"]["75000"]["RANGE"] + config["DEFAULT"]["75000"]["BIN"] * dB_75000 + 15.0 * config["DEFAULT"]["75000"]["BIN"])
             else:
                 btRange_75000 = 2.0 * rScale_75000 * (config["DEFAULT"]["75000"]["RANGE"] + config["DEFAULT"]["75000"]["BIN"] * dB_75000)
@@ -295,7 +295,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Checck if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_75000 = rScale_75000 * (config["DEFAULT"]["75000"]["RANGE"] + config["DEFAULT"]["75000"]["BIN"] * dB_75000 + 20.0 * config["DEFAULT"]["75000"]["BIN"])
             else:
                 wpRange_75000 = rScale_75000 * (config["DEFAULT"]["75000"]["RANGE"] + config["DEFAULT"]["75000"]["BIN"] * dB_75000)
@@ -328,7 +328,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CBTON_:
             # Check if NB
-            if _CBTBB_TransmitPulseType_ == ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
+            if _CBTBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCBTBB_Mode.NARROWBAND_LONG_RANGE.value:
                 btRange_38000 = 2.0 * rScale_38000 * (config["DEFAULT"]["38000"]["RANGE"] + config["DEFAULT"]["38000"]["BIN"] * dB_38000 + 15.0 * config["DEFAULT"]["38000"]["BIN"]);
             else:
                 btRange_38000 = 2.0 * rScale_38000 * (config["DEFAULT"]["38000"]["RANGE"] + config["DEFAULT"]["38000"]["BIN"] * dB_38000)
@@ -337,7 +337,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
         if _CWPON_:
             # Checck if NB
-            if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+            if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_38000 = rScale_38000 * (config["DEFAULT"]["38000"]["RANGE"] + config["DEFAULT"]["38000"]["BIN"] * dB_38000 + 20.0 * config["DEFAULT"]["38000"]["BIN"])
             else:
                 wpRange_38000 = rScale_38000 * (config["DEFAULT"]["38000"]["RANGE"] + config["DEFAULT"]["38000"]["BIN"] * dB_38000)
@@ -385,7 +385,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
     # Xmt Scale
     xmtScale = 1.0;
-    if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:        # Check if NB
+    if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:        # Check if NB
         xmtScale = 1.0
     else:
         # Check for bad value
@@ -436,7 +436,7 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
 
     # First Bin Position
     pos = 0.0;
-    if _CWPBB_TransmitPulseType_ == ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
+    if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
         pos = (2.0 * _CWPBS_ + 0.05) / 2.0
     else:
         if _CWPBB_TransmitPulseType_ > 1:

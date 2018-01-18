@@ -25,15 +25,14 @@ def calculate_max_velocity(**kwargs):
         config = json.loads(open(json_file_path).read())
     except Exception as e:
         print("Error getting the configuration file.  ", e)
-        return
+        return 0
 
     # _CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _SpeedOfSound_, _CyclesPerElement_
     return _calculate_max_velocity(kwargs.pop('CWPBB_LagLength', config['DEFAULT']['CWPBB_LagLength']),
                                    kwargs.pop('BeamAngle', config['BeamAngle']),
                                    kwargs.pop('SystemFrequency', config['DEFAULT']['SystemFrequency']),
                                    kwargs.pop('SpeedOfSound', config['SpeedOfSound']),
-                                   kwargs.pop('CyclesPerElement', config['CyclesPerElement']),
-                                   )
+                                   kwargs.pop('CyclesPerElement', config['CyclesPerElement']))
 
 
 def _calculate_max_velocity(_CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _SpeedOfSound_, _CyclesPerElement_):
@@ -60,6 +59,15 @@ def _calculate_max_velocity(_CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _
         print("Error getting the configuration file.  ", e)
         return
 
+    # Prevent divide by 0
+    if _CyclesPerElement_ == 0:
+        _CyclesPerElement_ = 1
+
+    if _SpeedOfSound_ == 0:
+        _SpeedOfSound_ = 1490
+
+    if _SystemFrequency_ == 0:
+        _SystemFrequency_ = config["DEFAULT"]["1200000"]["FREQ"]
 
     #  Sample Rate
     sumSampling = 0.0;
@@ -116,5 +124,5 @@ def _calculate_max_velocity(_CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _
         return uaRadial
 
 
-    return uaRadial / math.sin(_BeamAngle_ / 180.0 * math.pi);
+    return uaRadial / math.sin(_BeamAngle_ / 180.0 * math.pi)
 

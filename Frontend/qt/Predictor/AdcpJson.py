@@ -11,7 +11,7 @@ def get_json():
     :return:
     """
     json_file = "AdcpCommands.json"
-    json_file_adcp = "ADCP/AdcpCommands.json"
+    json_file_adcp = "rti_python/ADCP/AdcpCommands.json"
 
     # Get the descriptions from the json file
     # script_dir = ""
@@ -29,7 +29,7 @@ def get_json():
         os.getcwd() + os.sep + json_file,
         os.path.join(script_dir, os.path.join("ADCP", json_file)),
         os.getcwd() + os.sep + ".." + os.sep + ".." + os.sep + ".." + os.sep + "ADCP" + os.sep + json_file,
-        'ADCP/AdcpCommands.json',                                                                                   # App Run Local
+        'rti_python/ADCP/AdcpCommands.json',                                                            # App Run Local
     ]
 
     # Try to open the file, if found, return it
@@ -37,6 +37,7 @@ def get_json():
     for path in json_file_paths:
         cmds = _get_json(path)
         if cmds is not None:
+            print("AdcpCommands.JSON found at: " + path)
             return cmds
 
     return None
