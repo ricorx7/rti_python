@@ -1,20 +1,14 @@
-import json
-import os
-import sys
-from subsystem_view import Ui_Subsystem
-from PyQt5.QtWidgets import QWidget
-
+import ADCP.AdcpCommands as Commands
+import ADCP.Predictor.DataStorage as DS
+import ADCP.Predictor.MaxVelocity as Velocity
 import ADCP.Predictor.Power  as Power
 import ADCP.Predictor.Range as Range
-import ADCP.Predictor.MaxVelocity as Velocity
 import ADCP.Predictor.STD as STD
-import ADCP.Predictor.DataStorage as DS
 import ADCP.Subsystem as SS
+from PyQt5.QtWidgets import QWidget
+from subsystem_view import Ui_Subsystem
 
-import ADCP.AdcpCommands as Commands
-import AdcpJson as JSON
-import datetime
-import time
+from predictor import AdcpJson as JSON
 
 
 class SubsystemVM(Ui_Subsystem, QWidget):

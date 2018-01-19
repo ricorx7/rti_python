@@ -1,15 +1,15 @@
 import datetime
 import os
-import sys
-from predictor_view import Ui_RoweTechPredictor
+
+import ADCP.AdcpCommands as Commands
+import ADCP.Predictor.DataStorage as DS
+import ADCP.Subsystem as SS
+import AdcpJson as JSON
 from subsystem_view import Ui_Subsystem
 from subsystem_vm import SubsystemVM
-import ADCP.Subsystem as SS
-from PyQt5.QtWidgets import QWidget
 
-import ADCP.Predictor.DataStorage as DS
-import ADCP.AdcpCommands as Commands
-import AdcpJson as JSON
+from predictor.predictor_view import Ui_RoweTechPredictor
+
 
 class PredictorVM(Ui_RoweTechPredictor):
     """

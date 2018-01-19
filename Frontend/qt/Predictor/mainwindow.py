@@ -1,14 +1,12 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-import qdarkstyle
-import images_qr
 
-from twisted.logger import Logger
-from twisted.internet.defer import inlineCallbacks
-from autobahn.twisted.wamp import ApplicationSession
+from PyQt5 import QtGui, QtWidgets
 from autobahn.twisted.wamp import ApplicationRunner
+from autobahn.twisted.wamp import ApplicationSession
+from twisted.internet.defer import inlineCallbacks
+from twisted.logger import Logger
 
-from predictor_vm import PredictorVM
+from predictor.predictor_vm import PredictorVM
 
 
 class MainWindow(ApplicationSession, QtWidgets.QMainWindow):
