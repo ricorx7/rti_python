@@ -351,11 +351,10 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                                                           CBI_BurstInterval=self.cbiBurstIntervalDoubleSpinBox.value(),
                                                           CBI_NumEns=self.cbiNumEnsSpinBox.value(),)
 
-
+        # Calculate the number of batteries used
         self.calc_num_batt = Power.calculate_number_batteries(DeploymentDuration=deployment, PowerUsage=self.calc_power)
 
-
-
+        # Calculate all the ranges
         (bt_range, wp_range, first_bin, cfg_range) = Range.calculate_predicted_range(SystemFrequency=self.freq,
                                                 Beams=self.numBeamsSpinBox.value(),
                                                 CWPON=self.cwponCheckBox.isChecked(),
@@ -373,6 +372,7 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.calc_first_bin = first_bin
         self.calc_cfg_wp_range = cfg_range
 
+        # Calculate the maximum velocity
         self.calc_max_vel = Velocity.calculate_max_velocity(SystemFrequency=self.freq,
                                                             Beams=self.numBeamsSpinBox.value(),
                                                             CWPON=self.cwponCheckBox.isChecked(),
@@ -428,7 +428,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
                                                          IsE0000014=self.cedSysSettingCheckBox.isChecked(),
                                                          IsE0000015=self.cedRangeTrackingCheckBox.isChecked(),)
 
-
         self.calc_std = STD.calculate_std(SystemFrequency=self.freq,
                                           Beams=self.numBeamsSpinBox.value(),
                                           CWPON=self.cwponCheckBox.isChecked(),
@@ -450,7 +449,6 @@ class SubsystemVM(Ui_Subsystem, QWidget):
         self.maxVelLabel.setText(str(round(self.calc_max_vel, 3)) + " m/s")
         self.dataUsageLabel.setText(str(DS.bytes_2_human_readable(self.calc_data)))
         self.stdLabel.setText(str(round(self.calc_std, 3)) + " m/s")
-
 
         # Set the ping description
         self.pingingTextBrowser.clear()

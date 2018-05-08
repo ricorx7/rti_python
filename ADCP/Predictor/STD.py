@@ -29,8 +29,8 @@ def calculate_std(**kwargs):
     try:
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error getting the configuration file.  ", e)
-        return
+        print("Error getting the configuration file.  STD", e)
+        return 0.0
 
     return _calculate_std(kwargs.pop('CWPP', config['DEFAULT']['CWPP']),
                           kwargs.pop('CWPBS', config['DEFAULT']['CWPBS']),
@@ -75,8 +75,8 @@ def _calculate_std(_CWPP_, _CWPBS_, _CWPBB_LagLength_,
     try:
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error getting the configuration file.  ", e)
-        return
+        print("Error getting the configuration file.  STD", e)
+        return 0.0
 
 
     #  Sample Rate

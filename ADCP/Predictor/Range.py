@@ -29,7 +29,7 @@ def calculate_predicted_range(**kwargs):
     try:
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error opening JSON file", e)
+        print("Error opening JSON file Range", e)
         return (0.0, 0.0, 0.0, 0.0)
 
     return _calculate_predicted_range(kwargs.pop('CWPON', config['DEFAULT']['CWPON']),
@@ -85,8 +85,8 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
         # Get the configuration from the json file
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error getting the configuration file.  ", e)
-        return
+        print("Error getting the configuration file.  Range", e)
+        return (0.0, 0.0, 0.0, 0.0)
 
     # Wave length
     waveLength = _SpeedOfSound_ / _SystemFrequency_

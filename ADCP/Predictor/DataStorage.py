@@ -312,55 +312,57 @@ def _calculate_ensemble_size(_CWPBN_, _Beams_,
     :return: Number of bytes for the ensemble.
     """
 
+    MATLAB_OVERHEAD = 7
+
     # E0000001
     E0000001 = 0
     if IsE0000001:
-        E0000001 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000001 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000002
     E0000002 = 0
     if IsE0000002:
-        E0000002 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000002 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000003
     E0000003 = 0
     if IsE0000003:
-        E0000003 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000003 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000004
     E0000004 = 0
     if IsE0000004:
-        E0000004 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000004 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000005
     E0000005 = 0
     if IsE0000005:
-        E0000005 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000005 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000006
     E0000006 = 0
     if IsE0000006:
-        E0000006 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000006 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000007
     E0000007 = 0
     if IsE0000007:
-        E0000007 = 4 * (_CWPBN_ * _Beams_ + 7)
+        E0000007 = 4 * (_CWPBN_ * _Beams_ + MATLAB_OVERHEAD)
 
     #region E0000008
     E0000008 = 0
     if IsE0000008:
-        E0000008 = 4 * (23 + 7)
+        E0000008 = 4 * (23 + MATLAB_OVERHEAD)
 
     # E0000009
     E0000009 = 0
     if IsE0000009:
-        E0000009 = 4 * (19 + 7)
+        E0000009 = 4 * (19 + MATLAB_OVERHEAD)
 
     #E0000010
     E0000010 = 0
     if IsE0000010:
-        E0000010 = 4 * (14 + 15 * _Beams_ + 7)
+        E0000010 = 4 * (14 + 15 * _Beams_ + MATLAB_OVERHEAD)
 
     # E0000011
     E0000011 = 0
@@ -370,22 +372,22 @@ def _calculate_ensemble_size(_CWPBN_, _Beams_,
     # E0000012
     E0000012 = 0
     if IsE0000012:
-        E0000012 = 4 * (23 + 7)
+        E0000012 = 4 * (23 + MATLAB_OVERHEAD)
 
     # E0000013
     E0000013 = 0
     if IsE0000013:
-        E0000013 = 4 * (30 + 7)
+        E0000013 = 4 * (30 + MATLAB_OVERHEAD)
 
     # E0000014
     E0000014 = 0
     if IsE0000014:
-        E0000014 = 4 * (23 + 7)
+        E0000014 = 4 * (25 + MATLAB_OVERHEAD)
 
     # E0000015
     E0000015 = 0
     if IsE0000015:
-        E0000015 = 4 * (8 * _Beams_ + 1 + 7)
+        E0000015 = 4 * (8 * _Beams_ + 1 + MATLAB_OVERHEAD)
 
     bytes_per_ensemble = E0000001 + E0000002 + E0000003 + E0000004 + E0000005 + E0000006 + E0000007 + E0000008 + E0000009 + E0000010 + E0000011 + E0000012 + E0000013 + E0000014 + E0000015
     checksum = 4    # Checksum

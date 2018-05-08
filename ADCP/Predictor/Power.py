@@ -44,7 +44,7 @@ def calculate_power(**kwargs):
     try:
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error opening predictor.JSON file", e)
+        print("Error opening predictor.JSON file.  Power", e)
         return 0.0
 
     return _calculate_power(kwargs.pop('CEI', config['DEFAULT']['CEI']),
@@ -119,7 +119,7 @@ def calculate_burst_power(**kwargs):
     try:
         config = json.loads(open(json_file_path).read())
     except Exception as e:
-        print("Error opening predictor.JSON file", e)
+        print("Error opening predictor.JSON file. Power", e)
         return 0.0
 
     return _calculate_burst_power(kwargs.pop('CEI', config['DEFAULT']['CEI']),
@@ -260,8 +260,8 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
     # Wakeups  (Question about CEI)
     wakeups = 1
-    if _cei_ > 1.0:
-        if _cwptbp_ > 1.0:
+    if _cei_ > 3.0:
+        if _cwptbp_ > 3.0:
             wakeups = num_ensembles * _cwpp_
         else:
             wakeups = num_ensembles
@@ -479,13 +479,17 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
     # Profile Time / Receive Time
     receive_time = 0.0
     if sample_rate == 0:                                        # Default if issue with divide by zero
-        receive_time = 0
+        receive_time = _cei_
     elif _cwpp_ == 1:                                           # 1 Ping only, so no time between ping needed
-        receive_time = 0
-    elif time_between_pings > 1.0:                              # Time Between Pings is greater 1, sleeping between pings
-        receive_time = _cwpbn_ * bin_samples / sample_rate
-    else:                                                       # Use the greatest sleep time found
-        receive_time = time_between_pings
+        if _cei_ > 3:
+            receive_time = _cwpbn_ * bin_samples / sample_rate
+        else:
+            receive_time = _cei_
+    else:
+        if time_between_pings > 1.0:                            # Time Between Pings is greater 1, sleeping between pings
+            receive_time = _cwpbn_ * bin_samples / sample_rate
+        else:                                                   # Use the greatest sleep time found
+            receive_time = time_between_pings
 
     if _is_burst_:                                              # If in burst mode, use different default timing
         if _cwpp_ == 1:                                         # If single ping, use CEI for time
@@ -567,7 +571,6 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
 
     return bt_transmit_power + bt_receive_power + wakeup_power + init_power + transmit_power + receive_power + save_power + sleep_power + cap_charge_power
-
 
 
 def _calculate_burst_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
