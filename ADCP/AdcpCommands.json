@@ -221,6 +221,22 @@
           "Used in the water speed of sound calculation."
         ]
     },
+    "CWT": {
+      "desc": [
+        "CWT n.nnn<CR>",
+        "Water Temperature (degrees celsius). Used in the water speed of sound calculation if the temperature sensor is not available. ",
+        "",
+        "Used in the water speed of sound calculation."
+      ]
+    },
+    "CTD": {
+      "desc": [
+        "CTD n.nnn<CR>",
+        "Transducer Depth in (meters).",
+        "",
+        "Used in the water speed of sound calculation."
+      ]
+    },
     "CED": {
         "desc": [
           "CED ABCDEFGHIJKLMNOPQsssssssssssssss<CR>",
