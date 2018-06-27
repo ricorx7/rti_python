@@ -172,8 +172,6 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
             # Checck if NB
             if _CWPBB_TransmitPulseType_ == rti_python.ADCP.AdcpCommands.eCWPBB_TransmitPulseType.NARROWBAND.value:
                 wpRange_600000 = rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"] + config["DEFAULT"]["600000"]["BIN"] * dB_600000 + config["DEFAULT"]["NB_PROFILE_REF"] * config["DEFAULT"]["600000"]["BIN"] )
-                print("600 NB")
-                print(config["DEFAULT"]["NB_PROFILE_REF"])
             else:
                 wpRange_600000 = rScale_600000 * (config["DEFAULT"]["600000"]["RANGE"] + config["DEFAULT"]["600000"]["BIN"] * dB_600000)
         else:
