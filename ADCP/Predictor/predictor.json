@@ -40,6 +40,7 @@
         "CBI": false,
         "CBI_BurstInterval": 3600,
         "CBI_NumEns": 4096,
+        "NB_PROFILE_REF": 13,
         "IsE0000001": true,
         "IsE0000002": true,
         "IsE0000003": true,
