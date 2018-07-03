@@ -1,6 +1,7 @@
 import math
 import json
 import os
+import pytest
 import rti_python.ADCP.AdcpCommands
 import rti_python.ADCP.Predictor.Range
 
@@ -33,8 +34,11 @@ def calculate_power(**kwargs):
     :param SystemSleepPower=: The amount to power required to make the ADCP sleep in watts.
     :param BeamDiameter=: The beam diameter in meters.
     :param CyclesPerElement=: Cycles per element.
-    :param CBI=: Flag if we are using Burst Mode pinging.
-    :param CBI_NumEns: Number of ensemble in a burst.
+    :param Salinity=: Salinity in ppt.
+    :param Temperature=: Temperature in degrees C.
+    :param XdcrDepth=: Transducer depth in meters.
+    :param IsBurst_: Flag if we are using Burst Mode pinging.
+    :param EnsemblesPerBurst: Number of ensemble in a burst.
     :return: The amount of power required based of the deployment parameters.
     """
 
@@ -72,7 +76,12 @@ def calculate_power(**kwargs):
                             kwargs.pop('SystemSaveTime', config["SystemSaveTime"]),
                             kwargs.pop('SystemSleepPower', config["SystemSleepPower"]),
                             kwargs.pop('BeamDiameter', config["BeamDiameter"]),
-                            kwargs.pop('CyclesPerElement', config["CyclesPerElement"]))
+                            kwargs.pop('CyclesPerElement', config["CyclesPerElement"]),
+                            kwargs.pop('Salinity', config["Salinity"]),
+                            kwargs.pop('Temperature', config["Temperature"]),
+                            kwargs.pop('XdcrDepth', config["XdcrDepth"]),
+                            kwargs.pop('IsBurst', False),
+                            kwargs.pop('EnsemblesPerBurst', 0))
 
 
 def calculate_burst_power(**kwargs):
@@ -107,6 +116,9 @@ def calculate_burst_power(**kwargs):
     :param SystemSleepPower=: The amount to power required to make the ADCP sleep in watts.
     :param BeamDiameter=: The beam diameter in meters.
     :param CyclesPerElement=: Cycles per element.
+    :param Salinity=: Salinity in ppt.
+    :param Temperature=: Temperature in degrees C.
+    :param XdcrDepth=: Transducer depth in meters.
     :param CBI=: Flag if we are using Burst Mode pinging.
     :param CBI_NumEns: Number of ensemble in a burst.
     :param CBI_BurstInterval: The length of time in seconds for a burst.
@@ -148,6 +160,9 @@ def calculate_burst_power(**kwargs):
                                   kwargs.pop('SystemSleepPower', config["SystemSleepPower"]),
                                   kwargs.pop('BeamDiameter', config["BeamDiameter"]),
                                   kwargs.pop('CyclesPerElement', config["CyclesPerElement"]),
+                                  kwargs.pop('Salinity', config["Salinity"]),
+                                  kwargs.pop('Temperature', config["Temperature"]),
+                                  kwargs.pop('XdcrDepth', config["XdcrDepth"]),
                                   kwargs.pop('CBI', config["DEFAULT"]["CBI"]),
                                   kwargs.pop('CBI_BurstInterval', config["DEFAULT"]["CBI_BurstInterval"]),
                                   kwargs.pop('CBI_NumEns', config["DEFAULT"]["CBI_NumEns"]))
@@ -189,7 +204,9 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
                    _beam_angle_, _speed_of_sound_,
                    _system_boot_power_, _system_wakeup_time_, _system_init_power_, _system_init_time_,
                    _broadband_power_, _system_save_power_, _system_save_time_, _system_sleep_power_,
-                   _beam_diameter_, _cycles_per_element_, _is_burst_=False, _ensembles_per_burst_=0):
+                   _beam_diameter_, _cycles_per_element_,
+                   _salinity_, _temperature_, _xdcr_depth_,
+                   _is_burst_=False, _ensembles_per_burst_=0):
     """
     Calculate the power using based off the deployment parameters.  This will give the total power consumed
     of an ADCP for the given parameters.  You can then divide this by the battery total to get the number
@@ -278,7 +295,23 @@ def _calculate_power(_cei_, _deployment_duration_, _beams_, _system_frequency_,
 
 
     # Bottom Track Time
-    bottom_track_range = rti_python.ADCP.Predictor.Range._calculate_predicted_range(_cwpon_, _cwpbb_transmit_pulse_type_, _cwpbs_, _cwpbn_, _cwpbl_, _cbton_, _cbtbb_transmit_pulse_type_, _system_frequency_, _beam_diameter_, _cycles_per_element_, _beam_angle_, _speed_of_sound_, _cwpbb_lag_length_, _broadband_power_)[0]
+    (bottom_track_range, wp_range, first_bin, cfg_range) = rti_python.ADCP.Predictor.Range.calculate_predicted_range(CWPON=_cwpon_,
+                                                                                                                     CWPBB=_cwpbb_transmit_pulse_type_,
+                                                                                                                     CWPBS=_cwpbs_,
+                                                                                                                     CWPBN=_cwpbn_,
+                                                                                                                     CWPBL=_cwpbl_,
+                                                                                                                     CBTON=_cbton_,
+                                                                                                                     CBTBB=_cbtbb_transmit_pulse_type_,
+                                                                                                                     SystemFrequency=_system_frequency_,
+                                                                                                                     BeamDiameter=_beam_diameter_,
+                                                                                                                     CyclesPerElement=_cycles_per_element_,
+                                                                                                                     BeamAngle=_beam_angle_,
+                                                                                                                     SpeedOfSound=_speed_of_sound_,
+                                                                                                                     CWPBB_LagLength=_cwpbb_lag_length_,
+                                                                                                                     BroadbandPower=_broadband_power_,
+                                                                                                                     Salinity=_salinity_,
+                                                                                                                     Temperature=_temperature_,
+                                                                                                                     XdcrDepth=_xdcr_depth_)
     bottom_track_time = 0.0015 * bottom_track_range
 
 
@@ -580,7 +613,9 @@ def _calculate_burst_power(_cei_, _deployment_duration_, _beams_, _system_freque
                            _beam_angle_, _speed_of_sound_,
                            _system_boot_power_, _system_wakeup_time_, _system_init_power_, _system_init_time_,
                            _broadband_power_, _system_save_power_, _system_save_time_, _system_sleep_power_,
-                           _beam_diameter_, _cycles_per_element_, _is_burst_=True, _burst_interval_=3600, _ensembles_per_burst_=4096):
+                           _beam_diameter_, _cycles_per_element_,
+                           _salinity_, _temperature_, _xdcr_depth_,
+                           _is_burst_=True, _burst_interval_=3600, _ensembles_per_burst_=4096):
     """
     Calcualte power for a waves burst deployment.  This calculation will calculate power for a single burst.
     Then determine how many bursts are in the deployment.  Then calculate based off the power for a single
@@ -646,7 +681,11 @@ def _calculate_burst_power(_cei_, _deployment_duration_, _beams_, _system_freque
                                 _system_sleep_power_,
                                 _beam_diameter_,
                                 _cycles_per_element_,
-                                _is_burst_, _ensembles_per_burst_)
+                                _salinity_,
+                                _temperature_,
+                                _xdcr_depth_,
+                                _is_burst_,
+                                _ensembles_per_burst_)
 
     # Get the number of burst per deployment duration
     deployment_dur = _deployment_duration_ * 3600 * 24
@@ -675,3 +714,214 @@ def _calculate_number_batteries(_power_usage_, _deployment_duration, _battery_ca
     battery_pwr = _battery_capacity_ * _battery_derate_ - _battery_self_discharge_ * _deployment_duration / 365.0
 
     return _power_usage_ / battery_pwr
+
+
+def test__calculate_power():
+    power = calculate_power(CEI=1,
+                           DeploymentDuration=30,
+                           Beams=4,
+                           SystemFrequency=288000,
+                           CWPON=True,
+                           CWPBL=1,
+                           CWPBS=4,
+                           CWPBN=30,
+                           CWPBB_LagLength=1,
+                           CWPBB=1,
+                           CWPP=9,
+                           CWPTBP=0.5,
+                           CBTON=True,
+                           CBTBB=1,
+                           BeamAngle=20,
+                           SpeedOfSound=1490,
+                           SystemBootPower=1.8,
+                           SystemWakeUpTime=0.4,
+                           SystemInitPower=2.8,
+                           SystemInitTime=0.25,
+                           BroadbandPower=True,
+                           SystemSavePower=1.8,
+                           SystemSaveTime=0.15,
+                           SystemSleepPower=0.024,
+                           BeamDiameter=0.075,
+                           CyclesPerElement=12,
+                           Temperature=10.0,
+                           Salinity=35.0,
+                           XdcrDepth=0.0)
+
+    batteryUsage = calculate_number_batteries(PowerUsage=power,
+                                              DeploymentDuration=30,
+                                              BatteryCapacity=440.0,
+                                              BatteryDerate=0.85,
+                                              BatterySelfDischarge=0.05)
+
+    assert pytest.approx(power, 0.01) == 30754.86
+    assert pytest.approx(batteryUsage, 0.01) == 82.23
+
+
+def test__calculate_power_nb():
+    power = calculate_power(CEI=1,
+                           DeploymentDuration=30,
+                           Beams=4,
+                           SystemFrequency=288000,
+                           CWPON=True,
+                           CWPBL=1,
+                           CWPBS=4,
+                           CWPBN=30,
+                           CWPBB_LagLength=1,
+                           CWPBB=0,
+                           CWPP=9,
+                           CWPTBP=0.5,
+                           CBTON=True,
+                           CBTBB=0,
+                           BeamAngle=20,
+                           SpeedOfSound=1490,
+                           SystemBootPower=1.8,
+                           SystemWakeUpTime=0.4,
+                           SystemInitPower=2.8,
+                           SystemInitTime=0.25,
+                           BroadbandPower=True,
+                           SystemSavePower=1.8,
+                           SystemSaveTime=0.15,
+                           SystemSleepPower=0.024,
+                           BeamDiameter=0.075,
+                           CyclesPerElement=12,
+                           Temperature=10.0,
+                           Salinity=35.0,
+                           XdcrDepth=0.0)
+
+    batteryUsage = calculate_number_batteries(PowerUsage=power,
+                                              DeploymentDuration=30,
+                                              BatteryCapacity=440.0,
+                                              BatteryDerate=0.85,
+                                              BatterySelfDischarge=0.05)
+
+    assert pytest.approx(power, 0.01) == 34770.30
+    assert pytest.approx(batteryUsage, 0.01) == 92.97
+
+
+def test__calculate_power_600():
+    power = calculate_power(CEI=1,
+                           DeploymentDuration=30,
+                           Beams=4,
+                           SystemFrequency=576000,
+                           CWPON=True,
+                           CWPBL=1,
+                           CWPBS=4,
+                           CWPBN=30,
+                           CWPBB_LagLength=1,
+                           CWPBB=1,
+                           CWPP=9,
+                           CWPTBP=0.5,
+                           CBTON=True,
+                           CBTBB=1,
+                           BeamAngle=20,
+                           SpeedOfSound=1490,
+                           SystemBootPower=1.8,
+                           SystemWakeUpTime=0.4,
+                           SystemInitPower=2.8,
+                           SystemInitTime=0.25,
+                           BroadbandPower=True,
+                           SystemSavePower=1.8,
+                           SystemSaveTime=0.15,
+                           SystemSleepPower=0.024,
+                           BeamDiameter=0.075,
+                           CyclesPerElement=12,
+                           Temperature=10.0,
+                           Salinity=35.0,
+                           XdcrDepth=0.0)
+
+    batteryUsage = calculate_number_batteries(PowerUsage=power,
+                                              DeploymentDuration=30,
+                                              BatteryCapacity=440.0,
+                                              BatteryDerate=0.85,
+                                              BatterySelfDischarge=0.05)
+
+    assert pytest.approx(power, 0.01) == 16852.22
+    assert pytest.approx(batteryUsage, 0.01) == 45.06
+
+
+def test__calculate_power_burst():
+    power = calculate_burst_power(CEI=0.249,
+                           DeploymentDuration=1,
+                           Beams=4,
+                           SystemFrequency=288000,
+                           CWPON=True,
+                           CWPBL=1,
+                           CWPBS=4,
+                           CWPBN=30,
+                           CWPBB_LagLength=1,
+                           CWPBB=1,
+                           CWPP=1,
+                           CWPTBP=0.5,
+                           CBTON=False,
+                           CBTBB=1,
+                           BeamAngle=20,
+                           SpeedOfSound=1490,
+                           SystemBootPower=1.8,
+                           SystemWakeUpTime=0.4,
+                           SystemInitPower=2.8,
+                           SystemInitTime=0.25,
+                           BroadbandPower=True,
+                           SystemSavePower=1.8,
+                           SystemSaveTime=0.15,
+                           SystemSleepPower=0.024,
+                           BeamDiameter=0.075,
+                           CyclesPerElement=12,
+                           Temperature=10.0,
+                           Salinity=35.0,
+                           XdcrDepth=0.0,
+                           CBI_NumEns=4096,
+                           CBI_BurstInterval=3600,
+                           CBI=True)
+
+    batteryUsage = calculate_number_batteries(PowerUsage=power,
+                                              DeploymentDuration=30,
+                                              BatteryCapacity=440.0,
+                                              BatteryDerate=0.85,
+                                              BatterySelfDischarge=0.05)
+
+    assert pytest.approx(power, 0.01) == 65.10
+    assert pytest.approx(batteryUsage, 0.01) == 0.174
+
+
+def test__calculate_power_bt_30():
+    power = calculate_burst_power(CEI=0.249,
+                           DeploymentDuration=30,
+                           Beams=4,
+                           SystemFrequency=288000,
+                           CWPON=True,
+                           CWPBL=1,
+                           CWPBS=4,
+                           CWPBN=30,
+                           CWPBB_LagLength=1,
+                           CWPBB=1,
+                           CWPP=1,
+                           CWPTBP=0.5,
+                           CBTON=True,
+                           CBTBB=1,
+                           BeamAngle=20,
+                           SpeedOfSound=1490,
+                           SystemBootPower=1.8,
+                           SystemWakeUpTime=0.4,
+                           SystemInitPower=2.8,
+                           SystemInitTime=0.25,
+                           BroadbandPower=True,
+                           SystemSavePower=1.8,
+                           SystemSaveTime=0.15,
+                           SystemSleepPower=0.024,
+                           BeamDiameter=0.075,
+                           CyclesPerElement=12,
+                           Temperature=10.0,
+                           Salinity=35.0,
+                           XdcrDepth=0.0,
+                           CBI_NumEns=4096,
+                           CBI_BurstInterval=3600,
+                           CBI=True)
+
+    batteryUsage = calculate_number_batteries(PowerUsage=power,
+                                              DeploymentDuration=30,
+                                              BatteryCapacity=440.0,
+                                              BatteryDerate=0.85,
+                                              BatterySelfDischarge=0.05)
+
+    assert pytest.approx(power, 0.01) == 12475.41
+    assert pytest.approx(batteryUsage, 0.01) == 33.36

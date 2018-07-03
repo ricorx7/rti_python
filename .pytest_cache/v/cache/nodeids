@@ -1,0 +1,16 @@
+[
+  "ADCP/Predictor/DataStorage.py::test_datastorage",
+  "ADCP/Predictor/DataStorage.py::test_datastorageOnOff",
+  "ADCP/Predictor/MaxVelocity.py::test_narrowband",
+  "ADCP/Predictor/MaxVelocity.py::test_broadband",
+  "ADCP/Predictor/MaxVelocity.py::test_broadband300",
+  "ADCP/Predictor/Power.py::test__calculate_power",
+  "ADCP/Predictor/Power.py::test__calculate_power_nb",
+  "ADCP/Predictor/Power.py::test__calculate_power_600",
+  "ADCP/Predictor/Power.py::test__calculate_power_burst",
+  "ADCP/Predictor/Power.py::test__calculate_power_bt_30",
+  "ADCP/Predictor/Range.py::test_calc_range",
+  "ADCP/Predictor/Range.py::test_calc_range_nb",
+  "ADCP/Predictor/STD.py::test_STD",
+  "ADCP/Predictor/STD.py::test_STD_NB"
+]

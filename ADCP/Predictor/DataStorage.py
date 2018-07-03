@@ -425,3 +425,46 @@ def bytes_2_human_readable(number_of_bytes):
     number_of_bytes = round(number_of_bytes, precision)
 
     return str(number_of_bytes) + ' ' + unit
+
+
+def test_datastorage():
+    assert calculate_storage_amount(CWPBN=30,
+                                    Beams=4,
+                                    DeploymentDuration=30,
+                                    CEI=1.0,
+                                    IsE0000001=True,
+                                    IsE0000002=True,
+                                    IsE0000003=True,
+                                    IsE0000004=True,
+                                    IsE0000005=True,
+                                    IsE0000006=True,
+                                    IsE0000007=True,
+                                    IsE0000008=True,
+                                    IsE0000009=True,
+                                    IsE0000010=True,
+                                    IsE0000011=True,
+                                    IsE0000012=True,
+                                    IsE0000013=True,
+                                    IsE0000014=True,
+                                    IsE0000015=True) == 12172032000
+
+def test_datastorageOnOff():
+    assert calculate_storage_amount(CWPBN=30,
+                                    Beams=4,
+                                    DeploymentDuration=30,
+                                    CEI=1.0,
+                                    IsE0000001=True,
+                                    IsE0000002=False,
+                                    IsE0000003=True,
+                                    IsE0000004=False,
+                                    IsE0000005=True,
+                                    IsE0000006=True,
+                                    IsE0000007=False,
+                                    IsE0000008=True,
+                                    IsE0000009=False,
+                                    IsE0000010=True,
+                                    IsE0000011=False,
+                                    IsE0000012=True,
+                                    IsE0000013=False,
+                                    IsE0000014=True,
+                                    IsE0000015=False) == 7153920000

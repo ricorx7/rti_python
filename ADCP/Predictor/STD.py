@@ -1,6 +1,7 @@
 import json
 import os
 import math
+import pytest
 
 
 def calculate_std(**kwargs):
@@ -207,3 +208,30 @@ def _calculate_std(_CWPP_, _CWPBS_, _CWPBB_LagLength_,
     else:
         return nbStdDevHSystem      # Narrowband
 
+
+def test_STD():
+    assert pytest.approx(calculate_std(CWPP=9,
+                         CWPBS=4,
+                         CWPBB_LagLength=1.0,
+                         BeamAngle=20,
+                         CWPBB=1,
+                         SystemFrequency=288000,
+                         SpeedOfSound=1490,
+                         CyclesPerElement=12,
+                         SNR=30,
+                         Beta=1.0,
+                         NbFudge=1.4), 0.1) == 0.01
+
+
+def test_STD_NB():
+    assert pytest.approx(calculate_std(CWPP=9,
+                         CWPBS=4,
+                         CWPBB_LagLength=1.0,
+                         BeamAngle=20,
+                         CWPBB=0,
+                         SystemFrequency=288000,
+                         SpeedOfSound=1490,
+                         CyclesPerElement=12,
+                         SNR=30,
+                         Beta=1.0,
+                         NbFudge=1.4), 0.1) == 0.07

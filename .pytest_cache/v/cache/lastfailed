@@ -1,0 +1,7 @@
+{
+  "Unittest/ADCP/test_PredictionModel.py": true,
+  "tests/test_ADCP.py": true,
+  "tests/test_ReadMatFiles.py": true,
+  "tests/test_bokeh.py": true,
+  "tests/test_cxfreeze.py": true
+}

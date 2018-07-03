@@ -1,6 +1,7 @@
 import json
 import os
 import math
+import pytest
 
 
 def calculate_max_velocity(**kwargs):
@@ -9,7 +10,9 @@ def calculate_max_velocity(**kwargs):
     speed the ADCP is capable of measuring, if the speed exceeds this value, then the data will be incorrect
     due to rollovers.
 
+    :param _CWPBB_ Broadband or Narrowband.
     :param CWPBB_LagLength=: WP lag length in meters.
+    :param CWPBS=: Bin Size.
     :param BeamAngle=: Beam angle in degrees.
     :param SystemFrequency=: System frequency in hz.
     :param SpeedOfSound=: Speed of Sound in m/s.
@@ -28,19 +31,22 @@ def calculate_max_velocity(**kwargs):
         return 0.0
 
     # _CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _SpeedOfSound_, _CyclesPerElement_
-    return _calculate_max_velocity(kwargs.pop('CWPBB_LagLength', config['DEFAULT']['CWPBB_LagLength']),
+    return _calculate_max_velocity(kwargs.pop('CWPBB', config['DEFAULT']['CWPBB']),
+                                   kwargs.pop('CWPBB_LagLength', config['DEFAULT']['CWPBB_LagLength']),
+                                   kwargs.pop('CWPBS', config['DEFAULT']['CWPBS']),
                                    kwargs.pop('BeamAngle', config['BeamAngle']),
                                    kwargs.pop('SystemFrequency', config['DEFAULT']['SystemFrequency']),
                                    kwargs.pop('SpeedOfSound', config['SpeedOfSound']),
                                    kwargs.pop('CyclesPerElement', config['CyclesPerElement']))
 
 
-def _calculate_max_velocity(_CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _SpeedOfSound_, _CyclesPerElement_):
+def _calculate_max_velocity(_CWPBB_, _CWPBB_LagLength_, _CWPBS_, _BeamAngle_, _SystemFrequency_, _SpeedOfSound_, _CyclesPerElement_):
     """
     Calculate the maximum velocity the ADCP can measure including the boat speed in m/s.  This speed is the
     speed the ADCP is capable of measuring, if the speed exceeds this value, then the data will be incorrect
     due to rollovers.
 
+    :param _CWPBB_ Broadband or Narrowband.
     :param _CWPBB_LagLength_: WP lag length in meters.
     :param _BeamAngle_: Beam angle in degrees.
     :param _SystemFrequency_: System frequency in hz.
@@ -114,9 +120,37 @@ def _calculate_max_velocity(_CWPBB_LagLength_, _BeamAngle_, _SystemFrequency_, _
     else:
         uaRadial = uaHz * _SpeedOfSound_ / (2.0 * _SystemFrequency_)
 
+    #### NARROWBAND ####
+
+    # Beam Angle Radian
+    beamAngleRad = _BeamAngle_ / 180.0 * math.pi
+
+    # Ta
+    Ta = 2.0 * _CWPBS_ / _SpeedOfSound_ / math.cos(beamAngleRad)
+
+    # L
+    L = 0.5 * _SpeedOfSound_ * Ta
+
     # Check for vertical beam.No Beam angle
     if _BeamAngle_ == 0:
         return uaRadial
 
+    # Narrowband lag length
+    if _CWPBB_ == 0:
+        return L / math.sin(_BeamAngle_ / 180.0 * math.pi)
+
     return uaRadial / math.sin(_BeamAngle_ / 180.0 * math.pi)
 
+
+# UNIT TEST
+# Run with pytext MaxVelocity.py
+def test_narrowband():
+    assert pytest.approx(calculate_max_velocity(CWPBB=0, CWPBB_LagLength=1.0, CWPBS=0.60, BeamAngle=20, SystemFrequency=1152000, SpeedOfSound=1467), 0.001) == 1.867
+
+
+def test_broadband():
+    assert pytest.approx(calculate_max_velocity(CWPBB=1, CWPBB_LagLength=1.0, CWPBS=0.60, BeamAngle=20, SystemFrequency=1152000, SpeedOfSound=1490), 0.001) == 0.658
+
+
+def test_broadband300():
+    assert pytest.approx(calculate_max_velocity(CWPBB=1, CWPBB_LagLength=1.0, CWPBS=4.0, BeamAngle=20, SystemFrequency=288000.0, SpeedOfSound=1490), 0.001) == 2.669
