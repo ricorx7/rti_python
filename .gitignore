@@ -122,3 +122,6 @@ PlanR/backend/node_modules/
 PlanR/frontend/planr/build/
 PlanR/frontend/planr/dist/
 PlanR/frontend/planr/node_modules/
+
+# PyTest
+.pytest_cache/
