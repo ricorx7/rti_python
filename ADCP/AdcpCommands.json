@@ -237,6 +237,18 @@
         "Used in the water speed of sound calculation."
       ]
     },
+    "CWSS": {
+      "desc": [
+        "CWSS n.nnn<CR>",
+        "Water Speed of Sound (meters per second).",
+        "",
+        "If the speed of sound source is set to sensor or command i.e. CWSSCx,x,x,0<CR> or CWSSCx,x,x,1<CR>,",
+        "during standby and pinging the firmware monitors the communication ports for changes in CWSS and ",
+        "for the NMEA strings: $AML,SVM,SS,SN,nn*cs and/or $DVLSET, SS*cs. These NMEA strings are used on ",
+        "the Ocean Server platform for speed of sound input. When the ADCP/DVL detects a valid speed of sound ",
+        "NMEA string it automatically sets the CWSSC speed of sound source to 0 (command)."
+      ]
+    },
     "CED": {
         "desc": [
           "CED ABCDEFGHIJKLMNOPQsssssssssssssss<CR>",

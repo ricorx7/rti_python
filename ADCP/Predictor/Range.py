@@ -99,6 +99,10 @@ def _calculate_predicted_range(_CWPON_, _CWPBB_TransmitPulseType_, _CWPBS_, _CWP
         print("Error getting the configuration file.  Range", e)
         return (0.0, 0.0, 0.0, 0.0)
 
+    # Speed of sound must be a value
+    if _SpeedOfSound_ == 0:
+        _SpeedOfSound_ = 1490
+
     # Wave length
     waveLength = _SpeedOfSound_ / _SystemFrequency_
 
