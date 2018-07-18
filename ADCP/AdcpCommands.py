@@ -13,10 +13,11 @@ class AdcpCmd:
     def to_str(self, index):
         """
         Convert the command to a command string.
+        Convert the index to a hex then remove the 0x from the value.
         :param index: CEPO index.
         :return: String with the index.
         """
-        return self.cmd + '[' + str(index) + "] " + self.value
+        return self.cmd + '[' + hex(index)[2:] + "] " + self.value
 
 
 def get_tooltip(desc_array):
