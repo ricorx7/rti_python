@@ -174,7 +174,6 @@ def calculate_ensemble_size(**kwargs):
                                      kwargs.pop('IsE0000015', config['DEFAULT']['IsE0000015']))
 
 
-
 def _calculate_storage_amount(_CWPBN_, _Beams_,
                             _DeploymentDuration_, _CEI_,
                             IsE0000001, IsE0000002, IsE0000003,
@@ -394,6 +393,87 @@ def _calculate_ensemble_size(_CWPBN_, _Beams_,
     wrapper = 32    # Header
 
     return bytes_per_ensemble + checksum + wrapper
+
+
+def _calculate_pd0_ensemble_size(_CWPBN_, _Beams_,
+                                IsE0000001, IsE0000002, IsE0000003,
+                                IsE0000004, IsE0000005, IsE0000006,
+                                IsE0000007, IsE0000008, IsE0000009,
+                                IsE0000010, IsE0000011, IsE0000012,
+                                IsE0000013, IsE0000014, IsE0000015):
+    """
+    Calculate the number of bytes for the ensemble based off the parameters.
+    Value given in bytes.
+
+    :param _CWPBN_: Number of bins.
+    :param _Beams_: Number of beams.
+    :param IsE0000001: Flag if IsE0000001 is enabled.
+    :param IsE0000002: Flag if IsE0000002 is enabled.
+    :param IsE0000003: Flag if IsE0000003 is enabled.
+    :param IsE0000004: Flag if IsE0000004 is enabled.
+    :param IsE0000005: Flag if IsE0000005 is enabled.
+    :param IsE0000006: Flag if IsE0000006 is enabled.
+    :param IsE0000007: Flag if IsE0000007 is enabled.
+    :param IsE0000008: Flag if IsE0000008 is enabled.
+    :param IsE0000009: Flag if IsE0000009 is enabled.
+    :param IsE0000010: Flag if IsE0000010 is enabled.
+    :param IsE0000011: Flag if IsE0000011 is enabled.
+    :param IsE0000012: Flag if IsE0000012 is enabled.
+    :param IsE0000013: Flag if IsE0000013 is enabled.
+    :param IsE0000014: Flag if IsE0000014 is enabled.
+    :param IsE0000015: Flag if IsE0000015 is enabled.
+    :return: Number of bytes for the ensemble.
+    """
+
+    # Number of data types
+    num_dt = 0
+
+    # Fixed Leader
+    fl = 59
+    num_dt += 1
+
+    # Variable Leader
+    vl = 65
+    num_dt += 1
+
+    # Velocity
+    vel = 0
+    if IsE0000001 or IsE0000002 or IsE0000003:
+        vel = 2 + (_CWPBN_ * (2 * _Beams_))
+        num_dt += 1
+
+    # Echo Intensity (Amplitude)
+    echo = 0
+    if IsE0000004:
+        echo = 2 + (_CWPBN_ * _Beams_)
+        num_dt += 1
+
+    # Correlation
+    corr = 0
+    if IsE0000005:
+        corr = 2 + (_CWPBN_ * _Beams_)
+        num_dt += 1
+
+    # Percent Good
+    pg = 0
+    if IsE0000006:
+        pg = 2 + (_CWPBN_ * _Beams_)
+        num_dt += 1
+
+    # Bottom Track
+    bt = 0
+    if IsE0000010:
+        bt = 84
+        num_dt += 1
+
+    # Header
+    header = 6 + num_dt
+
+    # Bytes per ensemble
+    bytes_per_ensemble = header + fl + vl + vel + echo + corr + pg + bt
+    checksum = 2    # Checksum
+
+    return bytes_per_ensemble + checksum
 
 
 def bytes_2_human_readable(number_of_bytes):
