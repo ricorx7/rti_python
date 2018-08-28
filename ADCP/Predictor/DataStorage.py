@@ -2,12 +2,12 @@ import math
 import json
 import os
 
-
 def calculate_storage_amount(**kwargs):
     """
     Calculate the amount of storage required for the parameter for the deployment.
     Value given in bytes.
 
+    :param CEOUTPUT= Format the data is in.  RTB or PD0
     :param CWPBN=: Number of bins.
     :param Beams=: Number of beams.
     :param DeploymentDuration=: Deployment duration.
@@ -39,7 +39,8 @@ def calculate_storage_amount(**kwargs):
         print("Error opening JSON file", e)
         return 0.0
 
-    return _calculate_storage_amount(kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
+    return _calculate_storage_amount(kwargs.pop('CEOUTPUT', config['CEOUTPUT']),
+                                     kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
                                      kwargs.pop('Beams', config['DEFAULT']['Beams']),
                                      kwargs.pop('DeploymentDuration', config['DEFAULT']['DeploymentDuration']),
                                      kwargs.pop('CEI', config['DEFAULT']['CEI']),
@@ -65,6 +66,7 @@ def calculate_burst_storage_amount(**kwargs):
     Calculate the amount of storage required for the parameter for the deployment.
     Value given in bytes.
 
+    :param CEOUTPUT= Format the data is in.  RTB or PD0
     :param CBI_NumEns: Number of ensembles in the burst.
     :param CWPBN=: Number of bins.
     :param Beams=: Number of beams.
@@ -97,9 +99,10 @@ def calculate_burst_storage_amount(**kwargs):
         print("Error opening JSON file", e)
         return 0.0
 
-    return _calculate_burst_storage_amount(kwargs.pop('CBI_NumEns', config['DEFAULT']['CBI_NumEns']),
-                                           kwargs.pop('CBI_BurstInterval', config['DEFAULT']['CBI_BurstInterval']),
-                                           kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
+    return _calculate_burst_storage_amount(kwargs.pop('CEOUTPUT', config['CEOUTPUT']),
+                                             kwargs.pop('CBI_NumEns', config['DEFAULT']['CBI_NumEns']),
+                                             kwargs.pop('CBI_BurstInterval', config['DEFAULT']['CBI_BurstInterval']),
+                                             kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
                                              kwargs.pop('Beams', config['DEFAULT']['Beams']),
                                              kwargs.pop('DeploymentDuration', config['DEFAULT']['DeploymentDuration']),
                                              kwargs.pop('IsE0000001', config['DEFAULT']['IsE0000001']),
@@ -124,6 +127,7 @@ def calculate_ensemble_size(**kwargs):
     Calculate the amount of storage required for the parameter for the deployment.
     Value given in bytes.
 
+    :param CEOUTPUT= Format the data is in.  RTB or PD0
     :param CWPBN=: Number of bins.
     :param Beams=: Number of beams.
     :param DeploymentDuration=: Deployment duration.
@@ -155,7 +159,8 @@ def calculate_ensemble_size(**kwargs):
         print("Error opening JSON file", e)
         return 0.0
 
-    return _calculate_ensemble_size(kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
+    return _calculate_ensemble_size(kwargs.pop('CEOUTPUT', config['CEOUTPUT']),
+                                     kwargs.pop('CWPBN', config['DEFAULT']['CWPBN']),
                                      kwargs.pop('Beams', config['DEFAULT']['Beams']),
                                      kwargs.pop('IsE0000001', config['DEFAULT']['IsE0000001']),
                                      kwargs.pop('IsE0000002', config['DEFAULT']['IsE0000002']),
@@ -174,7 +179,7 @@ def calculate_ensemble_size(**kwargs):
                                      kwargs.pop('IsE0000015', config['DEFAULT']['IsE0000015']))
 
 
-def _calculate_storage_amount(_CWPBN_, _Beams_,
+def _calculate_storage_amount(_CEOUTPUT_, _CWPBN_, _Beams_,
                             _DeploymentDuration_, _CEI_,
                             IsE0000001, IsE0000002, IsE0000003,
                             IsE0000004, IsE0000005, IsE0000006,
@@ -186,6 +191,7 @@ def _calculate_storage_amount(_CWPBN_, _Beams_,
     Calculate the amount of storage required for the parameter for the deployment.
     Value given in bytes.
 
+    :param _CEOUTPUT_ Format the data is in.  RTB or PD0
     :param _CWPBN_: Number of bins.
     :param _Beams_: Number of beams.
     :param _DeploymentDuration_: Deployment duration.
@@ -208,7 +214,7 @@ def _calculate_storage_amount(_CWPBN_, _Beams_,
     :return: Number of bytes required for the given deployment.
     """
 
-    ensembleSize = _calculate_ensemble_size(_CWPBN_, _Beams_,
+    ensembleSize = _calculate_ensemble_size(_CEOUTPUT_, _CWPBN_, _Beams_,
                                            IsE0000001, IsE0000002,
                                            IsE0000003, IsE0000004,
                                            IsE0000005, IsE0000006,
@@ -227,7 +233,7 @@ def _calculate_storage_amount(_CWPBN_, _Beams_,
     return ensembles * ensembleSize
 
 
-def _calculate_burst_storage_amount(_CBI_NumEns_,
+def _calculate_burst_storage_amount(_CEOUTPUT_, _CBI_NumEns_,
                                     _CBI_BurstInterval_,
                                     _CWPBN_, _Beams_,
                                     _DeploymentDuration_,
@@ -240,6 +246,7 @@ def _calculate_burst_storage_amount(_CBI_NumEns_,
     Calculate the amount of storage required from the parameter for the burst deployment.
     Value given in bytes.
 
+    :param _CEOUTPUT_ Format the data is in.  RTB or PD0
     :param _CBI_NumEns_: Number of ensembles in the burst.
     :param _CWPBN_: Number of bins.
     :param _Beams_: Number of beams.
@@ -264,7 +271,7 @@ def _calculate_burst_storage_amount(_CBI_NumEns_,
     """
 
     # Number of bytes per ensemble
-    ensemble_size = _calculate_ensemble_size(_CWPBN_, _Beams_, IsE0000001, IsE0000002, IsE0000003, IsE0000004, IsE0000005,
+    ensemble_size = _calculate_ensemble_size(_CEOUTPUT_, _CWPBN_, _Beams_, IsE0000001, IsE0000002, IsE0000003, IsE0000004, IsE0000005,
                                    IsE0000006, IsE0000007, IsE0000008, IsE0000009, IsE0000010, IsE0000011, IsE0000012,
                                    IsE0000013, IsE0000014, IsE0000015)
 
@@ -281,14 +288,63 @@ def _calculate_burst_storage_amount(_CBI_NumEns_,
     return burst_mem * num_bursts
 
 
-def _calculate_ensemble_size(_CWPBN_, _Beams_,
-                            IsE0000001, IsE0000002, IsE0000003,
-                            IsE0000004, IsE0000005, IsE0000006,
-                            IsE0000007, IsE0000008, IsE0000009,
-                            IsE0000010, IsE0000011, IsE0000012,
-                            IsE0000013, IsE0000014, IsE0000015):
+def _calculate_ensemble_size(_CEOUTPUT_,
+                             _CWPBN_, _Beams_,
+                             IsE0000001, IsE0000002, IsE0000003,
+                             IsE0000004, IsE0000005, IsE0000006,
+                             IsE0000007, IsE0000008, IsE0000009,
+                             IsE0000010, IsE0000011, IsE0000012,
+                             IsE0000013, IsE0000014, IsE0000015):
     """
     Calculate the number of bytes for the ensemble based off the parameters.
+    Value given in bytes.
+
+    :param _CEOUTPUT_ Format the data is in.  RTB or PD0
+    :param _CWPBN_: Number of bins.
+    :param _Beams_: Number of beams.
+    :param IsE0000001: Flag if IsE0000001 is enabled.
+    :param IsE0000002: Flag if IsE0000002 is enabled.
+    :param IsE0000003: Flag if IsE0000003 is enabled.
+    :param IsE0000004: Flag if IsE0000004 is enabled.
+    :param IsE0000005: Flag if IsE0000005 is enabled.
+    :param IsE0000006: Flag if IsE0000006 is enabled.
+    :param IsE0000007: Flag if IsE0000007 is enabled.
+    :param IsE0000008: Flag if IsE0000008 is enabled.
+    :param IsE0000009: Flag if IsE0000009 is enabled.
+    :param IsE0000010: Flag if IsE0000010 is enabled.
+    :param IsE0000011: Flag if IsE0000011 is enabled.
+    :param IsE0000012: Flag if IsE0000012 is enabled.
+    :param IsE0000013: Flag if IsE0000013 is enabled.
+    :param IsE0000014: Flag if IsE0000014 is enabled.
+    :param IsE0000015: Flag if IsE0000015 is enabled.
+    :return: Number of bytes for the ensemble.
+    """
+
+    if _CEOUTPUT_ == "RTB":
+        return _calculate_rtb_ensemble_size(_CWPBN_, _Beams_,
+                                             IsE0000001, IsE0000002, IsE0000003,
+                                             IsE0000004, IsE0000005, IsE0000006,
+                                             IsE0000007, IsE0000008, IsE0000009,
+                                             IsE0000010, IsE0000011, IsE0000012,
+                                             IsE0000013, IsE0000014, IsE0000015)
+
+    else:
+        return _calculate_pd0_ensemble_size(_CWPBN_, _Beams_,
+                                             IsE0000001, IsE0000002, IsE0000003,
+                                             IsE0000004, IsE0000005, IsE0000006,
+                                             IsE0000007, IsE0000008, IsE0000009,
+                                             IsE0000010, IsE0000011, IsE0000012,
+                                             IsE0000013, IsE0000014, IsE0000015)
+
+
+def _calculate_rtb_ensemble_size(_CWPBN_, _Beams_,
+                                 IsE0000001, IsE0000002, IsE0000003,
+                                 IsE0000004, IsE0000005, IsE0000006,
+                                 IsE0000007, IsE0000008, IsE0000009,
+                                 IsE0000010, IsE0000011, IsE0000012,
+                                 IsE0000013, IsE0000014, IsE0000015):
+    """
+    Calculate the number of bytes for the RTB ensemble based off the parameters.
     Value given in bytes.
 
     :param _CWPBN_: Number of bins.
@@ -402,7 +458,7 @@ def _calculate_pd0_ensemble_size(_CWPBN_, _Beams_,
                                 IsE0000010, IsE0000011, IsE0000012,
                                 IsE0000013, IsE0000014, IsE0000015):
     """
-    Calculate the number of bytes for the ensemble based off the parameters.
+    Calculate the number of bytes for the PD0 ensemble based off the parameters.
     Value given in bytes.
 
     :param _CWPBN_: Number of bins.
@@ -437,41 +493,43 @@ def _calculate_pd0_ensemble_size(_CWPBN_, _Beams_,
     num_dt += 1
 
     # Velocity
-    vel = 0
-    if IsE0000001 or IsE0000002 or IsE0000003:
-        vel = 2 + (_CWPBN_ * (2 * _Beams_))
-        num_dt += 1
+    #vel = 0
+    #if IsE0000001 or IsE0000002 or IsE0000003:
+    vel = 2 + (_CWPBN_ * (2 * _Beams_))
+    num_dt += 1
 
     # Echo Intensity (Amplitude)
-    echo = 0
-    if IsE0000004:
-        echo = 2 + (_CWPBN_ * _Beams_)
-        num_dt += 1
+    #echo = 0
+    #if IsE0000004:
+    echo = 2 + (_CWPBN_ * _Beams_)
+    num_dt += 1
 
     # Correlation
-    corr = 0
-    if IsE0000005:
-        corr = 2 + (_CWPBN_ * _Beams_)
-        num_dt += 1
+    #corr = 0
+    #if IsE0000005:
+    corr = 2 + (_CWPBN_ * _Beams_)
+    num_dt += 1
 
     # Percent Good
-    pg = 0
-    if IsE0000006:
-        pg = 2 + (_CWPBN_ * _Beams_)
-        num_dt += 1
+    #pg = 0
+    #if IsE0000006:
+    pg = 2 + (_CWPBN_ * _Beams_)
+    num_dt += 1
 
     # Bottom Track
-    bt = 0
-    if IsE0000010:
-        bt = 84
-        num_dt += 1
+    #bt = 0
+    #if IsE0000010:
+    bt = 84
+    num_dt += 1
 
     # Header
     header = 6 + num_dt
 
     # Bytes per ensemble
     bytes_per_ensemble = header + fl + vl + vel + echo + corr + pg + bt
-    checksum = 2    # Checksum
+
+    # Checksum
+    checksum = 2
 
     return bytes_per_ensemble + checksum
 
@@ -508,7 +566,8 @@ def bytes_2_human_readable(number_of_bytes):
 
 
 def test_datastorage():
-    assert calculate_storage_amount(CWPBN=30,
+    assert calculate_storage_amount(CEOUTPUT="RTB",
+                                    CWPBN=30,
                                     Beams=4,
                                     DeploymentDuration=30,
                                     CEI=1.0,
@@ -528,8 +587,10 @@ def test_datastorage():
                                     IsE0000014=True,
                                     IsE0000015=True) == 12172032000
 
+
 def test_datastorageOnOff():
-    assert calculate_storage_amount(CWPBN=30,
+    assert calculate_storage_amount(CEOUTPUT="RTB",
+                                    CWPBN=30,
                                     Beams=4,
                                     DeploymentDuration=30,
                                     CEI=1.0,
@@ -548,3 +609,49 @@ def test_datastorageOnOff():
                                     IsE0000013=False,
                                     IsE0000014=True,
                                     IsE0000015=False) == 7153920000
+
+
+def test_datastorage_pd0():
+    assert calculate_storage_amount(CEOUTPUT="PD0",
+                                    CWPBN=30,
+                                    Beams=4,
+                                    DeploymentDuration=30,
+                                    CEI=1.0,
+                                    IsE0000001=True,
+                                    IsE0000002=True,
+                                    IsE0000003=True,
+                                    IsE0000004=True,
+                                    IsE0000005=True,
+                                    IsE0000006=True,
+                                    IsE0000007=True,
+                                    IsE0000008=True,
+                                    IsE0000009=True,
+                                    IsE0000010=True,
+                                    IsE0000011=True,
+                                    IsE0000012=True,
+                                    IsE0000013=True,
+                                    IsE0000014=True,
+                                    IsE0000015=True) == 2153952000
+
+
+def test_datastorageOnOff_pd0():
+    assert calculate_storage_amount(CEOUTPUT="PD0",
+                                    CWPBN=30,
+                                    Beams=4,
+                                    DeploymentDuration=30,
+                                    CEI=1.0,
+                                    IsE0000001=True,
+                                    IsE0000002=False,
+                                    IsE0000003=True,
+                                    IsE0000004=False,
+                                    IsE0000005=True,
+                                    IsE0000006=True,
+                                    IsE0000007=False,
+                                    IsE0000008=True,
+                                    IsE0000009=False,
+                                    IsE0000010=True,
+                                    IsE0000011=False,
+                                    IsE0000012=True,
+                                    IsE0000013=False,
+                                    IsE0000014=True,
+                                    IsE0000015=False) == 2153952000

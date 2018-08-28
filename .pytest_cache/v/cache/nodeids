@@ -1,6 +1,8 @@
 [
   "ADCP/Predictor/DataStorage.py::test_datastorage",
   "ADCP/Predictor/DataStorage.py::test_datastorageOnOff",
+  "ADCP/Predictor/DataStorage.py::test_datastorage_pd0",
+  "ADCP/Predictor/DataStorage.py::test_datastorageOnOff_pd0",
   "ADCP/Predictor/MaxVelocity.py::test_narrowband",
   "ADCP/Predictor/MaxVelocity.py::test_broadband",
   "ADCP/Predictor/MaxVelocity.py::test_broadband300",

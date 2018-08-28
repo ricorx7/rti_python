@@ -19,7 +19,7 @@
     "Salinity": 35.0,
     "Temperature": 10.0,
     "XdcrDepth": 0.0,
-    "DataFormat": "RTB",
+    "CEOUTPUT": "RTB",
     "CoordinateTransform": "Earth",
 
 	"DEFAULT": {
